@@ -1,11 +1,10 @@
 import React from "react";
-import logo from "../assets/logo.png";
 
 export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-forest-cream/80 backdrop-blur-md border-b border-forest/10 px-6 py-3 flex items-center justify-between">
       <div className="flex items-center">
-        <img src={logo} alt="Bharat Office Setu Logo" className="h-16 lg:h-24 w-auto object-contain mix-blend-multiply" />
+        <img src="/logo.png" alt="Bharat Office Setu Logo" className="h-16 lg:h-24 w-auto object-contain mix-blend-multiply" />
       </div>
 
       <div className="hidden md:flex items-center space-x-8 text-sm font-medium uppercase tracking-widest text-forest/70">

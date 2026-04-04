@@ -10,10 +10,13 @@ export default function FooterBanner() {
         <p className="text-lg md:text-xl text-forest-sage mb-10 max-w-2xl mx-auto">
           Join thousands of enterprises growing with Bharat Office Setu. Let's discuss your custom workspace and compliance needs.
         </p>
-        <button className="bg-white text-forest px-10 py-5 rounded-full font-bold text-lg shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 mx-auto">
+        <a 
+          href="mailto:partners@bharatofficesetu.com"
+          className="bg-white text-forest px-10 py-5 rounded-full font-bold text-lg shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 mx-auto w-fit"
+        >
           Book a Free Consultation
           <ArrowRight className="w-5 h-5" />
-        </button>
+        </a>
       </div>
       
       <div className="max-w-7xl mx-auto px-6 mt-32 border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-forest-sage/60">
