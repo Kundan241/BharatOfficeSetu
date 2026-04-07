@@ -6,7 +6,7 @@ import FooterBanner from './components/FooterBanner'
 
 function App() {
   return (
-    <div className="min-h-screen font-sans bg-forest-cream smooth-scroll selection:bg-forest-mint selection:text-forest">
+    <div className="min-h-screen" style={{ background: "#0a1628", color: "#e2e8f0" }}>
       <Navbar />
       <main>
         <Hero />
