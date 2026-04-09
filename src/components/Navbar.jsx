@@ -43,8 +43,9 @@ export default function Navbar() {
         </a>
       </div>
 
-      <button
-        className="px-5 py-2 rounded-full font-bold text-xs uppercase tracking-[0.15em] hover:scale-105 transition-all active:scale-95"
+      <a
+        href="mailto:partners@bharatofficesetu.com"
+        className="px-5 py-2 rounded-full font-bold text-xs uppercase tracking-[0.15em] hover:scale-105 transition-all active:scale-95 text-center flex items-center justify-center"
         style={{
           background: "linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%)",
           color: "#ffffff",
@@ -53,7 +54,7 @@ export default function Navbar() {
         }}
       >
         Get Started
-      </button>
+      </a>
     </nav>
   );
 }
