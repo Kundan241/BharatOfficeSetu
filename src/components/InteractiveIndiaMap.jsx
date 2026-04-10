@@ -35,7 +35,7 @@ export default function InteractiveIndiaMap({ activeState, setActiveState, showC
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
         className="w-full lg:w-3/5 aspect-[4/5] sm:aspect-square flex items-center justify-center relative"
       >
         <div className="hidden md:block absolute inset-0 bg-blue-500/5 rounded-full blur-[120px] animate-pulse" />
@@ -75,7 +75,7 @@ export function LocationCard({ activeState, isMobileFloating = false, isMobileGr
     <motion.div
       initial={{ opacity: 0, y: isMobileFloating ? -10 : 0, x: isMobileFloating ? 0 : 40 }}
       animate={{ opacity: 1, y: 0, x: 0 }}
-      transition={{ duration: 0.9, delay: isMobileFloating ? 0.2 : 0.6, ease: "easeOut" }}
+      transition={{ duration: 0.4, delay: isMobileFloating ? 0.1 : 0.3, ease: "easeOut" }}
       className={`w-full lg:w-auto lg:min-w-[280px] lg:max-w-[320px] ${isMobileGrid ? 'hidden' : isMobileFloating ? 'w-[120px] shadow-2xl' : 'md:relative z-10'}`}
     >
       <AnimatePresence mode="wait">
@@ -84,7 +84,7 @@ export function LocationCard({ activeState, isMobileFloating = false, isMobileGr
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: -20 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
           className="rounded-[12px] md:rounded-3xl overflow-hidden glass-card"
           style={{
             padding: "2px",

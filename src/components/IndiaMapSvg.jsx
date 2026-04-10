@@ -85,7 +85,7 @@ export default function IndiaMapSvg({ activeState, onHover, onLeave, onClick, se
         <motion.path 
           initial={{ pathLength: 0, opacity: 0 }}
           animate={{ pathLength: 1, opacity: 1 }}
-          transition={{ duration: 2, ease: "easeInOut" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           d={BORDER_PATH} 
           stroke="rgba(96,165,250,0.15)" 
         />

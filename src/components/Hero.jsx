@@ -96,7 +96,8 @@ export default function Hero() {
           >
             <svg 
               width="100%" 
-              height="160" 
+              height="auto" 
+              className="h-20 md:h-40" 
               viewBox="0 0 1100 160" 
               preserveAspectRatio="xMidYMid meet"
               style={{ 
@@ -105,7 +106,8 @@ export default function Hero() {
                 left: '50%', 
                 transform: 'translate(-50%, -50%)', 
                 maxWidth: '1100px',
-                opacity: 0.09
+                opacity: 'var(--bridge-opacity, 0.18)',
+                '--bridge-opacity': '0.18'
               }}
             >
               <g fill="none" stroke="#7090b0" strokeWidth="1">
