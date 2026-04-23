@@ -2,7 +2,9 @@ import React from 'react'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Services from './components/Services'
+import InfoSections from './components/InfoSections'
 import FooterBanner from './components/FooterBanner'
+import WhatsAppWidget from './components/WhatsAppWidget'
 
 function App() {
   return (
@@ -11,8 +13,10 @@ function App() {
       <main>
         <Hero />
         <Services />
+        <InfoSections />
       </main>
       <FooterBanner />
+      <WhatsAppWidget />
     </div>
   )
 }

@@ -38,7 +38,7 @@ export default function InteractiveIndiaMap({ activeState, setActiveState, showC
         transition={{ duration: 0.4, ease: "easeOut" }}
         className="w-full lg:w-3/5 aspect-[4/5] sm:aspect-square flex items-center justify-center relative"
       >
-        <div className="hidden md:block absolute inset-0 bg-blue-500/5 rounded-full blur-[120px] animate-pulse" />
+        <div className="hidden md:block absolute inset-0 bg-blue-500/5 rounded-full blur-[120px]" />
         <div className="relative w-full h-full transform scale-110 sm:scale-100 flex items-center justify-center">
           <IndiaMapSvg 
             activeState={activeState} 

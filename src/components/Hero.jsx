@@ -9,30 +9,42 @@ export default function Hero() {
     <section
       className="relative min-h-screen overflow-hidden flex flex-col noise-overlay"
       style={{
-        background: "linear-gradient(160deg, #0a1628 0%, #0f2038 40%, #132744 70%, #0a1628 100%)",
+        background: "linear-gradient(160deg, #05050A 0%, #0B0F19 45%, #080C16 75%, #05050A 100%)",
       }}
     >
-      {/* Ambient glow effects */}
+      {/* Ambient mesh blobs — Electric Indigo + Deep Magenta */}
       <div
         className="absolute pointer-events-none"
         style={{
-          width: "600px",
-          height: "600px",
-          top: "-200px",
-          right: "-100px",
-          background: "radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%)",
-          filter: "blur(40px)",
+          width: "700px",
+          height: "700px",
+          top: "-220px",
+          right: "-120px",
+          background: "radial-gradient(circle, rgba(79,70,229,0.14) 0%, rgba(109,40,217,0.06) 50%, transparent 70%)",
+          filter: "blur(80px)",
         }}
       />
       <div
         className="absolute pointer-events-none"
         style={{
-          width: "500px",
-          height: "500px",
-          bottom: "-100px",
+          width: "550px",
+          height: "550px",
+          bottom: "-120px",
           left: "-100px",
-          background: "radial-gradient(circle, rgba(96,165,250,0.08) 0%, transparent 70%)",
-          filter: "blur(60px)",
+          background: "radial-gradient(circle, rgba(6,182,212,0.1) 0%, rgba(139,92,246,0.05) 50%, transparent 70%)",
+          filter: "blur(90px)",
+        }}
+      />
+      {/* Deep magenta accent blob — center-left */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          width: "400px",
+          height: "400px",
+          top: "30%",
+          left: "5%",
+          background: "radial-gradient(circle, rgba(168,85,247,0.07) 0%, transparent 70%)",
+          filter: "blur(70px)",
         }}
       />
 
@@ -45,34 +57,37 @@ export default function Hero() {
         }}
       />
 
-      {/* Animated Background Decorative Elements */}
+      {/* Animated drifting mesh — Electric Indigo & Cyan */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <motion.div 
-          animate={{ 
-            scale: [1, 1.2, 1],
-            rotate: [0, 90, 0],
-            x: [0, 50, 0],
-            y: [0, -30, 0]
+        <motion.div
+          animate={{
+            scale: [1, 1.15, 1],
+            rotate: [0, 60, 0],
+            x: [0, 40, 0],
+            y: [0, -25, 0],
           }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-blue-600/10 blur-[80px]"
+          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-24 -left-24 w-[420px] h-[420px] rounded-full blur-[90px]"
+          style={{ background: "radial-gradient(circle, rgba(79,70,229,0.13) 0%, transparent 70%)" }}
         />
-        <motion.div 
-          animate={{ 
+        <motion.div
+          animate={{
             scale: [1, 1.1, 1],
-            x: [0, -40, 0],
-            y: [0, 40, 0]
+            x: [0, -35, 0],
+            y: [0, 35, 0],
           }}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute top-1/2 -right-24 w-80 h-80 rounded-full bg-cyan-600/10 blur-[100px]"
+          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/2 -right-24 w-[360px] h-[360px] rounded-full blur-[100px]"
+          style={{ background: "radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 70%)" }}
         />
-        <motion.div 
-          animate={{ 
-            scale: [1, 1.3, 1],
-            y: [0, 60, 0]
+        <motion.div
+          animate={{
+            scale: [1, 1.25, 1],
+            y: [0, 55, 0],
           }}
-          transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-24 left-1/4 w-72 h-72 rounded-full bg-indigo-600/10 blur-[90px]"
+          transition={{ duration: 19, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -bottom-24 left-1/4 w-[320px] h-[320px] rounded-full blur-[80px]"
+          style={{ background: "radial-gradient(circle, rgba(139,92,246,0.09) 0%, transparent 70%)" }}
         />
       </div>
 
@@ -145,10 +160,10 @@ export default function Hero() {
           >
             <h1
               className="text-[22px] md:text-7xl lg:text-8xl font-black tracking-tighter shimmer-text whitespace-nowrap md:whitespace-normal"
-              style={{ 
-                fontFamily: "'Outfit', sans-serif", 
+              style={{
+                fontFamily: "'Plus Jakarta Sans', 'Outfit', sans-serif",
                 lineHeight: 0.9,
-                letterSpacing: '-0.5px'
+                letterSpacing: '-0.5px',
               }}
             >
               Bharat Office Setu
@@ -180,7 +195,7 @@ export default function Hero() {
           className="flex items-center justify-center gap-4 md:gap-10 -mt-2 md:mt-4"
         >
           {[
-            { num: "28+", label: "States" },
+            { num: "36+", label: "States" },
             { num: "150+", label: "Cities" },
             { num: "5000+", label: "Clients" },
           ].map((stat, i) => (
@@ -193,7 +208,13 @@ export default function Hero() {
             >
               <span
                 className="text-base md:text-2xl font-black block"
-                style={{ color: "#60a5fa", fontFamily: "'Outfit', sans-serif" }}
+                style={{
+                  background: "linear-gradient(135deg, #06B6D4 0%, #4F46E5 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  fontFamily: "'Plus Jakarta Sans', 'Outfit', sans-serif",
+                }}
               >
                 {stat.num}
               </span>

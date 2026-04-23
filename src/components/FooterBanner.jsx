@@ -8,22 +8,22 @@ export default function FooterBanner() {
       className="relative overflow-hidden"
       id="contact"
       style={{
-        background: "linear-gradient(180deg, #132744 0%, #0a1628 100%)",
+        background: "linear-gradient(180deg, #080C14 0%, #05050A 100%)",
       }}
     >
       {/* Gradient line separator */}
       <div className="h-px w-full" style={{
-        background: "linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.3) 50%, transparent 100%)",
+        background: "linear-gradient(90deg, transparent 0%, rgba(79,70,229,0.4) 30%, rgba(6,182,212,0.4) 70%, transparent 100%)",
       }} />
 
       {/* CTA Section */}
       <div className="py-24 relative">
         {/* Ambient glow */}
         <div className="absolute pointer-events-none" style={{
-          width: "500px", height: "300px", top: "50%", left: "50%",
+          width: "600px", height: "340px", top: "50%", left: "50%",
           transform: "translate(-50%, -50%)",
-          background: "radial-gradient(ellipse, rgba(59,130,246,0.08) 0%, transparent 70%)",
-          filter: "blur(40px)",
+          background: "radial-gradient(ellipse, rgba(79,70,229,0.1) 0%, rgba(6,182,212,0.06) 50%, transparent 70%)",
+          filter: "blur(60px)",
         }} />
 
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
@@ -32,7 +32,7 @@ export default function FooterBanner() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-xs font-bold uppercase tracking-[0.3em] mb-4"
-            style={{ color: "#60a5fa" }}
+            style={{ color: "#06B6D4", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
           >
             Get Started Today
           </motion.p>
@@ -41,7 +41,7 @@ export default function FooterBanner() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-6 leading-tight"
-            style={{ fontFamily: "'Outfit', sans-serif" }}
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.03em' }}
           >
             Ready to bridge your<br />business to success?
           </motion.h2>
@@ -51,7 +51,7 @@ export default function FooterBanner() {
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
             className="text-base md:text-lg mb-10 max-w-2xl mx-auto"
-            style={{ color: "rgba(148,163,184,0.6)" }}
+            style={{ color: "#9CA3AF", lineHeight: '1.75' }}
           >
             Join thousands of enterprises growing with Bharat Office Setu. Let's discuss your custom workspace and compliance needs.
           </motion.p>
@@ -66,9 +66,10 @@ export default function FooterBanner() {
             whileTap={{ scale: 0.95 }}
             className="inline-flex items-center gap-3 px-10 py-4 rounded-full font-bold text-sm uppercase tracking-[0.15em] transition-all"
             style={{
-              background: "linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%)",
+              background: "linear-gradient(135deg, #4F46E5 0%, #06B6D4 100%)",
               color: "#ffffff",
-              boxShadow: "0 8px 30px rgba(59,130,246,0.35), 0 0 60px rgba(59,130,246,0.1)",
+              boxShadow: "0 8px 40px rgba(79,70,229,0.4), 0 0 60px rgba(6,182,212,0.12)",
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
             }}
           >
             Book a Free Consultation

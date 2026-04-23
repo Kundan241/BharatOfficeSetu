@@ -1,33 +1,42 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+html {
+  scroll-behavior: smooth;
+}
 
 @theme {
+  --color-obsidian: #05050A;
+  --color-midnight: #0B0F19;
   --color-navy: #0a1628;
   --color-navy-light: #0f2038;
   --color-navy-card: #132744;
-  --color-accent: #3b82f6;
-  --color-accent-glow: #60a5fa;
-  --color-accent-deep: #1e3a8a;
+  --color-accent: #4F46E5;
+  --color-accent-cyan: #06B6D4;
+  --color-accent-glow: #818cf8;
+  --color-accent-deep: #3730a3;
   --color-gold: #f59e0b;
+  --color-silver: #9CA3AF;
   --color-forest: #143628;
   --color-forest-cream: #F8F9F8;
   --color-forest-mint: #E0F2F1;
   --color-forest-sage: #B2DFDB;
 
-  --font-serif: "Playfair Display", serif;
+  --font-serif: "Plus Jakarta Sans", serif;
   --font-sans: "Inter", Helvetica, sans-serif;
-  --font-display: "Outfit", sans-serif;
+  --font-display: "Plus Jakarta Sans", sans-serif;
 }
 
 @layer base {
   body {
-    font-family: "Inter", sans-serif;
+    font-family: "Plus Jakarta Sans", "Inter", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: #05050A;
   }
 }
 
-/* Animations */
+/* ─── Keyframe Animations ─── */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-8px); }
@@ -39,6 +48,11 @@
 }
 
 @keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes shimmer-indigo {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
@@ -61,10 +75,29 @@
   90% { transform: translate(-10%, 10%); }
 }
 
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes border-glow-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+@keyframes mesh-drift {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 30px) scale(0.98); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+/* ─── Utility Classes ─── */
 .float-animation {
   animation: float 4s ease-in-out infinite;
 }
 
+/* Hero title shimmer — white → blue tones */
 .shimmer-text {
   background: linear-gradient(
     90deg,
@@ -80,10 +113,31 @@
   animation: shimmer 4s linear infinite;
 }
 
+/* "Success" word — cyan→indigo gradient + glow */
+.text-gradient-success {
+  background: linear-gradient(135deg, #06B6D4 0%, #818cf8 50%, #4F46E5 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer-indigo 5s linear infinite;
+  filter: drop-shadow(0 0 18px rgba(6, 182, 212, 0.55));
+}
+
+/* Legacy gradient (kept for backward compat) */
+.text-gradient-blue {
+  background: linear-gradient(135deg, #06B6D4 0%, #4F46E5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass cards */
 .glass-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .glass-card-light {
@@ -92,12 +146,53 @@
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* New tech-forward enhancements */
-@keyframes scanline {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
+/* Bento glass card with gradient border */
+.bento-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
+.bento-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(79, 70, 229, 0.2) 0%,
+    rgba(6, 182, 212, 0.1) 50%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.6;
+  transition: opacity 0.4s ease;
+}
+
+.bento-card:hover::before {
+  opacity: 1;
+  animation: border-glow-pulse 2s ease-in-out infinite;
+}
+
+.bento-card:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 20px 60px -10px rgba(6, 182, 212, 0.15),
+    0 0 40px -10px rgba(79, 70, 229, 0.1);
+  border-color: rgba(6, 182, 212, 0.2);
+}
+
+/* Scanline effect */
 .scanline::after {
   content: '';
   position: absolute;
@@ -105,15 +200,9 @@
   left: 0;
   width: 100%;
   height: 20px;
-  background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.05), transparent);
+  background: linear-gradient(to bottom, transparent, rgba(79, 70, 229, 0.04), transparent);
   animation: scanline 8s linear infinite;
   pointer-events: none;
-}
-
-.text-gradient-blue {
-  background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 /* Noise texture overlay */
@@ -130,6 +219,23 @@
   z-index: 1;
 }
 
+/* Mesh background for hero */
 .hero-gradient-bg {
   background: radial-gradient(circle at 50% 0%, #172554 0%, #0a1628 50%, #020617 100%);
+}
+
+/* Deep obsidian mesh background */
+.obsidian-bg {
+  background: linear-gradient(160deg, #05050A 0%, #0B0F19 60%, #05050A 100%);
+}
+
+/* Icon glow wrapper */
+.icon-glow {
+  filter: drop-shadow(0 0 10px currentColor);
+}
+
+/* Dot grid */
+.dot-grid {
+  background-image: radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px);
+  background-size: 28px 28px;
 }

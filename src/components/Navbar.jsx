@@ -4,12 +4,13 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-3 flex items-center justify-between transition-all duration-300"
       style={{
-        background: "rgba(10,22,40,0.6)",
-        backdropFilter: "blur(20px)",
-        borderBottom: "1px solid rgba(255,255,255,0.05)",
+        background: "rgba(5,5,10,0.72)",
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
       }}
     >
-      <div className="flex items-center">
+      <a href="/" className="flex items-center" aria-label="Bharat Office Setu — Home">
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-blue-500/20 rounded-xl blur group-hover:bg-blue-500/40 transition"></div>
           <div className="relative flex items-center justify-center bg-white rounded-xl p-0.5 shadow-lg border border-white/20">
@@ -20,26 +21,27 @@ export default function Navbar() {
             />
           </div>
         </div>
-      </div>
+      </a>
 
-      <div className="hidden md:flex items-center space-x-8 text-xs font-semibold uppercase tracking-[0.2em]"
-        style={{ color: "rgba(255,255,255,0.5)" }}
+      <div
+        className="hidden md:flex items-center space-x-8 text-xs font-semibold uppercase tracking-[0.2em]"
+        style={{ color: "rgba(255,255,255,0.45)", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
       >
         <a href="#services" className="hover:text-white transition-colors duration-300 relative group">
           Services
-          <span className="absolute -bottom-1 left-0 w-0 h-px bg-blue-400 group-hover:w-full transition-all duration-300" />
+          <span className="absolute -bottom-1 left-0 w-0 h-px group-hover:w-full transition-all duration-300" style={{ background: "linear-gradient(90deg, #06B6D4, #4F46E5)" }} />
         </a>
         <a href="#workspaces" className="hover:text-white transition-colors duration-300 relative group">
           Workspaces
-          <span className="absolute -bottom-1 left-0 w-0 h-px bg-blue-400 group-hover:w-full transition-all duration-300" />
+          <span className="absolute -bottom-1 left-0 w-0 h-px group-hover:w-full transition-all duration-300" style={{ background: "linear-gradient(90deg, #06B6D4, #4F46E5)" }} />
         </a>
         <a href="#compliance" className="hover:text-white transition-colors duration-300 relative group">
           Compliance
-          <span className="absolute -bottom-1 left-0 w-0 h-px bg-blue-400 group-hover:w-full transition-all duration-300" />
+          <span className="absolute -bottom-1 left-0 w-0 h-px group-hover:w-full transition-all duration-300" style={{ background: "linear-gradient(90deg, #06B6D4, #4F46E5)" }} />
         </a>
         <a href="#about" className="hover:text-white transition-colors duration-300 relative group">
           About
-          <span className="absolute -bottom-1 left-0 w-0 h-px bg-blue-400 group-hover:w-full transition-all duration-300" />
+          <span className="absolute -bottom-1 left-0 w-0 h-px group-hover:w-full transition-all duration-300" style={{ background: "linear-gradient(90deg, #06B6D4, #4F46E5)" }} />
         </a>
       </div>
 
@@ -47,10 +49,11 @@ export default function Navbar() {
         href="mailto:partners@bharatofficesetu.com"
         className="px-5 py-2 rounded-full font-bold text-xs uppercase tracking-[0.15em] hover:scale-105 transition-all active:scale-95 text-center flex items-center justify-center"
         style={{
-          background: "linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%)",
+          background: "linear-gradient(135deg, #4F46E5 0%, #06B6D4 100%)",
           color: "#ffffff",
           border: "none",
-          boxShadow: "0 4px 20px rgba(59,130,246,0.3)",
+          boxShadow: "0 4px 24px rgba(79,70,229,0.35), 0 0 40px rgba(6,182,212,0.12)",
+          fontFamily: "'Plus Jakarta Sans', sans-serif",
         }}
       >
         Get Started
