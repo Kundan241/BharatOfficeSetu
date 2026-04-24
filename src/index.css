@@ -92,9 +92,17 @@ html {
   100% { transform: translate(0, 0) scale(1); }
 }
 
+/* Navbar — glassmorphism on desktop, solid on mobile */
+.navbar-root {
+  background: rgba(5, 5, 10, 0.72);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
 /* ─── Utility Classes ─── */
 .float-animation {
   animation: float 4s ease-in-out infinite;
+  will-change: transform;
 }
 
 /* Hero title shimmer — white → blue tones */
@@ -238,4 +246,128 @@ html {
 .dot-grid {
   background-image: radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px);
   background-size: 28px 28px;
+}
+
+/* ─────────────────────────────────────────────────────────────── */
+/* Mobile Performance Optimizations (screens < 768px)             */
+/* ─────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+
+  /* 1. Disable Glassmorphism — replace backdrop-filter blurs
+        with solid high-opacity backgrounds to eliminate GPU-
+        compositor layers on mobile devices.                       */
+  .glass-card {
+    background: rgba(14, 20, 38, 0.98);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .glass-card-light {
+    background: rgba(20, 25, 45, 0.98);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .bento-card {
+    background: rgba(14, 20, 38, 0.98);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* 2. Remove expensive box-shadow & text-shadow on mobile
+        to cut down repaint cost on every scroll/interaction.      */
+  .bento-card:hover {
+    box-shadow: none !important;
+  }
+
+  /* icon glow filter is cheap visually but expensive on mobile */
+  .icon-glow {
+    filter: none !important;
+  }
+
+  /* 3. Disable the heavy grain noise animation (GPU texture
+        thrashing every 10 steps).                                  */
+  .noise-overlay::before {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+
+  /* 4. Disable the scanline animation on mobile.                  */
+  .scanline::after {
+    animation: none !important;
+    display: none !important;
+  }
+
+  /* 5. Ensure float animation stays on the compositor thread.
+        Only transform + opacity are GPU-accelerated.               */
+  .float-animation {
+    animation: float 4s ease-in-out infinite;
+    will-change: transform;
+    /* Override any accidental box-shadow/filter on the element   */
+    filter: none !important;
+  }
+
+  /* 6. Disable the mesh-drift animation that uses scale()
+        combined with translate — layout-triggering on mobile.     */
+  @keyframes mesh-drift-mobile {
+    0%, 100% { transform: translate(0, 0); }
+    50%       { transform: translate(15px, -10px); }
+  }
+
+  /* Any element using mesh-drift should use only transform     */
+  [style*="mesh-drift"] {
+    animation-name: none !important;
+  }
+
+  /* 7. WhatsApp pulse — ensure only transform+opacity are used.
+        The existing @keyframes wa-pulse already does this, but
+        add will-change to promote to composite layer.              */
+  a[aria-label="Chat with us on WhatsApp"] > span {
+    will-change: transform, opacity;
+  }
+
+  /* 8. Disable bento-card hover glow pseudo-element animation
+        (border-glow-pulse) — saves a repaint per frame.           */
+  .bento-card::before {
+    animation: none !important;
+    opacity: 0.3;
+  }
+
+  .bento-card:hover::before {
+    animation: none !important;
+    opacity: 0.6;
+  }
+
+  /* 9. Navbar — use a solid opaque background on mobile
+        instead of a compositor-heavy backdrop-filter blur.         */
+  .navbar-root {
+    background: rgba(5, 5, 10, 0.97) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* 10. Location card on mobile — the inner bg div uses
+         backdrop-blur-xl which maps to backdrop-filter: blur(24px).
+         Override all backdrop-filter usages inside the card.      */
+  .rounded-\[11px\],
+  .rounded-\[22px\] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(14, 20, 38, 0.98) !important;
+  }
+
+  /* 11. Strip the heavy box-shadow off the location card wrapper  */
+  .glass-card [style*="boxShadow"],
+  [style*="box-shadow: 0 30px"] {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  /* 12. Hero ambient blobs — these use filter:blur() via inline
+         style. Reduce the blur radius to save GPU compositing.    */
+  .hero-gradient-bg {
+    /* Suppress the background radial gradient recalc */
+  }
+
+  /* 13. Disable the 3 Framer Motion drifting blobs on mobile —
+         handled in Hero.jsx by adding 'hidden md:block'           */
 }

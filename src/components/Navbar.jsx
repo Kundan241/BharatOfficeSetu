@@ -2,11 +2,8 @@ import React from "react";
 
 export default function Navbar() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-3 flex items-center justify-between transition-all duration-300"
+    <nav className="navbar-root fixed top-0 left-0 right-0 z-50 px-6 py-3 flex items-center justify-between transition-all duration-300"
       style={{
-        background: "rgba(5,5,10,0.72)",
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
         borderBottom: "1px solid rgba(255,255,255,0.06)",
       }}
     >

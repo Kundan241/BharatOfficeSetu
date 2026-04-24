@@ -23,15 +23,14 @@ export default function WhatsAppWidget() {
         height: '56px',
         borderRadius: '50%',
         background: 'linear-gradient(135deg, #25D366, #128C7E)',
-        boxShadow: hovered
-          ? '0 8px 32px rgba(37,211,102,0.55), 0 0 0 4px rgba(37,211,102,0.15)'
-          : '0 6px 24px rgba(37,211,102,0.35)',
+        /* box-shadow removed — triggers repaint on mobile; only transform is GPU-safe */
         transform: hovered ? 'scale(1.12)' : 'scale(1)',
-        transition: 'transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.22s ease',
+        transition: 'transform 0.22s cubic-bezier(0.34,1.56,0.64,1)',
         textDecoration: 'none',
+        willChange: 'transform',
       }}
     >
-      {/* Pulse ring */}
+      {/* Pulse ring — will-change promotes to compositor layer */}
       <span
         style={{
           position: 'absolute',
@@ -40,6 +39,7 @@ export default function WhatsAppWidget() {
           background: 'rgba(37,211,102,0.3)',
           animation: 'wa-pulse 2.4s ease-out infinite',
           pointerEvents: 'none',
+          willChange: 'transform, opacity',
         }}
       />
 

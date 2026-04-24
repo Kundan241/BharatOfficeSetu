@@ -7,58 +7,60 @@ export default function Hero() {
 
   return (
     <section
-      className="relative min-h-screen overflow-hidden flex flex-col noise-overlay"
+      className="relative min-h-0 md:min-h-screen overflow-hidden flex flex-col noise-overlay"
       style={{
         background: "linear-gradient(160deg, #05050A 0%, #0B0F19 45%, #080C16 75%, #05050A 100%)",
       }}
     >
-      {/* Ambient mesh blobs — Electric Indigo + Deep Magenta */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          width: "700px",
-          height: "700px",
-          top: "-220px",
-          right: "-120px",
-          background: "radial-gradient(circle, rgba(79,70,229,0.14) 0%, rgba(109,40,217,0.06) 50%, transparent 70%)",
-          filter: "blur(80px)",
-        }}
-      />
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          width: "550px",
-          height: "550px",
-          bottom: "-120px",
-          left: "-100px",
-          background: "radial-gradient(circle, rgba(6,182,212,0.1) 0%, rgba(139,92,246,0.05) 50%, transparent 70%)",
-          filter: "blur(90px)",
-        }}
-      />
-      {/* Deep magenta accent blob — center-left */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          width: "400px",
-          height: "400px",
-          top: "30%",
-          left: "5%",
-          background: "radial-gradient(circle, rgba(168,85,247,0.07) 0%, transparent 70%)",
-          filter: "blur(70px)",
-        }}
-      />
+      {/* Ambient mesh blobs — hidden on mobile to prevent expensive blur compositing */}
+      <div className="hidden md:block">
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            width: "700px",
+            height: "700px",
+            top: "-220px",
+            right: "-120px",
+            background: "radial-gradient(circle, rgba(79,70,229,0.14) 0%, rgba(109,40,217,0.06) 50%, transparent 70%)",
+            filter: "blur(80px)",
+          }}
+        />
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            width: "550px",
+            height: "550px",
+            bottom: "-120px",
+            left: "-100px",
+            background: "radial-gradient(circle, rgba(6,182,212,0.1) 0%, rgba(139,92,246,0.05) 50%, transparent 70%)",
+            filter: "blur(90px)",
+          }}
+        />
+        {/* Deep magenta accent blob — center-left */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            width: "400px",
+            height: "400px",
+            top: "30%",
+            left: "5%",
+            background: "radial-gradient(circle, rgba(168,85,247,0.07) 0%, transparent 70%)",
+            filter: "blur(70px)",
+          }}
+        />
+      </div>
 
-      {/* Subtle dot grid pattern */}
+      {/* Subtle dot grid pattern — hidden on mobile */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-[0.03]"
+        className="absolute inset-0 pointer-events-none opacity-[0.03] hidden md:block"
         style={{
           backgroundImage: `radial-gradient(rgba(255,255,255,0.5) 1px, transparent 1px)`,
           backgroundSize: "30px 30px",
         }}
       />
 
-      {/* Animated drifting mesh — Electric Indigo & Cyan */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {/* Animated drifting mesh — hidden on mobile (JS-driven Framer Motion + filter:blur = expensive) */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden hidden md:block">
         <motion.div
           animate={{
             scale: [1, 1.15, 1],
@@ -90,6 +92,7 @@ export default function Hero() {
           style={{ background: "radial-gradient(circle, rgba(139,92,246,0.09) 0%, transparent 70%)" }}
         />
       </div>
+
 
       {/* Hero Content Container */}
       <div className="relative z-10 flex flex-col items-center lg:block pt-24 md:pt-28 pb-0 px-6 max-w-7xl mx-auto w-full text-center lg:text-center">
@@ -226,7 +229,7 @@ export default function Hero() {
         </motion.div>
 
       {/* Interactive Map Section */}
-      <div className="relative z-10 flex-1 mt-16 md:-mt-8">
+      <div className="relative z-10 mt-4 md:-mt-8 pb-0">
         <InteractiveIndiaMap activeState={activeState} setActiveState={setActiveState} />
       </div>
       </div>

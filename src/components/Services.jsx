@@ -333,25 +333,27 @@ export default function Services() {
         background: "linear-gradient(180deg, #05050A 0%, #0B0F19 40%, #080C14 80%, #05050A 100%)",
       }}
     >
-      {/* ── Deep background mesh blobs ── */}
+      {/* ── Deep background mesh blobs — hidden on mobile (mesh-drift animation is expensive) ── */}
+      <div className="hidden md:block">
+        <div
+          className="absolute top-[-120px] right-[-80px] w-[650px] h-[650px] rounded-full pointer-events-none"
+          style={{
+            background: "radial-gradient(circle, rgba(79,70,229,0.09) 0%, transparent 70%)",
+            filter: "blur(80px)",
+            animation: "mesh-drift 22s ease-in-out infinite",
+          }}
+        />
+        <div
+          className="absolute bottom-[-80px] left-[-80px] w-[500px] h-[500px] rounded-full pointer-events-none"
+          style={{
+            background: "radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 70%)",
+            filter: "blur(100px)",
+            animation: "mesh-drift 18s ease-in-out infinite reverse",
+          }}
+        />
+      </div>
       <div
-        className="absolute top-[-120px] right-[-80px] w-[650px] h-[650px] rounded-full pointer-events-none"
-        style={{
-          background: "radial-gradient(circle, rgba(79,70,229,0.09) 0%, transparent 70%)",
-          filter: "blur(80px)",
-          animation: "mesh-drift 22s ease-in-out infinite",
-        }}
-      />
-      <div
-        className="absolute bottom-[-80px] left-[-80px] w-[500px] h-[500px] rounded-full pointer-events-none"
-        style={{
-          background: "radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 70%)",
-          filter: "blur(100px)",
-          animation: "mesh-drift 18s ease-in-out infinite reverse",
-        }}
-      />
-      <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-full pointer-events-none"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-full pointer-events-none hidden md:block"
         style={{
           background: "radial-gradient(ellipse, rgba(129,140,248,0.04) 0%, transparent 70%)",
           filter: "blur(60px)",
