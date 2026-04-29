@@ -1,60 +1,140 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const navLinks = [
+    { name: "Services", href: "#services" },
+    { name: "Workspaces", href: "#workspaces" },
+    { name: "Compliance", href: "#compliance" },
+    { name: "About", href: "#about" },
+  ];
+
   return (
-    <nav className="navbar-root fixed top-0 left-0 right-0 z-50 px-6 py-3 flex items-center justify-between transition-all duration-300"
-      style={{
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
-      }}
-    >
-      <a href="/" className="flex items-center" aria-label="Bharat Office Setu — Home">
-        <div className="relative group">
-          <div className="absolute -inset-0.5 bg-blue-500/20 rounded-xl blur group-hover:bg-blue-500/40 transition"></div>
-          <div className="relative flex items-center justify-center bg-white rounded-xl p-0.5 shadow-lg border border-white/20">
-            <img
-              src="/logo.png"
-              alt="Bharat Office Setu Logo"
-              className="h-8 lg:h-10 w-auto object-contain rounded-lg"
-            />
-          </div>
-        </div>
-      </a>
-
-      <div
-        className="hidden md:flex items-center space-x-8 text-xs font-semibold uppercase tracking-[0.2em]"
-        style={{ color: "rgba(255,255,255,0.45)", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-      >
-        <a href="#services" className="hover:text-white transition-colors duration-300 relative group">
-          Services
-          <span className="absolute -bottom-1 left-0 w-0 h-px group-hover:w-full transition-all duration-300" style={{ background: "linear-gradient(90deg, #06B6D4, #4F46E5)" }} />
-        </a>
-        <a href="#workspaces" className="hover:text-white transition-colors duration-300 relative group">
-          Workspaces
-          <span className="absolute -bottom-1 left-0 w-0 h-px group-hover:w-full transition-all duration-300" style={{ background: "linear-gradient(90deg, #06B6D4, #4F46E5)" }} />
-        </a>
-        <a href="#compliance" className="hover:text-white transition-colors duration-300 relative group">
-          Compliance
-          <span className="absolute -bottom-1 left-0 w-0 h-px group-hover:w-full transition-all duration-300" style={{ background: "linear-gradient(90deg, #06B6D4, #4F46E5)" }} />
-        </a>
-        <a href="#about" className="hover:text-white transition-colors duration-300 relative group">
-          About
-          <span className="absolute -bottom-1 left-0 w-0 h-px group-hover:w-full transition-all duration-300" style={{ background: "linear-gradient(90deg, #06B6D4, #4F46E5)" }} />
-        </a>
-      </div>
-
-      <a
-        href="mailto:partners@bharatofficesetu.com"
-        className="px-5 py-2 rounded-full font-bold text-xs uppercase tracking-[0.15em] hover:scale-105 transition-all active:scale-95 text-center flex items-center justify-center"
+    <>
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between transition-all duration-300`}
         style={{
-          background: "linear-gradient(135deg, #4F46E5 0%, #06B6D4 100%)",
-          color: "#ffffff",
-          border: "none",
-          boxShadow: "0 4px 24px rgba(79,70,229,0.35), 0 0 40px rgba(6,182,212,0.12)",
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
+          background: scrolled ? "rgba(249, 248, 245, 0.85)" : "transparent",
+          backdropFilter: scrolled ? "blur(12px)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(12px)" : "none",
+          borderBottom: scrolled ? "0.5px solid var(--color-border-sage)" : "0.5px solid transparent",
         }}
       >
-        Get Started
-      </a>
-    </nav>
+        {/* Logo */}
+        <a href="/" className="flex items-center hover-lift" aria-label="Bharat Office Setu — Home">
+          <img
+            src="/logo.png"
+            alt="Bharat Office Setu Logo"
+            className="h-8 lg:h-10 w-auto object-contain"
+          />
+        </a>
+
+        {/* Desktop Links */}
+        <div className="hidden md:flex items-center space-x-10 text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+          {navLinks.map((link) => (
+            <a
+              key={link.name}
+              href={link.href}
+              className="hover:text-[var(--color-primary)] transition-colors duration-300 relative group"
+            >
+              {link.name}
+              <span className="absolute -bottom-1.5 left-0 w-0 h-0.5 bg-[var(--color-accent)] group-hover:w-full transition-all duration-300" />
+            </a>
+          ))}
+        </div>
+
+        {/* CTA Button */}
+        <div className="hidden md:block">
+          <a
+            href="mailto:partners@bharatofficesetu.com"
+            className="px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-[0.1em] transition-all hover-lift"
+            style={{
+              backgroundColor: "var(--color-primary)",
+              color: "#ffffff",
+            }}
+          >
+            Get Started
+          </a>
+        </div>
+
+        {/* Mobile Hamburger */}
+        <button
+          className="md:hidden p-2 text-[var(--color-text-dark)] focus:outline-none"
+          onClick={() => setMobileMenuOpen(true)}
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+      </nav>
+
+      {/* Mobile Full-Height Drawer */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-0 z-[60] flex flex-col px-6 py-4"
+            style={{ backgroundColor: "var(--color-bg-warm)" }}
+          >
+            <div className="flex items-center justify-between mb-12">
+              <img src="/logo.png" alt="Bharat Office Setu" className="h-8" />
+              <button
+                className="p-2 text-[var(--color-text-dark)]"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="flex flex-col space-y-8 flex-1 justify-center items-center text-center">
+              {navLinks.map((link, i) => (
+                <motion.a
+                  key={link.name}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + i * 0.1, duration: 0.4 }}
+                  className="text-2xl font-bold uppercase tracking-wider text-[var(--color-text-dark)] hover:text-[var(--color-primary)] transition-colors"
+                >
+                  {link.name}
+                </motion.a>
+              ))}
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.4 }}
+              className="mt-auto mb-8 flex justify-center"
+            >
+              <a
+                href="mailto:partners@bharatofficesetu.com"
+                className="w-full text-center px-6 py-4 rounded-full font-bold text-sm uppercase tracking-[0.1em]"
+                style={{
+                  backgroundColor: "var(--color-primary)",
+                  color: "#ffffff",
+                }}
+              >
+                Get Started
+              </a>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

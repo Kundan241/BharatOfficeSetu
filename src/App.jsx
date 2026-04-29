@@ -8,7 +8,7 @@ import WhatsAppWidget from './components/WhatsAppWidget'
 
 function App() {
   return (
-    <div className="min-h-screen" style={{ background: "#0a1628", color: "#e2e8f0" }}>
+    <div className="min-h-screen bg-[var(--color-bg-warm)] text-[var(--color-text-dark)]">
       <Navbar />
       <main>
         <Hero />

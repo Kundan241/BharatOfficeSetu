@@ -18,39 +18,29 @@ export default function WhatsAppWidget() {
         zIndex: 9999,
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        width: '56px',
-        height: '56px',
-        borderRadius: '50%',
-        background: 'linear-gradient(135deg, #25D366, #128C7E)',
-        /* box-shadow removed — triggers repaint on mobile; only transform is GPU-safe */
-        transform: hovered ? 'scale(1.12)' : 'scale(1)',
-        transition: 'transform 0.22s cubic-bezier(0.34,1.56,0.64,1)',
+        gap: '8px',
+        padding: '12px 20px 12px 14px',
+        borderRadius: '9999px',
+        background: '#25D366',
+        color: '#ffffff',
+        fontFamily: "'Plus Jakarta Sans', sans-serif",
+        fontSize: '14px',
+        fontWeight: '700',
         textDecoration: 'none',
+        boxShadow: '0 8px 24px rgba(37,211,102,0.35)',
+        transform: hovered ? 'translateY(-4px) scale(1.02)' : 'translateY(0) scale(1)',
+        transition: 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+        animation: hovered ? 'none' : 'wa-bounce 8s infinite',
         willChange: 'transform',
       }}
     >
-      {/* Pulse ring — will-change promotes to compositor layer */}
-      <span
-        style={{
-          position: 'absolute',
-          inset: 0,
-          borderRadius: '50%',
-          background: 'rgba(37,211,102,0.3)',
-          animation: 'wa-pulse 2.4s ease-out infinite',
-          pointerEvents: 'none',
-          willChange: 'transform, opacity',
-        }}
-      />
-
       {/* WhatsApp SVG icon */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 32 32"
-        width="30"
-        height="30"
+        width="26"
+        height="26"
         fill="none"
-        style={{ position: 'relative', zIndex: 1 }}
       >
         <path
           d="M16 1C7.716 1 1 7.716 1 16c0 2.69.707 5.25 2.048 7.488L1 31l7.72-2.023A14.93 14.93 0 0 0 16 31c8.284 0 15-6.716 15-15S24.284 1 16 1z"
@@ -64,13 +54,14 @@ export default function WhatsAppWidget() {
           fill="#ffffff"
         />
       </svg>
+      <span style={{ letterSpacing: '0.01em' }}>Chat with us</span>
 
       {/* Keyframe injection via a style tag */}
       <style>{`
-        @keyframes wa-pulse {
-          0%   { transform: scale(1);   opacity: 0.5; }
-          70%  { transform: scale(1.6); opacity: 0;   }
-          100% { transform: scale(1.6); opacity: 0;   }
+        @keyframes wa-bounce {
+          0%, 88%, 94%, 100% { transform: translateY(0) scale(1); }
+          91% { transform: translateY(-12px) scale(1); }
+          97% { transform: translateY(-6px) scale(1); }
         }
       `}</style>
     </a>

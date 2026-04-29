@@ -1,373 +1,111 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&family=Inter:wght@400;500;700&display=swap');
 
 html {
   scroll-behavior: smooth;
 }
 
 @theme {
-  --color-obsidian: #05050A;
-  --color-midnight: #0B0F19;
-  --color-navy: #0a1628;
-  --color-navy-light: #0f2038;
-  --color-navy-card: #132744;
-  --color-accent: #4F46E5;
-  --color-accent-cyan: #06B6D4;
-  --color-accent-glow: #818cf8;
-  --color-accent-deep: #3730a3;
-  --color-gold: #f59e0b;
-  --color-silver: #9CA3AF;
-  --color-forest: #143628;
-  --color-forest-cream: #F8F9F8;
-  --color-forest-mint: #E0F2F1;
-  --color-forest-sage: #B2DFDB;
+  --color-primary: #1B6B2F;
+  --color-accent: #F4831F;
+  --color-highlight: #8BC34A;
+  --color-bg-warm: #F9F8F5;
+  --color-bg-sage: #E8F0E0;
+  --color-bg-light-sage: #F0F5EA;
+  --color-text-dark: #111110;
+  --color-text-muted: #6B7280;
+  --color-border-sage: #C5D9B0;
 
-  --font-serif: "Plus Jakarta Sans", serif;
-  --font-sans: "Inter", Helvetica, sans-serif;
+  --font-sans: "Inter", sans-serif;
   --font-display: "Plus Jakarta Sans", sans-serif;
 }
 
 @layer base {
   body {
-    font-family: "Plus Jakarta Sans", "Inter", sans-serif;
+    font-family: "Inter", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #05050A;
+    background-color: #F9F8F5;
+    color: #111110;
+    line-height: 1.7;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    line-height: 1.2;
+    color: #111110;
   }
 }
 
-/* ─── Keyframe Animations ─── */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
+/* ─── Global Interaction Rules ─── */
+button, a {
+  cursor: pointer;
+}
+
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.hover-lift:active {
+  transform: scale(0.98);
+}
+
+.card-lift {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+}
+
+.card-lift:hover {
+  transform: translateY(-4px);
+}
+
+/* ─── Hero SVG Animation ─── */
+.underline-draw {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: draw 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.5s;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ─── General Animations ─── */
+@keyframes fade-up-anim {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-up-enter {
+  opacity: 0;
+  animation: fade-up-anim 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ─── WhatsApp Pulse ─── */
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
 }
 
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.05); }
+.bounce-interval {
+  animation: bounce-subtle 0.6s cubic-bezier(0.28, 0.84, 0.42, 1) 8s infinite;
 }
 
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes shimmer-indigo {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes grain {
-  0%, 100% { transform: translate(0, 0); }
-  10% { transform: translate(-5%, -10%); }
-  20% { transform: translate(-15%, 5%); }
-  30% { transform: translate(7%, -25%); }
-  40% { transform: translate(-5%, 25%); }
-  50% { transform: translate(-15%, 10%); }
-  60% { transform: translate(15%, 0%); }
-  70% { transform: translate(0%, 15%); }
-  80% { transform: translate(3%, 35%); }
-  90% { transform: translate(-10%, 10%); }
-}
-
-@keyframes scanline {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
-}
-
-@keyframes border-glow-pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
-}
-
-@keyframes mesh-drift {
-  0% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -20px) scale(1.05); }
-  66% { transform: translate(-20px, 30px) scale(0.98); }
-  100% { transform: translate(0, 0) scale(1); }
-}
-
-/* Navbar — glassmorphism on desktop, solid on mobile */
-.navbar-root {
-  background: rgba(5, 5, 10, 0.72);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-}
-
-/* ─── Utility Classes ─── */
-.float-animation {
-  animation: float 4s ease-in-out infinite;
-  will-change: transform;
-}
-
-/* Hero title shimmer — white → blue tones */
-.shimmer-text {
-  background: linear-gradient(
-    90deg,
-    rgba(255,255,255,0.6) 0%,
-    rgba(255,255,255,1) 40%,
-    rgba(96,165,250,1) 60%,
-    rgba(255,255,255,0.6) 100%
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmer 4s linear infinite;
-}
-
-/* "Success" word — cyan→indigo gradient + glow */
-.text-gradient-success {
-  background: linear-gradient(135deg, #06B6D4 0%, #818cf8 50%, #4F46E5 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmer-indigo 5s linear infinite;
-  filter: drop-shadow(0 0 18px rgba(6, 182, 212, 0.55));
-}
-
-/* Legacy gradient (kept for backward compat) */
-.text-gradient-blue {
-  background: linear-gradient(135deg, #06B6D4 0%, #4F46E5 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Glass cards */
-.glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.glass-card-light {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-/* Bento glass card with gradient border */
-.bento-card {
-  position: relative;
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-}
-
-.bento-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 20px;
-  padding: 1px;
-  background: linear-gradient(
-    135deg,
-    rgba(79, 70, 229, 0.2) 0%,
-    rgba(6, 182, 212, 0.1) 50%,
-    rgba(255, 255, 255, 0.03) 100%
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  opacity: 0.6;
-  transition: opacity 0.4s ease;
-}
-
-.bento-card:hover::before {
-  opacity: 1;
-  animation: border-glow-pulse 2s ease-in-out infinite;
-}
-
-.bento-card:hover {
-  transform: translateY(-6px);
-  box-shadow:
-    0 20px 60px -10px rgba(6, 182, 212, 0.15),
-    0 0 40px -10px rgba(79, 70, 229, 0.1);
-  border-color: rgba(6, 182, 212, 0.2);
-}
-
-/* Scanline effect */
-.scanline::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 20px;
-  background: linear-gradient(to bottom, transparent, rgba(79, 70, 229, 0.04), transparent);
-  animation: scanline 8s linear infinite;
-  pointer-events: none;
-}
-
-/* Noise texture overlay */
-.noise-overlay::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-  animation: grain 8s steps(10) infinite;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Mesh background for hero */
-.hero-gradient-bg {
-  background: radial-gradient(circle at 50% 0%, #172554 0%, #0a1628 50%, #020617 100%);
-}
-
-/* Deep obsidian mesh background */
-.obsidian-bg {
-  background: linear-gradient(160deg, #05050A 0%, #0B0F19 60%, #05050A 100%);
-}
-
-/* Icon glow wrapper */
-.icon-glow {
-  filter: drop-shadow(0 0 10px currentColor);
-}
-
-/* Dot grid */
-.dot-grid {
-  background-image: radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px);
-  background-size: 28px 28px;
-}
-
-/* ─────────────────────────────────────────────────────────────── */
-/* Mobile Performance Optimizations (screens < 768px)             */
-/* ─────────────────────────────────────────────────────────────── */
+/* ─── Mobile Overrides ─── */
 @media (max-width: 767px) {
-
-  /* 1. Disable Glassmorphism — replace backdrop-filter blurs
-        with solid high-opacity backgrounds to eliminate GPU-
-        compositor layers on mobile devices.                       */
-  .glass-card {
-    background: rgba(14, 20, 38, 0.98);
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  .glass-card-light {
-    background: rgba(20, 25, 45, 0.98);
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  .bento-card {
-    background: rgba(14, 20, 38, 0.98);
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  /* 2. Remove expensive box-shadow & text-shadow on mobile
-        to cut down repaint cost on every scroll/interaction.      */
-  .bento-card:hover {
-    box-shadow: none !important;
-  }
-
-  /* icon glow filter is cheap visually but expensive on mobile */
-  .icon-glow {
-    filter: none !important;
-  }
-
-  /* 3. Disable the heavy grain noise animation (GPU texture
-        thrashing every 10 steps).                                  */
-  .noise-overlay::before {
-    animation: none !important;
-    opacity: 0 !important;
-  }
-
-  /* 4. Disable the scanline animation on mobile.                  */
-  .scanline::after {
-    animation: none !important;
-    display: none !important;
-  }
-
-  /* 5. Ensure float animation stays on the compositor thread.
-        Only transform + opacity are GPU-accelerated.               */
-  .float-animation {
-    animation: float 4s ease-in-out infinite;
-    will-change: transform;
-    /* Override any accidental box-shadow/filter on the element   */
-    filter: none !important;
-  }
-
-  /* 6. Disable the mesh-drift animation that uses scale()
-        combined with translate — layout-triggering on mobile.     */
-  @keyframes mesh-drift-mobile {
-    0%, 100% { transform: translate(0, 0); }
-    50%       { transform: translate(15px, -10px); }
-  }
-
-  /* Any element using mesh-drift should use only transform     */
-  [style*="mesh-drift"] {
-    animation-name: none !important;
-  }
-
-  /* 7. WhatsApp pulse — ensure only transform+opacity are used.
-        The existing @keyframes wa-pulse already does this, but
-        add will-change to promote to composite layer.              */
-  a[aria-label="Chat with us on WhatsApp"] > span {
-    will-change: transform, opacity;
-  }
-
-  /* 8. Disable bento-card hover glow pseudo-element animation
-        (border-glow-pulse) — saves a repaint per frame.           */
-  .bento-card::before {
-    animation: none !important;
-    opacity: 0.3;
-  }
-
-  .bento-card:hover::before {
-    animation: none !important;
-    opacity: 0.6;
-  }
-
-  /* 9. Navbar — use a solid opaque background on mobile
-        instead of a compositor-heavy backdrop-filter blur.         */
-  .navbar-root {
-    background: rgba(5, 5, 10, 0.97) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  /* 10. Location card on mobile — the inner bg div uses
-         backdrop-blur-xl which maps to backdrop-filter: blur(24px).
-         Override all backdrop-filter usages inside the card.      */
-  .rounded-\[11px\],
-  .rounded-\[22px\] {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: rgba(14, 20, 38, 0.98) !important;
-  }
-
-  /* 11. Strip the heavy box-shadow off the location card wrapper  */
-  .glass-card [style*="boxShadow"],
-  [style*="box-shadow: 0 30px"] {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
-  }
-
-  /* 12. Hero ambient blobs — these use filter:blur() via inline
-         style. Reduce the blur radius to save GPU compositing.    */
-  .hero-gradient-bg {
-    /* Suppress the background radial gradient recalc */
-  }
-
-  /* 13. Disable the 3 Framer Motion drifting blobs on mobile —
-         handled in Hero.jsx by adding 'hidden md:block'           */
+  .hover-lift:hover { transform: none; box-shadow: none; }
+  .card-lift:hover { transform: none; }
 }

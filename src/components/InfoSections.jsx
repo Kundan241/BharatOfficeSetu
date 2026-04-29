@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-/* ─── Shared fade-up animation ─────────────────────────────────── */
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 32 },
   whileInView: { opacity: 1, y: 0 },
@@ -9,45 +8,12 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.7, delay, ease: [0.4, 0, 0.2, 1] },
 });
 
-/* ─── Section wrapper ───────────────────────────────────────────── */
-function InfoSection({ id, accentFrom, accentTo, glowColor, label, heading, body, stats, features, reverse = false }) {
+function InfoSection({ id, accentColor, bgClass, label, heading, body, stats, features, reverse = false }) {
   return (
     <section
       id={id}
-      className="relative py-28 px-6 overflow-hidden"
-      style={{
-        background: 'linear-gradient(180deg, #05050A 0%, #0B0F19 50%, #05050A 100%)',
-      }}
+      className={`relative py-28 px-6 overflow-hidden ${bgClass}`}
     >
-      {/* Background glow blobs */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          width: 700,
-          height: 700,
-          borderRadius: '50%',
-          top: '-120px',
-          [reverse ? 'left' : 'right']: '-180px',
-          background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`,
-          filter: 'blur(90px)',
-        }}
-      />
-
-      {/* Dot grid */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.022]"
-        style={{
-          backgroundImage: 'radial-gradient(rgba(255,255,255,0.7) 1px, transparent 1px)',
-          backgroundSize: '28px 28px',
-        }}
-      />
-
-      {/* Divider line at top */}
-      <div
-        className="absolute top-0 left-0 right-0 h-px"
-        style={{ background: `linear-gradient(90deg, transparent, ${accentFrom}44, transparent)` }}
-      />
-
       <div className="max-w-7xl mx-auto relative z-10">
         <div className={`flex flex-col ${reverse ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-16 lg:gap-24`}>
 
@@ -56,12 +22,11 @@ function InfoSection({ id, accentFrom, accentTo, glowColor, label, heading, body
             {/* Label pill */}
             <motion.div {...fadeUp(0)} className="mb-6">
               <span
-                className="inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.4em]"
+                className="inline-block px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest"
                 style={{
-                  background: `${accentFrom}18`,
-                  border: `1px solid ${accentFrom}35`,
-                  color: accentFrom,
-                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  background: `${accentColor}1A`,
+                  border: `1px solid ${accentColor}33`,
+                  color: accentColor,
                 }}
               >
                 {label}
@@ -71,35 +36,15 @@ function InfoSection({ id, accentFrom, accentTo, glowColor, label, heading, body
             {/* Heading */}
             <motion.h2
               {...fadeUp(0.08)}
-              className="text-4xl md:text-5xl font-black mb-6 leading-tight"
-              style={{
-                fontFamily: "'Plus Jakarta Sans', sans-serif",
-                letterSpacing: '-0.03em',
-                color: '#FFFFFF',
-              }}
+              className="text-4xl md:text-5xl font-black mb-6 leading-tight text-[#111110] tracking-tight"
             >
-              <span
-                style={{
-                  background: `linear-gradient(135deg, ${accentFrom}, ${accentTo})`,
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                {heading.split(' ').slice(0, 2).join(' ')}{' '}
-              </span>
-              {heading.split(' ').slice(2).join(' ')}
+              {heading}
             </motion.h2>
 
             {/* Body */}
             <motion.p
               {...fadeUp(0.15)}
-              className="text-base md:text-lg leading-relaxed mb-10"
-              style={{
-                color: '#9CA3AF',
-                fontFamily: "'Plus Jakarta Sans', sans-serif",
-                lineHeight: '1.9',
-              }}
+              className="text-lg leading-relaxed mb-10 text-[#111110]/70"
             >
               {body}
             </motion.p>
@@ -110,25 +55,12 @@ function InfoSection({ id, accentFrom, accentTo, glowColor, label, heading, body
                 {stats.map((stat, i) => (
                   <div
                     key={i}
-                    className="flex flex-col px-5 py-3 rounded-2xl"
-                    style={{
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.07)',
-                    }}
+                    className="flex flex-col px-6 py-4 rounded-2xl bg-white border border-[#1B6B2F]/10 shadow-sm"
                   >
-                    <span
-                      className="text-2xl font-black leading-none mb-0.5"
-                      style={{
-                        background: `linear-gradient(135deg, ${accentFrom}, ${accentTo})`,
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text',
-                        fontFamily: "'Plus Jakarta Sans', sans-serif",
-                      }}
-                    >
+                    <span className="text-3xl font-black mb-1 text-[#1B6B2F]">
                       {stat.num}
                     </span>
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.15em]" style={{ color: 'rgba(156,163,175,0.7)' }}>
+                    <span className="text-xs font-bold uppercase tracking-widest text-[#111110]/50">
                       {stat.label}
                     </span>
                   </div>
@@ -140,13 +72,7 @@ function InfoSection({ id, accentFrom, accentTo, glowColor, label, heading, body
             <motion.a
               {...fadeUp(0.28)}
               href={`mailto:partners@bharatofficesetu.com?subject=Inquiry about ${label}`}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm uppercase tracking-[0.15em] transition-all hover:scale-105 active:scale-95"
-              style={{
-                background: `linear-gradient(135deg, ${accentFrom}, ${accentTo})`,
-                color: '#fff',
-                boxShadow: `0 8px 32px ${accentFrom}44`,
-                fontFamily: "'Plus Jakarta Sans', sans-serif",
-              }}
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm transition-all hover:scale-105 active:scale-95 bg-[#1B6B2F] text-white shadow-lg shadow-[#1B6B2F]/20"
             >
               Get in Touch →
             </motion.a>
@@ -157,32 +83,15 @@ function InfoSection({ id, accentFrom, accentTo, glowColor, label, heading, body
             {...fadeUp(0.18)}
             className="flex-1 min-w-0 w-full"
           >
-            <div
-              className="rounded-3xl p-8 relative overflow-hidden"
-              style={{
-                background: 'rgba(255,255,255,0.025)',
-                border: '1px solid rgba(255,255,255,0.07)',
-                backdropFilter: 'blur(16px)',
-                boxShadow: `0 40px 80px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.04)`,
-              }}
-            >
-              {/* Inner accent glow */}
+            <div className="rounded-[2rem] p-10 relative overflow-hidden bg-white border border-[#1B6B2F]/10 shadow-[0_20px_40px_rgba(27,107,47,0.04)]">
+              
+              {/* Subtle top accent bar */}
               <div
-                className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none"
-                style={{
-                  background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`,
-                  filter: 'blur(40px)',
-                  transform: 'translate(30%, -30%)',
-                }}
+                className="absolute top-0 left-0 w-full h-1.5"
+                style={{ background: accentColor }}
               />
 
-              {/* Gradient top bar */}
-              <div
-                className="h-1 w-24 rounded-full mb-8"
-                style={{ background: `linear-gradient(90deg, ${accentFrom}, ${accentTo})` }}
-              />
-
-              <ul className="space-y-4 relative z-10">
+              <ul className="space-y-6 relative z-10 mt-2">
                 {features.map((feat, i) => (
                   <motion.li
                     key={i}
@@ -190,25 +99,20 @@ function InfoSection({ id, accentFrom, accentTo, glowColor, label, heading, body
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.2 + i * 0.07, duration: 0.5 }}
-                    className="flex items-start gap-4"
+                    className="flex items-start gap-5"
                   >
-                    {/* Accent dot */}
-                    <div
-                      className="mt-1.5 flex-shrink-0 w-2 h-2 rounded-full"
-                      style={{
-                        background: `linear-gradient(135deg, ${accentFrom}, ${accentTo})`,
-                        boxShadow: `0 0 8px ${accentFrom}88`,
-                      }}
-                    />
+                    {/* Check icon */}
+                    <div className="mt-1 flex-shrink-0 w-6 h-6 rounded-full bg-[#1B6B2F]/10 flex items-center justify-center">
+                       <svg className="w-3.5 h-3.5 text-[#1B6B2F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                       </svg>
+                    </div>
                     <div>
-                      <p
-                        className="text-sm font-semibold mb-0.5"
-                        style={{ color: '#FFFFFF', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                      >
+                      <p className="text-base font-bold mb-1 text-[#111110]">
                         {feat.title}
                       </p>
                       {feat.sub && (
-                        <p className="text-xs" style={{ color: 'rgba(156,163,175,0.75)' }}>
+                        <p className="text-sm text-[#111110]/60 leading-relaxed">
                           {feat.sub}
                         </p>
                       )}
@@ -224,15 +128,13 @@ function InfoSection({ id, accentFrom, accentTo, glowColor, label, heading, body
   );
 }
 
-/* ─── Section data ──────────────────────────────────────────────── */
 export default function InfoSections() {
   return (
     <>
       <InfoSection
         id="workspaces"
-        accentFrom="#06B6D4"
-        accentTo="#4F46E5"
-        glowColor="rgba(6,182,212,0.12)"
+        accentColor="#1B6B2F"
+        bgClass="bg-white"
         label="Workspaces"
         heading="Premium Workspaces Built for the New India"
         body="Whether you are an agile startup or a sprawling multinational, your physical footprint matters. Bharat Office Setu delivers premium, fully-managed workspaces designed for productivity, collaboration, and scale. From plug-and-play coworking desks to custom-built enterprise headquarters across 150+ cities, we provide the flexible infrastructure your business needs to thrive without the overhead of traditional real estate."
@@ -253,9 +155,8 @@ export default function InfoSections() {
 
       <InfoSection
         id="compliance"
-        accentFrom="#f59e0b"
-        accentTo="#ef4444"
-        glowColor="rgba(245,158,11,0.10)"
+        accentColor="#F4831F"
+        bgClass="bg-[#F9F8F5]"
         label="Compliance"
         heading="Seamless Business Setup & Regulatory Compliance"
         body="Navigating the complexities of business operations across different states shouldn't slow your growth. Our end-to-end compliance ecosystem takes the friction out of expansion. We handle everything from company incorporation and virtual office registrations to GST compliance, payroll, and legal advisory. Focus on your core business while our experts ensure you remain 100% compliant across the Indian subcontinent."
@@ -276,9 +177,8 @@ export default function InfoSections() {
 
       <InfoSection
         id="about"
-        accentFrom="#a78bfa"
-        accentTo="#4F46E5"
-        glowColor="rgba(167,139,250,0.10)"
+        accentColor="#8BC34A"
+        bgClass="bg-white"
         label="About Us"
         heading="Bridging Your Enterprise to Success"
         body="Bharat Office Setu is more than a real estate or compliance firm—we are the digital and physical infrastructure backbone for India's fastest-growing enterprises. With a presence in 36+ states and union territories, and trusted by over 5,000 clients, our mission is to empower business expansion by providing world-class workspaces and rock-solid operational support. We build the bridges; you cross them to success."
