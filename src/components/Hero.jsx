@@ -5,10 +5,10 @@ export default function Hero() {
   const [activeState, setActiveState] = useState("Maharashtra");
 
   return (
-    <section className="relative min-h-[90vh] pt-24 pb-6 px-6 flex flex-col items-center bg-[var(--color-bg-warm)] overflow-hidden">
+    <section className="relative pt-24 pb-6 md:pb-6 px-6 flex flex-col items-center bg-[var(--color-bg-warm)] overflow-hidden" style={{ minHeight: 'auto' }}>
       
-      {/* Top Centered Content - Compact to give map 80% area */}
-      <div className="max-w-5xl mx-auto w-full flex flex-col items-center text-center z-10 mt-2">
+      {/* Top Centered Content */}
+      <div className="max-w-5xl mx-auto w-full flex flex-col items-center text-center z-10 mt-2 order-1">
         
         {/* Atal Setu Inspired Bridge Illustration */}
         <div className="absolute top-4 left-1/2 -translate-x-1/2 w-full max-w-[1200px] h-64 pointer-events-none flex justify-center z-0">
@@ -40,19 +40,41 @@ export default function Hero() {
         </div>
 
         {/* Headline */}
-        <h1 
-          className="fade-up-enter text-5xl md:text-[76px] font-bold tracking-tight leading-[1.1] mb-2 relative z-10"
-          style={{ 
-            animationDelay: '0.1s',
-            color: "var(--color-text-dark)"
-          }}
-        >
-          Bharat Office Setu
-        </h1>
+        <div className="w-full flex justify-start md:justify-center px-0 md:px-0 mb-2">
+          <h1 
+            className="fade-up-enter font-bold relative z-10 whitespace-normal min-[360px]:whitespace-nowrap text-left md:text-center pl-6 md:pl-0 text-[clamp(28px,8.5vw,42px)] md:text-[84px] lg:text-[100px]"
+            style={{ 
+              animationDelay: '0.1s',
+              fontWeight: 800,
+              letterSpacing: '-0.03em',
+              color: '#111110',
+              lineHeight: 1.1
+            }}
+          >
+            <span className="whitespace-nowrap">Bharat Office</span>{' '}
+            <span className="relative inline-block whitespace-nowrap" style={{ color: '#F4831F' }}>
+              Setu
+              <svg 
+                className="absolute left-0 bottom-[-2px] md:bottom-[-6px] w-full h-[6px] md:h-[16px] lg:h-[20px] underline-draw" 
+                viewBox="0 0 100 12" 
+                preserveAspectRatio="none"
+                style={{ overflow: 'visible' }}
+              >
+                <path 
+                  d="M2,8 Q50,2 98,8" 
+                  stroke="#F4831F" 
+                  strokeWidth="4" 
+                  fill="none" 
+                  strokeLinecap="round" 
+                />
+              </svg>
+            </span>
+          </h1>
+        </div>
 
         {/* Subheading / Decorator */}
         <div 
-          className="fade-up-enter relative mb-8 w-full flex justify-center"
+          className="fade-up-enter relative mb-6 md:mb-8 w-full flex justify-center"
           style={{ animationDelay: '0.2s' }}
         >
           <div className="absolute top-1/2 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--color-primary)] to-transparent opacity-20"></div>
@@ -60,12 +82,13 @@ export default function Hero() {
             Digital Infrastructure for the New India
           </span>
         </div>
+      </div>
 
-        {/* Stats Row - Smaller */}
-        <div 
-          className="fade-up-enter flex flex-wrap items-center justify-center gap-8 md:gap-16 mb-6"
-          style={{ animationDelay: '0.3s' }}
-        >
+      {/* Stats Row - Moves below map on mobile */}
+      <div 
+        className="fade-up-enter flex flex-wrap items-center justify-center gap-8 md:gap-16 w-full z-10 order-3 md:order-2 my-4 md:my-0 md:mb-6"
+        style={{ animationDelay: '0.3s' }}
+      >
           {[
             { num: "36+", label: "States" },
             { num: "150+", label: "Cities" },
@@ -82,12 +105,10 @@ export default function Hero() {
           ))}
         </div>
 
-      </div>
-
       {/* Bottom Full-Width Map - Maximize Area */}
       <div 
-        className="fade-up-enter w-full max-w-[1400px] mx-auto flex-1 flex flex-col items-center relative z-10"
-        style={{ animationDelay: '0.4s', minHeight: '60vh' }}
+        className="fade-up-enter w-full max-w-[1400px] mx-auto flex-1 flex flex-col items-center relative z-10 order-2 md:order-3 mb-0 pb-0"
+        style={{ animationDelay: '0.4s' }}
       >
         <InteractiveIndiaMap activeState={activeState} setActiveState={setActiveState} />
       </div>

@@ -54,7 +54,7 @@ export default function InteractiveIndiaMap({ activeState, setActiveState, showC
       };
 
   return (
-    <div className="flex flex-col md:flex-row items-center justify-center gap-8 lg:gap-12 w-full max-w-6xl mx-auto py-2 lg:py-4 pb-0 lg:pb-4 overflow-x-hidden">
+    <div className="flex flex-col md:flex-row items-center justify-center gap-8 lg:gap-12 w-full max-w-6xl mx-auto pt-2 lg:pt-4 pb-0 overflow-x-hidden">
       <MapContainer
         {...mapMotionProps}
         className="w-full md:w-[65%] flex items-center justify-center relative"

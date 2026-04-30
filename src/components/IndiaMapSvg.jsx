@@ -48,7 +48,7 @@ export default function IndiaMapSvg({ activeState, onHover, onLeave, onClick, se
   };
 
   return (
-    <svg viewBox="0 0 432 488" preserveAspectRatio="xMidYMid meet" className={className || "w-full h-full"}>
+    <svg viewBox="0 0 432 470" preserveAspectRatio="xMidYMid meet" className={className || "w-full h-full"}>
       <g className="regions">
         {STATES.map((state) => {
           const isActive = activeState === state.id;

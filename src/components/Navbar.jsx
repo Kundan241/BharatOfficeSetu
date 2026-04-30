@@ -37,7 +37,7 @@ export default function Navbar() {
           <img
             src="/logo.png"
             alt="Bharat Office Setu Logo"
-            className="h-8 lg:h-10 w-auto object-contain"
+            className="h-8 md:h-12 lg:h-16 w-auto object-contain"
           />
         </a>
 

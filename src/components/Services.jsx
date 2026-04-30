@@ -163,7 +163,7 @@ export default function Services() {
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
-    <section id="services" className="py-24 lg:py-32 bg-[#F9F8F5] relative overflow-hidden">
+    <section id="services" className="pt-10 pb-24 lg:py-32 bg-[#F9F8F5] relative overflow-hidden">
       {/* Background Architectural Grid */}
       <div 
         className="absolute inset-0 pointer-events-none opacity-[0.03]" 
