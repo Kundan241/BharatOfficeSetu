@@ -4,6 +4,10 @@ import InteractiveIndiaMap from "./InteractiveIndiaMap";
 export default function Hero() {
   const [activeState, setActiveState] = useState("Maharashtra");
 
+  React.useEffect(() => {
+    window.lastHoveredState = activeState;
+  }, [activeState]);
+
   return (
     <section className="relative pt-24 pb-6 md:pb-6 px-6 flex flex-col items-center bg-[var(--color-bg-warm)] overflow-hidden" style={{ minHeight: 'auto' }}>
       

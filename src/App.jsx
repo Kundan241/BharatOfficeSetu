@@ -1,6 +1,7 @@
 import React from 'react'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
+import FreeConsultation from './components/FreeConsultation'
 import Services from './components/Services'
 import InfoSections from './components/InfoSections'
 import FooterBanner from './components/FooterBanner'
@@ -12,6 +13,7 @@ function App() {
       <Navbar />
       <main>
         <Hero />
+        <FreeConsultation />
         <Services />
         <InfoSections />
       </main>
