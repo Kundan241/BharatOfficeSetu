@@ -70,7 +70,7 @@ export default function FreeConsultation() {
     };
 
     try {
-      await fetch('https://script.google.com/macros/s/AKfycbyV3FGQHAjeSoeCYm0o4Z_QXQ1f1_W6jSJl4W7yxjUzrqI5bCPs850kTrE-cgYC2Brf_A/exec', {
+      await fetch('https://script.google.com/macros/s/AKfycbxJsqakzHd4nbETSSWqscn3baHoEPS3lSFJwRsxvPnuo6OLr9ssPWpr2dGJXv-LCnM5gQ/exec', {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain;charset=utf-8',
