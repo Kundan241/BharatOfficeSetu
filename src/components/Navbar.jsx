@@ -55,8 +55,19 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* CTA Button */}
-        <div className="hidden md:block">
+        {/* CTA Buttons */}
+        <div className="hidden md:flex items-center space-x-4">
+          <a
+            href="/login"
+            className="px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-[0.1em] transition-all hover-lift"
+            style={{
+              backgroundColor: "transparent",
+              color: "var(--color-primary)",
+              border: "1px solid var(--color-primary)"
+            }}
+          >
+            Login / Register
+          </a>
           <a
             href="mailto:partners@bharatofficesetu.com"
             className="px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-[0.1em] transition-all hover-lift"
@@ -119,8 +130,19 @@ export default function Navbar() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.4 }}
-              className="mt-auto mb-8 flex justify-center"
+              className="mt-auto mb-8 flex flex-col space-y-4 px-4 w-full"
             >
+              <a
+                href="/login"
+                className="w-full text-center px-6 py-4 rounded-full font-bold text-sm uppercase tracking-[0.1em] transition-all"
+                style={{
+                  backgroundColor: "transparent",
+                  color: "var(--color-primary)",
+                  border: "1px solid var(--color-primary)"
+                }}
+              >
+                Login / Register
+              </a>
               <a
                 href="mailto:partners@bharatofficesetu.com"
                 className="w-full text-center px-6 py-4 rounded-full font-bold text-sm uppercase tracking-[0.1em]"
