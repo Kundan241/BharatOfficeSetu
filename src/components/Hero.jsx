@@ -69,7 +69,7 @@ export default function Hero() {
       </div>
 
       {/* Stats Row - Moves below map on mobile */}
-      <div className="fade-up-enter stats-pill-strip z-10" style={{ animationDelay: '0.3s' }}>
+      <div className="fade-up-enter stats-pill-strip z-10 order-3 md:order-2 mt-4 md:mt-0" style={{ animationDelay: '0.3s' }}>
         <div className="stat-item">
           <span className="stat-num">36+</span>
           <span className="stat-label">States</span>
