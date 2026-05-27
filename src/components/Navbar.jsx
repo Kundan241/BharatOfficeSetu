@@ -66,7 +66,7 @@ export default function Navbar() {
               border: "1px solid var(--color-primary)"
             }}
           >
-            Login / Register
+            LOGIN
           </a>
           <a
             href="mailto:partners@bharatofficesetu.com"
@@ -141,7 +141,7 @@ export default function Navbar() {
                   border: "1px solid var(--color-primary)"
                 }}
               >
-                Login / Register
+                LOGIN
               </a>
               <a
                 href="mailto:partners@bharatofficesetu.com"

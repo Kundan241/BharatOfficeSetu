@@ -90,7 +90,7 @@ export default function FreeConsultation() {
   };
 
   return (
-    <section className="bg-[#F4F3EE] py-12 md:py-20 px-5 md:px-6 border-t border-[#1B6B2F]/10">
+    <section id="consultation" className="bg-[#F4F3EE] py-12 md:py-20 px-5 md:px-6 border-t border-[#1B6B2F]/10">
       <div className="max-w-[860px] mx-auto">
         
         {/* Section Header */}

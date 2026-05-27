@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
+import WhyBosSection from './components/WhyBosSection'
 import WorkspaceListings from './components/WorkspaceListings'
 import FreeConsultation from './components/FreeConsultation'
 import Services from './components/Services'
@@ -23,6 +24,7 @@ function LandingPage() {
       <Navbar />
       <main>
         <Hero />
+        <WhyBosSection />
         <WorkspaceListings />
         <FreeConsultation />
         <Services />

@@ -9,39 +9,19 @@ export default function Hero() {
   }, [activeState]);
 
   return (
-    <section className="relative pt-24 pb-6 md:pb-6 px-6 flex flex-col items-center bg-[var(--color-bg-warm)] overflow-hidden" style={{ minHeight: 'auto' }}>
+    <section className="relative pt-24 pb-6 md:pb-6 px-6 flex flex-col items-center bg-[var(--color-bg-warm)] overflow-hidden" style={{ minHeight: 'auto', isolation: 'isolate' }}>
       
+      {/* Background Orbs */}
+      <div className="orb-1"></div>
+      <div className="orb-2"></div>
+      <div className="orb-3"></div>
+      <div className="bos-aurora" aria-hidden="true"></div>
+
       {/* Top Centered Content */}
       <div className="max-w-5xl mx-auto w-full flex flex-col items-center text-center z-10 mt-2 order-1">
         
         {/* Atal Setu Inspired Bridge Illustration */}
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-full max-w-[1200px] h-64 pointer-events-none flex justify-center z-0">
-          <svg viewBox="0 0 1200 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-            {/* Sleek curved deck fading at the ends */}
-            <path d="M0,150 Q600,165 1200,150" stroke="var(--color-text-muted)" strokeWidth="2" opacity="0.2" />
-            <path d="M0,160 Q600,175 1200,160" stroke="var(--color-text-muted)" strokeWidth="1" opacity="0.1" />
-            
-            {/* Sweeping suspension curves */}
-            <path d="M100,50 Q250,150 400,150" stroke="var(--color-primary)" strokeWidth="1" opacity="0.3" />
-            <path d="M400,150 Q550,150 700,50" stroke="var(--color-primary)" strokeWidth="1" opacity="0.3" />
-            <path d="M700,50 Q850,150 1000,150" stroke="var(--color-primary)" strokeWidth="1" opacity="0.3" />
-            <path d="M1000,150 Q1100,150 1200,100" stroke="var(--color-primary)" strokeWidth="1" opacity="0.3" />
-            
-            {/* Elegant vertical tension cables */}
-            {[...Array(25)].map((_, i) => (
-              <line 
-                key={i} 
-                x1={100 + i*41.6} 
-                y1={50 + Math.abs(Math.sin(i*0.26))*100} 
-                x2={100 + i*41.6} 
-                y2={152 + Math.sin(i*0.13)*10} 
-                stroke="var(--color-primary)" 
-                strokeWidth="0.5" 
-                opacity={0.1 + Math.abs(Math.cos(i*0.3))*0.15} 
-              />
-            ))}
-          </svg>
-        </div>
+        {/* Removed bridge graphic */}
 
         {/* Headline */}
         <div className="w-full flex justify-start md:justify-center px-0 md:px-0 mb-2">
@@ -89,25 +69,22 @@ export default function Hero() {
       </div>
 
       {/* Stats Row - Moves below map on mobile */}
-      <div 
-        className="fade-up-enter flex flex-wrap items-center justify-center gap-8 md:gap-16 w-full z-10 order-3 md:order-2 my-4 md:my-0 md:mb-6"
-        style={{ animationDelay: '0.3s' }}
-      >
-          {[
-            { num: "36+", label: "States" },
-            { num: "150+", label: "Cities" },
-            { num: "5000+", label: "Clients" },
-          ].map((stat, i) => (
-            <div key={i} className="flex flex-col items-center transition-transform hover:-translate-y-1">
-              <span className="text-3xl md:text-4xl font-bold text-[var(--color-primary)] leading-none mb-1.5" style={{ fontFamily: "var(--font-display)", filter: "drop-shadow(0 2px 4px rgba(27,107,47,0.1))" }}>
-                {stat.num}
-              </span>
-              <span className="text-[10px] md:text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">
-                {stat.label}
-              </span>
-            </div>
-          ))}
+      <div className="fade-up-enter stats-pill-strip z-10" style={{ animationDelay: '0.3s' }}>
+        <div className="stat-item">
+          <span className="stat-num">36+</span>
+          <span className="stat-label">States</span>
         </div>
+        <div className="stat-separator"></div>
+        <div className="stat-item">
+          <span className="stat-num">150+</span>
+          <span className="stat-label">Cities</span>
+        </div>
+        <div className="stat-separator"></div>
+        <div className="stat-item">
+          <span className="stat-num">5000+</span>
+          <span className="stat-label">Clients</span>
+        </div>
+      </div>
 
       {/* Bottom Full-Width Map - Maximize Area */}
       <div 
@@ -117,6 +94,8 @@ export default function Hero() {
         <InteractiveIndiaMap activeState={activeState} setActiveState={setActiveState} />
       </div>
 
+      {/* Hero Bottom Fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-[80px] pointer-events-none z-[1]" style={{ background: 'linear-gradient(to bottom, transparent, #F4F3EE)' }}></div>
     </section>
   );
 }

@@ -40,7 +40,7 @@ export const STATE_DATA = {
   "Jammu And Kashmir": { count: 1, img: "/Himachal Pradesh.jpeg" },
 };
 
-export const DEFAULT_DATA = { count: 0, img: "/general.png" };
+export const DEFAULT_DATA = { count: 1, img: "/general.png" };
 
 export default function InteractiveIndiaMap({ activeState, setActiveState, showCard = true }) {
   const isMobile = useIsMobile();
