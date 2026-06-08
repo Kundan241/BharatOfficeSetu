@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, Check, FileText, Download, MessageCircle, X as XIcon } from 'lucide-react';
 import { useAuth } from '../components/AuthContext';
 import { SERVICE_STEPS } from '../services/services';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
 import { getClient } from '../services/clients';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
@@ -51,32 +52,57 @@ export default function Dashboard() {
   }, [user, loading, navigate]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setFetching(true);
-      try {
-        await new Promise(r => setTimeout(r, 1000));
-        // Mock data
-        const mockServices = [
-          { id: '1', name: 'GST Registration', startDate: '12 Apr 2026', currentStep: 'Application Filed', status: 'active', lastUpdated: '2' },
-          { id: '2', name: 'Company Incorporation', startDate: '01 Feb 2026', currentStep: 'Completed', status: 'completed', lastUpdated: '45' }
-        ];
-        const mockDocs = [
-          { id: '1', name: 'Incorporation_Certificate.pdf', url: '#' },
-          { id: '2', name: 'GST_Receipt.pdf', url: '#' }
-        ];
-        
-        setServices(mockServices);
-        setDocuments(mockDocs);
-      } catch (err) {
-        console.error(err);
-      } finally {
+    if (!user) return;
+
+    setFetching(true);
+    
+    const servicesRef = collection(db, 'clients', user.uid, 'services');
+    
+    const unsubServices = onSnapshot(
+      servicesRef,
+      (snapshot) => {
+        const services = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          // Mapping 'type' to 'name' and 'status' to 'currentStep' to match UI
+          name: doc.data().type,
+          currentStep: doc.data().status,
+          status: doc.data().completedDate ? 'completed' : 'active',
+          startDate: doc.data().startDate?.toDate?.().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) || 'Just now',
+          completedDate: doc.data().completedDate?.toDate?.() || null,
+          lastUpdated: doc.data().startDate ? Math.floor((new Date() - doc.data().startDate.toDate()) / (1000 * 60 * 60 * 24)) : 0
+        }));
+        setServices(services);
+        setFetching(false);
+      },
+      (error) => {
+        console.error('Services error:', error);
         setFetching(false);
       }
+    );
+
+    const docsRef = collection(db, 'clients', user.uid, 'documents');
+    
+    const unsubDocs = onSnapshot(
+      docsRef,
+      (snapshot) => {
+        const documents = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          uploadedAt: doc.data().uploadedAt?.toDate?.() || null
+        }));
+        setDocuments(documents);
+      },
+      (error) => {
+        console.error('Documents error:', error);
+      }
+    );
+
+    return () => {
+      unsubServices();
+      unsubDocs();
     };
     
-    if (user) {
-      fetchData();
-    }
   }, [user]);
 
   // Modal Timer

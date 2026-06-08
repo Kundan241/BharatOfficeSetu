@@ -7,6 +7,7 @@ import WorkspaceListings from './components/WorkspaceListings'
 import FreeConsultation from './components/FreeConsultation'
 import Services from './components/Services'
 import InfoSections from './components/InfoSections'
+import BlogPreview from './components/BlogPreview'
 import FooterBanner from './components/FooterBanner'
 import WhatsAppWidget from './components/WhatsAppWidget'
 
@@ -18,6 +19,9 @@ import SetPassword from './pages/SetPassword'
 import Dashboard from './pages/Dashboard'
 import Admin from './pages/Admin'
 
+import BlogListing from './pages/BlogListing'
+import BlogPost from './pages/BlogPost'
+
 function LandingPage() {
   return (
     <div className="bg-[var(--color-bg-warm)] text-[var(--color-text-dark)]">
@@ -28,6 +32,7 @@ function LandingPage() {
         <WorkspaceListings />
         <FreeConsultation />
         <Services />
+        <BlogPreview />
         <InfoSections />
       </main>
       <FooterBanner />
@@ -44,6 +49,8 @@ function App() {
           <div className="min-h-screen">
             <Routes>
               <Route path="/" element={<LandingPage />} />
+              <Route path="/blog" element={<BlogListing />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/login" element={<Login />} />
               <Route path="/set-password" element={<SetPassword />} />
               <Route path="/dashboard" element={<Dashboard />} />

@@ -40,8 +40,11 @@ export const createClientAccount = async (email, password) => {
 
 export const sendSetPasswordEmail = async (email) => {
   try {
-    await sendPasswordResetEmail(auth, email);
-    return { success: true };
+    await sendPasswordResetEmail(auth, email, {
+      url: window.location.origin + '/login',
+      handleCodeInApp: false
+    });
+    return { error: null };
   } catch (error) {
     return { error: error.message };
   }

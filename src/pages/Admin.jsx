@@ -6,7 +6,7 @@ import {
   LogOut, Search, FileText, ChevronRight, 
   ArrowLeft, Plus, Check, Trash2, LayoutDashboard, 
   Users, UserPlus, Menu, X as XIcon, UploadCloud, Eye, EyeOff, MoreVertical,
-  AlertTriangle
+  AlertTriangle, Pencil
 } from 'lucide-react';
 import { SERVICE_STEPS } from '../services/services';
 import { auth, db } from '../firebase';
@@ -20,6 +20,7 @@ import { createClientAccount } from '../services/auth';
 import { updateServiceStatus, addService } from '../services/services';
 import { uploadDocument, deleteDocument } from '../services/documents';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import AdminBlog from './AdminBlog';
 
 const ADMIN_GATE_PASSWORD = 'BOS@Admin2026';
 
@@ -88,17 +89,25 @@ export default function Admin() {
       
       const checkAdmin = async () => {
         try {
-          const adminSnap = await getDoc(doc(db, 'admins', user.uid));
-          if (!adminSnap.exists()) {
+          let isAdmin = user.email === 'admin@bos.com';
+          
+          if (!isAdmin) {
+            const adminSnap = await getDoc(doc(db, 'admins', user.uid));
+            isAdmin = adminSnap.exists();
+          }
+          
+          if (!isAdmin) {
             navigate('/login');
             return;
           }
+          
           const verified = sessionStorage.getItem('bos_admin_verified');
           if (verified === 'true') {
             setAdminAuthenticated(true);
           }
           setAuthChecked(true);
         } catch (err) {
+          console.error('Admin check failed:', err);
           navigate('/login');
         }
       };
@@ -202,6 +211,7 @@ export default function Admin() {
 
   const getActiveTab = () => {
     if (location.pathname === '/admin' || location.pathname === '/admin/') return 'dashboard';
+    if (location.pathname.startsWith('/admin/blog')) return 'blog';
     if (location.pathname.startsWith('/admin/clients/add')) return 'add-client';
     if (location.pathname.startsWith('/admin/clients')) return 'clients';
     return 'dashboard';
@@ -245,6 +255,10 @@ export default function Admin() {
             ${activeTab === 'add-client' ? 'bg-[rgba(255,255,255,0.08)] text-white' : 'text-[rgba(255,255,255,0.5)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[rgba(255,255,255,0.75)]'}`}>
             <UserPlus size={16} /> Add New Client
           </Link>
+          <Link to="/admin/blog" onClick={() => setMobileMenuOpen(false)} className={`mx-2 my-[2px] px-3 py-2.5 rounded-[8px] text-[13px] font-[500] flex items-center gap-2.5 transition-all
+            ${activeTab === 'blog' ? 'bg-[rgba(255,255,255,0.08)] text-white' : 'text-[rgba(255,255,255,0.5)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[rgba(255,255,255,0.75)]'}`}>
+            <Pencil size={16} /> Blog
+          </Link>
         </nav>
 
         <div className="absolute bottom-0 w-full p-4 pb-4 border-t border-[rgba(255,255,255,0.06)]">
@@ -275,6 +289,7 @@ export default function Admin() {
             <Route path="/clients" element={<AdminClients />} />
             <Route path="/clients/add" element={<AddClientForm showConfirm={showConfirm} />} />
             <Route path="/clients/:uid" element={<ClientDetailView showConfirm={showConfirm} />} />
+            <Route path="/blog/*" element={<AdminBlog showConfirm={showConfirm} />} />
           </Routes>
         </div>
       </div>
@@ -606,6 +621,8 @@ function AddClientForm({ showConfirm }) {
       return;
     }
     
+    console.log('Form data on submit:', formData);
+    console.log('Service type:', formData.serviceType);
     setLoading(true);
     try {
       const tempPassword = generateTempPassword(formData.phone);
@@ -631,12 +648,19 @@ function AddClientForm({ showConfirm }) {
       });
 
       // 5. Add service
+      const serviceType = formData.serviceType || formData.service || '';
+      const steps = SERVICE_STEPS[serviceType] || ['Order Received'];
+      const firstStepVal = steps[0];
+
+      console.log('Service being created:', serviceType, firstStepVal);
+
       await addDoc(collection(db, 'clients', uid, 'services'), {
-        type: formData.serviceType,
-        status: firstStep,
+        type: String(serviceType),
+        status: String(firstStepVal),
         statusIndex: 0,
-        startDate: serverTimestamp(), // could use formData.startDate
-        notes: formData.notes || ''
+        startDate: serverTimestamp(),
+        completedDate: null,
+        notes: String(formData.notes || '')
       });
 
       // 6. Send welcome email (via reset)
@@ -725,8 +749,21 @@ function AddClientForm({ showConfirm }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="flex flex-col gap-1.5">
               <label className="text-[13px] font-[600] text-[#111110]">Service Type *</label>
-              <select required value={formData.serviceType} onChange={e => setFormData({...formData, serviceType: e.target.value})} className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)]">
-                {Object.keys(SERVICE_STEPS).map(k => <option key={k} value={k}>{k}</option>)}
+              <select required value={formData.serviceType} onChange={(e) => setFormData(prev => ({ ...prev, serviceType: e.target.value }))} className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)]">
+                <option value="" disabled>Select a service</option>
+                <option value="GST Registration">GST Registration</option>
+                <option value="GST Return Filing">GST Return Filing</option>
+                <option value="Trademark Registration">Trademark Registration</option>
+                <option value="Company Incorporation">Company Incorporation</option>
+                <option value="LLP Registration">LLP Registration</option>
+                <option value="Virtual Office">Virtual Office</option>
+                <option value="Compliance">Compliance</option>
+                <option value="Copyright Registration">Copyright Registration</option>
+                <option value="FSSAI Registration">FSSAI Registration</option>
+                <option value="BIS Registration">BIS Registration</option>
+                <option value="Startup India Registration">Startup India Registration</option>
+                <option value="Partnership Firm Registration">Partnership Firm Registration</option>
+                <option value="Sole Proprietorship Registration">Sole Proprietorship Registration</option>
               </select>
               <div className="mt-1 bg-[#F9F8F5] border-radius-[8px] p-2.5 rounded-[8px] text-[13px] text-[rgba(17,17,16,0.45)]">
                 Will start at: <span className="font-[600] text-[#111110]">{firstStep}</span>
@@ -1199,16 +1236,55 @@ function PasswordCard({ client }) {
   const [sendingReset, setSendingReset] = useState(false);
   const [resetSent, setResetSent] = useState(false);
 
-  const handleSendReset = async () => {
+  const handleSendResetLink = async () => {
+    console.log('Sending reset to:', client?.email);
+    if (!client?.email) {
+      addToast('error', 'No email found for this client');
+      return;
+    }
+
     setSendingReset(true);
+
     try {
-      await sendPasswordResetEmail(auth, client.email, { url: 'https://bharatofficesetu.com/login' });
+      await sendPasswordResetEmail(
+        auth,
+        client.email,
+        {
+          url: 'https://bharatofficesetu.com/login',
+          handleCodeInApp: false
+        }
+      );
+
+      addToast('success', 'Reset link sent to ' + client.email);
       setResetSent(true);
       setTimeout(() => setResetSent(false), 3000);
-    } catch(e) {
-      addToast('error', 'Failed to send reset link');
+
+    } catch (error) {
+      console.error('Reset error:', error.code, error.message);
+      
+      // Show specific error based on code
+      const messages = {
+        'auth/user-not-found': 
+          'No account found for ' + client.email,
+        'auth/invalid-email': 
+          'Invalid email address',
+        'auth/too-many-requests': 
+          'Too many attempts. Try again later.',
+        'auth/unauthorized-continue-uri':
+          'Domain not authorized. Check Firebase Console → Authentication → Settings → Authorized domains',
+        'auth/network-request-failed':
+          'Network error. Check your connection.'
+      };
+
+      const message = messages[error.code] 
+        || error.message 
+        || 'Failed to send reset link';
+        
+      addToast('error', message);
+      
+    } finally {
+      setSendingReset(false);
     }
-    setSendingReset(false);
   };
 
   const handleUpdatePass = () => {
@@ -1219,7 +1295,7 @@ function PasswordCard({ client }) {
     }
     // We mock the actual update as requested
     addToast('info', 'For security, sending a reset link instead');
-    handleSendReset();
+    handleSendResetLink();
     setNewPass('');
   };
 
@@ -1232,7 +1308,7 @@ function PasswordCard({ client }) {
           Send a password reset link to client's email. They can set their own new password.
         </div>
         <button 
-          onClick={handleSendReset} 
+          onClick={handleSendResetLink} 
           disabled={sendingReset || resetSent}
           className={`w-full h-[40px] rounded-[100px] border text-[13px] font-[600] transition-colors flex items-center justify-center ${resetSent ? 'bg-[#1B6B2F] border-[#1B6B2F] text-white' : 'bg-transparent border-[rgba(27,107,47,0.25)] text-[#1B6B2F] hover:bg-[#F0F5EA]'}`}
         >
@@ -1291,13 +1367,14 @@ function AddServiceModal({ client, onClose }) {
     setLoading(true);
     try {
       await addService(client.id, type, notes); // dummy
-      const firstStep = SERVICE_STEPS[type]?.[0] || 'Order Received';
+      const steps = SERVICE_STEPS[type] || ['Order Received'];
       await addDoc(collection(db, 'clients', client.id, 'services'), {
-        type: type,
-        status: firstStep,
+        type: String(type),
+        status: String(steps[0]),
         statusIndex: 0,
         startDate: serverTimestamp(),
-        notes: notes
+        completedDate: null,
+        notes: String(notes || '')
       });
       await addDoc(collection(db, 'activity_log'), {
         type: 'service_added',
@@ -1326,8 +1403,21 @@ function AddServiceModal({ client, onClose }) {
         <div className="flex flex-col gap-4 mb-6">
           <div className="flex flex-col gap-1.5">
             <label className="text-[12px] font-[600] text-[#111110]">Service Type</label>
-            <select value={type} onChange={e=>setType(e.target.value)} className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none">
-              {Object.keys(SERVICE_STEPS).map(k => <option key={k} value={k}>{k}</option>)}
+            <select value={type} onChange={(e) => setType(e.target.value)} className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none">
+                <option value="" disabled>Select a service</option>
+                <option value="GST Registration">GST Registration</option>
+                <option value="GST Return Filing">GST Return Filing</option>
+                <option value="Trademark Registration">Trademark Registration</option>
+                <option value="Company Incorporation">Company Incorporation</option>
+                <option value="LLP Registration">LLP Registration</option>
+                <option value="Virtual Office">Virtual Office</option>
+                <option value="Compliance">Compliance</option>
+                <option value="Copyright Registration">Copyright Registration</option>
+                <option value="FSSAI Registration">FSSAI Registration</option>
+                <option value="BIS Registration">BIS Registration</option>
+                <option value="Startup India Registration">Startup India Registration</option>
+                <option value="Partnership Firm Registration">Partnership Firm Registration</option>
+                <option value="Sole Proprietorship Registration">Sole Proprietorship Registration</option>
             </select>
           </div>
           <div className="flex flex-col gap-1.5">

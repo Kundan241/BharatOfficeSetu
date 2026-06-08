@@ -788,3 +788,98 @@ button, a {
     scroll-behavior: auto !important;
   }
 }
+
+/* ─── Blog Content Styling ─── */
+.article-content h1, .article-content h2, .article-content h3 {
+  color: #111110;
+  font-weight: 700;
+  margin: 32px 0 12px;
+  line-height: 1.25;
+}
+.article-content h2 {
+  font-size: 24px;
+  border-bottom: 1px solid rgba(17,17,16,0.08);
+  padding-bottom: 8px;
+}
+.article-content h3 {
+  font-size: 20px;
+}
+.article-content p {
+  font-size: 17px;
+  line-height: 1.8;
+  color: rgba(17,17,16,0.8);
+  margin-bottom: 20px;
+}
+.article-content a {
+  color: #1B6B2F;
+  text-decoration: underline;
+  text-decoration-color: rgba(27,107,47,0.3);
+}
+.article-content ul, .article-content ol {
+  padding-left: 24px;
+  margin-bottom: 20px;
+}
+.article-content li {
+  font-size: 17px;
+  line-height: 1.8;
+  color: rgba(17,17,16,0.8);
+  margin-bottom: 6px;
+  list-style-type: disc;
+}
+.article-content blockquote {
+  border-left: 3px solid #F4831F;
+  padding: 12px 20px;
+  margin: 24px 0;
+  background: rgba(244,131,31,0.04);
+  border-radius: 0 8px 8px 0;
+}
+.article-content blockquote p {
+  color: rgba(17,17,16,0.65);
+  font-style: italic;
+  margin: 0;
+}
+.article-content code {
+  background: rgba(17,17,16,0.06);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 14px;
+  font-family: monospace;
+  color: #111110;
+}
+.article-content pre {
+  background: #111110;
+  border-radius: 10px;
+  padding: 20px;
+  overflow-x: auto;
+  margin: 24px 0;
+}
+.article-content pre code {
+  background: transparent;
+  color: #e5e5e5;
+  font-size: 14px;
+  padding: 0;
+}
+.article-content img {
+  width: 100%;
+  border-radius: 10px;
+  margin: 24px 0;
+}
+.article-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+  font-size: 15px;
+}
+.article-content th {
+  background: #F4F3EE;
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: #111110;
+  border-bottom: 1px solid rgba(17,17,16,0.1);
+}
+.article-content td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(17,17,16,0.06);
+  color: rgba(17,17,16,0.75);
+}

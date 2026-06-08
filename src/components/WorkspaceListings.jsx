@@ -37,6 +37,18 @@ const listingsData = [
     features: ['WiFi', 'Parking', 'GST Address'],
     image: '/images/listings/navrangpura.jpg',
     available: true
+  },
+  {
+    id: 'pc-001',
+    name: 'Executive Private Cabin',
+    city: 'Mumbai',
+    state: 'Maharashtra',
+    type: 'Private Cabin',
+    price: '25,000',
+    priceUnit: 'mo',
+    features: ['High-Speed WiFi', '24/7 Access', 'AC'],
+    image: '/images/listings/private-cabin.jpg',
+    available: true
   }
 ];
 
