@@ -21,6 +21,7 @@ import Admin from './pages/Admin'
 
 import BlogListing from './pages/BlogListing'
 import BlogPost from './pages/BlogPost'
+import DraftGenerator from './pages/DraftGenerator'
 
 function LandingPage() {
   return (
@@ -55,6 +56,7 @@ function App() {
               <Route path="/set-password" element={<SetPassword />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/admin/*" element={<Admin />} />
+              <Route path="/drafts" element={<DraftGenerator />} />
             </Routes>
           </div>
         </ToastProvider>
