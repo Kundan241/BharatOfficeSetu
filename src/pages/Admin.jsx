@@ -19,7 +19,7 @@ import { sendPasswordResetEmail } from 'firebase/auth';
 import { createClientAccount } from '../services/auth';
 import { updateServiceStatus, addService } from '../services/services';
 import { uploadDocument, deleteDocument } from '../services/documents';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { uploadFile } from '../services/cloudinary';
 import AdminBlog from './AdminBlog';
 
 const ADMIN_GATE_PASSWORD = 'BOS@Admin2026';
@@ -663,13 +663,22 @@ function AddClientForm({ showConfirm }) {
         notes: String(formData.notes || '')
       });
 
-      // 6. Send welcome email (via reset)
-      await sendPasswordResetEmail(auth, formData.email, {
-        url: 'https://bharatofficesetu.com/login'
+      // 6. Log Activity
+      await addDoc(collection(db, 'activity_log'), {
+        type: 'client_created',
+        clientName: formData.name,
+        clientId: uid,
+        description: `${formData.name} added — ${formData.serviceType}`,
+        timestamp: serverTimestamp()
       });
 
+      // 7. Send Welcome Email via Google Apps Script (Isolated in its own try/catch)
       try {
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxJsqakzHd4nbETSSWqscn3baHoEPS3lSFJwRsxvPnuo6OLr9ssPWpr2dGJXv-LCnM5gQ/exec';
+        await sendPasswordResetEmail(auth, formData.email, {
+          url: 'https://bharatofficesetu.com/login'
+        });
+
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyV3FGQHAjeSoeCYm0o4Z_QXQ1f1_W6jSJl4W7yxjUzrqI5bCPs850kTrE-cgYC2Brf_A/exec';
         await fetch(SCRIPT_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -683,18 +692,9 @@ function AddClientForm({ showConfirm }) {
             loginUrl: 'https://bharatofficesetu.com/login'
           })
         });
-      } catch (e) {
-        console.error('Apps Script error', e);
+      } catch (emailError) {
+        console.error("Database updated successfully, but email dispatch failed:", emailError);
       }
-
-      // 7. Log Activity
-      await addDoc(collection(db, 'activity_log'), {
-        type: 'client_created',
-        clientName: formData.name,
-        clientId: uid,
-        description: `${formData.name} added — ${formData.serviceType}`,
-        timestamp: serverTimestamp()
-      });
 
       // 8. Success
       addToast('success', `Client created! Welcome email sent to ${formData.email}`);
@@ -1092,44 +1092,36 @@ function DocumentsCard({ client, documents, showConfirm }) {
     
     setIsUploading(true);
     setUploadProgress(0);
-    const storage = getStorage();
-    const filePath = `clients/${client.id}/${Date.now()}_${file.name}`;
-    const storageRef = ref(storage, filePath);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
-    uploadTask.on('state_changed', 
-      (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+    
+    try {
+      const downloadURL = await uploadFile(file, (progress) => {
         setUploadProgress(progress);
-      }, 
-      (error) => {
-        console.error(error);
-        addToast('error', 'Upload failed');
-        setIsUploading(false);
-      }, 
-      async () => {
-        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-        await uploadDocument(client.id, file); // Dummy call
-        
-        await addDoc(collection(db, 'clients', client.id, 'documents'), {
-          name: file.name,
-          url: downloadURL,
-          path: filePath,
-          uploadedAt: serverTimestamp()
-        });
+      });
+      
+      const filePath = `clients/${client.id}/${Date.now()}_${file.name}`;
+      
+      await addDoc(collection(db, 'clients', client.id, 'documents'), {
+        name: file.name,
+        url: downloadURL.url,
+        path: filePath,
+        uploadedAt: serverTimestamp()
+      });
 
-        await addDoc(collection(db, 'activity_log'), {
-          type: 'document_uploaded',
-          clientName: client.name,
-          clientId: client.id,
-          description: `${client.name} — ${file.name} uploaded`,
-          timestamp: serverTimestamp()
-        });
+      await addDoc(collection(db, 'activity_log'), {
+        type: 'document_uploaded',
+        clientName: client.name,
+        clientId: client.id,
+        description: `${client.name} — ${file.name} uploaded`,
+        timestamp: serverTimestamp()
+      });
 
-        addToast('success', 'Document uploaded successfully');
-        setIsUploading(false);
-      }
-    );
+      addToast('success', 'Document uploaded successfully');
+      setIsUploading(false);
+    } catch (error) {
+      console.error(error);
+      addToast('error', 'Upload failed');
+      setIsUploading(false);
+    }
   };
 
   const handleDelete = (docId, path, name) => {

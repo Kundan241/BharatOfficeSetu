@@ -164,20 +164,24 @@ export default function Dashboard() {
         
       setWhatsAppMsg(fallbackMsg);
 
-      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxJsqakzHd4nbETSSWqscn3baHoEPS3lSFJwRsxvPnuo6OLr9ssPWpr2dGJXv-LCnM5gQ/exec';
+      try {
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyV3FGQHAjeSoeCYm0o4Z_QXQ1f1_W6jSJl4W7yxjUzrqI5bCPs850kTrE-cgYC2Brf_A/exec';
 
-      await fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({
-          name: client?.name || 'Unknown',
-          phone: client?.phone || 'Unknown',
-          email: client?.email || user?.email || 'Unknown',
-          services: selectedService,
-          state: 'Existing Client — Dashboard Request',
-          details: details || ''
-        })
-      });
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            name: client?.name || 'Unknown',
+            phone: client?.phone || 'Unknown',
+            email: client?.email || user?.email || 'Unknown',
+            services: selectedService,
+            state: 'Existing Client — Dashboard Request',
+            details: details || ''
+          })
+        });
+      } catch (fetchError) {
+        console.error("Apps script fetch failed:", fetchError);
+      }
 
       setSubmitSuccess(true);
       setCountdown(5);
@@ -386,7 +390,7 @@ export default function Dashboard() {
                       <span className="text-[14px] font-medium text-[#111110]">{doc.name}</span>
                     </div>
                     <button 
-                      onClick={() => window.open(doc.url, '_blank')}
+                      onClick={() => window.open(typeof doc.url === 'string' ? doc.url : doc.url?.url, '_blank')}
                       className="border border-[rgba(27,107,47,0.2)] text-[#1B6B2F] rounded-[100px] px-3.5 py-1.5 text-[12px] font-bold hover:bg-[#F0F5EA] hover:border-[#1B6B2F] transition-colors flex items-center gap-1.5"
                     >
                       <Download size={14} />

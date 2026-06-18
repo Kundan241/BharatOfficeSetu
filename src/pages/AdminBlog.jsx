@@ -10,7 +10,7 @@ import {
   collection, doc, getDocs, setDoc, addDoc, updateDoc, 
   deleteDoc, query, orderBy, serverTimestamp 
 } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { uploadFile } from '../services/cloudinary';
 
 const generateSlug = (title) => {
   return title
@@ -136,29 +136,21 @@ export default function AdminBlog({ showConfirm }) {
     fetchPosts();
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const storageRef = ref(storage, 'blog-images/' + Date.now() + '-' + file.name);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
-    uploadTask.on('state_changed',
-      (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+    try {
+      const url = await uploadFile(file, (progress) => {
         setUploadProgress(progress);
-      },
-      (error) => {
-        console.error(error);
-        addToast('error', 'Image upload failed');
-        setUploadProgress(null);
-      },
-      async () => {
-        const url = await getDownloadURL(uploadTask.snapshot.ref);
-        setCoverImageUrl(url);
-        setUploadProgress(null);
-      }
-    );
+      });
+      setCoverImageUrl(url);
+      setUploadProgress(null);
+    } catch (error) {
+      console.error(error);
+      addToast('error', 'Image upload failed');
+      setUploadProgress(null);
+    }
   };
 
   const insertHtml = (tag) => {
