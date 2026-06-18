@@ -5,7 +5,9 @@ import {
   sendPasswordResetEmail,
   onAuthStateChanged as firebaseOnAuthStateChanged
 } from 'firebase/auth';
-import { auth } from '../firebase';
+import { auth, firebaseConfig } from '../firebase';
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
 
 export const login = async (email, password) => {
   try {
@@ -31,7 +33,10 @@ export const logout = async () => {
 
 export const createClientAccount = async (email, password) => {
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp" + Date.now());
+    const secondaryAuth = getAuth(secondaryApp);
+    const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+    await signOut(secondaryAuth);
     return { user: userCredential.user };
   } catch (error) {
     return { error: error.message };

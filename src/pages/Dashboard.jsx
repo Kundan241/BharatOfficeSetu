@@ -46,7 +46,7 @@ export default function Dashboard() {
     }
     
     // Admin user redirects
-    if (!loading && user && user.email === 'admin@bos.com') {
+    if (!loading && user && ['admin@bos.com', 'mu8ndan@gmail.com'].includes(user.email)) {
       navigate('/admin');
     }
   }, [user, loading, navigate]);

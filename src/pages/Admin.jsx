@@ -89,7 +89,7 @@ export default function Admin() {
       
       const checkAdmin = async () => {
         try {
-          let isAdmin = user.email === 'admin@bos.com';
+          let isAdmin = ['admin@bos.com', 'mu8ndan@gmail.com'].includes(user.email);
           
           if (!isAdmin) {
             const adminSnap = await getDoc(doc(db, 'admins', user.uid));
