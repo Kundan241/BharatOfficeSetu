@@ -21,6 +21,14 @@ import { updateServiceStatus, addService } from '../services/services';
 import { uploadDocument, deleteDocument } from '../services/documents';
 import { uploadFile } from '../services/cloudinary';
 import AdminBlog from './AdminBlog';
+import { 
+  createPartner, 
+  getAllPartners, 
+  getPartner, 
+  addReferral, 
+  updateReferralStatus, 
+  getPartnerReferrals 
+} from '../services/partners';
 
 const ADMIN_GATE_PASSWORD = 'BOS@Admin2026';
 
@@ -214,6 +222,8 @@ export default function Admin() {
     if (location.pathname.startsWith('/admin/blog')) return 'blog';
     if (location.pathname.startsWith('/admin/clients/add')) return 'add-client';
     if (location.pathname.startsWith('/admin/clients')) return 'clients';
+    if (location.pathname.startsWith('/admin/partners/add')) return 'add-partner';
+    if (location.pathname.startsWith('/admin/partners')) return 'partners';
     return 'dashboard';
   };
   const activeTab = getActiveTab();
@@ -238,7 +248,7 @@ export default function Admin() {
           <img src="/logo.png" alt="BOS Logo" className="h-7 object-contain brightness-0 invert" />
         </div>
 
-        <div className="text-[10px] font-[600] tracking-[0.1em] text-[rgba(255,255,255,0.25)] px-5 pt-5 pb-2">
+        <div className="text-[10px] font-[600] tracking-[0.1em] text-[rgba(255,255,255,0.25)] px-5 pt-5 pb-1">
           MENU
         </div>
 
@@ -247,6 +257,10 @@ export default function Admin() {
             ${activeTab === 'dashboard' ? 'bg-[rgba(255,255,255,0.08)] text-white' : 'text-[rgba(255,255,255,0.5)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[rgba(255,255,255,0.75)]'}`}>
             <LayoutDashboard size={16} /> Dashboard
           </Link>
+          
+          <div className="text-[10px] font-[600] tracking-[0.1em] text-[rgba(255,255,255,0.25)] px-5 pt-4 pb-1">
+            CLIENTS
+          </div>
           <Link to="/admin/clients" onClick={() => setMobileMenuOpen(false)} className={`mx-2 my-[2px] px-3 py-2.5 rounded-[8px] text-[13px] font-[500] flex items-center gap-2.5 transition-all
             ${activeTab === 'clients' && !location.pathname.includes('/add') ? 'bg-[rgba(255,255,255,0.08)] text-white' : 'text-[rgba(255,255,255,0.5)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[rgba(255,255,255,0.75)]'}`}>
             <Users size={16} /> Clients
@@ -255,6 +269,22 @@ export default function Admin() {
             ${activeTab === 'add-client' ? 'bg-[rgba(255,255,255,0.08)] text-white' : 'text-[rgba(255,255,255,0.5)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[rgba(255,255,255,0.75)]'}`}>
             <UserPlus size={16} /> Add New Client
           </Link>
+
+          <div className="text-[10px] font-[600] tracking-[0.1em] text-[rgba(255,255,255,0.25)] px-5 pt-4 pb-1">
+            PARTNERS
+          </div>
+          <Link to="/admin/partners" onClick={() => setMobileMenuOpen(false)} className={`mx-2 my-[2px] px-3 py-2.5 rounded-[8px] text-[13px] font-[500] flex items-center gap-2.5 transition-all
+            ${activeTab === 'partners' && !location.pathname.includes('/add') ? 'bg-[rgba(255,255,255,0.08)] text-white' : 'text-[rgba(255,255,255,0.5)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[rgba(255,255,255,0.75)]'}`}>
+            <Users size={16} /> Partners
+          </Link>
+          <Link to="/admin/partners/add" onClick={() => setMobileMenuOpen(false)} className={`mx-2 my-[2px] px-3 py-2.5 rounded-[8px] text-[13px] font-[500] flex items-center gap-2.5 transition-all
+            ${activeTab === 'add-partner' ? 'bg-[rgba(255,255,255,0.08)] text-white' : 'text-[rgba(255,255,255,0.5)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[rgba(255,255,255,0.75)]'}`}>
+            <UserPlus size={16} /> Add New Partner
+          </Link>
+
+          <div className="text-[10px] font-[600] tracking-[0.1em] text-[rgba(255,255,255,0.25)] px-5 pt-4 pb-1">
+            CONTENT
+          </div>
           <Link to="/admin/blog" onClick={() => setMobileMenuOpen(false)} className={`mx-2 my-[2px] px-3 py-2.5 rounded-[8px] text-[13px] font-[500] flex items-center gap-2.5 transition-all
             ${activeTab === 'blog' ? 'bg-[rgba(255,255,255,0.08)] text-white' : 'text-[rgba(255,255,255,0.5)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[rgba(255,255,255,0.75)]'}`}>
             <Pencil size={16} /> Blog
@@ -289,6 +319,9 @@ export default function Admin() {
             <Route path="/clients" element={<AdminClients />} />
             <Route path="/clients/add" element={<AddClientForm showConfirm={showConfirm} />} />
             <Route path="/clients/:uid" element={<ClientDetailView showConfirm={showConfirm} />} />
+            <Route path="/partners" element={<AdminPartners />} />
+            <Route path="/partners/add" element={<AddPartnerForm />} />
+            <Route path="/partners/:uid" element={<PartnerDetailView showConfirm={showConfirm} />} />
             <Route path="/blog/*" element={<AdminBlog showConfirm={showConfirm} />} />
           </Routes>
         </div>
@@ -1428,6 +1461,612 @@ function AddServiceModal({ client, onClose }) {
             {loading ? 'Adding...' : 'Add Service →'}
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// PARTNERS SECTION
+// ============================================================================
+
+// 1. ADD NEW PARTNER VIEW
+function AddPartnerForm() {
+  const navigate = useNavigate();
+  const { addToast } = useToast();
+  const [formData, setFormData] = useState({
+    name: '', phone: '', email: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [shakeFields, setShakeFields] = useState(false);
+
+  const generateTempPassword = (phone) => {
+    if (!phone) return 'BOS@XXXX';
+    const clean = phone.replace(/\D/g, '');
+    if (clean.length < 4) return 'BOS@XXXX';
+    return 'BOS@' + clean.slice(-4);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.phone || !formData.email) {
+      setShakeFields(true);
+      setTimeout(() => setShakeFields(false), 500);
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const res = await createPartner(formData);
+      addToast('success', `Partner created! Welcome email sent to ${formData.email}`);
+      navigate(`/admin/partners/${res.uid}`);
+    } catch (err) {
+      console.error(err);
+      addToast('error', err.message || 'Failed to create partner.');
+      setLoading(false);
+    }
+  };
+
+  const copyPassword = () => {
+    navigator.clipboard.writeText(generateTempPassword(formData.phone));
+    addToast('success', 'Copied!');
+  };
+
+  return (
+    <div className="fade-up-enter max-w-[600px] mx-auto pb-20">
+      <div className="mb-7 flex justify-between items-start">
+        <div>
+          <h1 className="text-[20px] font-[800] text-[#111110]">Add New Partner</h1>
+          <p className="text-[13px] text-[rgba(17,17,16,0.45)] mt-1">Create partner account and send welcome email automatically</p>
+        </div>
+      </div>
+
+      <div className="bg-white border border-[rgba(17,17,16,0.08)] rounded-[16px] p-8 shadow-sm">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <div className="text-[11px] font-[600] tracking-[0.08em] text-[rgba(17,17,16,0.4)] mb-1">PARTNER DETAILS</div>
+          
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[13px] font-[600] text-[#111110]">Full Name *</label>
+            <input 
+              required 
+              type="text" 
+              placeholder="e.g. Rahul Sharma" 
+              value={formData.name} 
+              onChange={e => setFormData({...formData, name: e.target.value})} 
+              className={`h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] transition-all ${shakeFields && !formData.name ? 'border-[#DC2626] shake-animation' : ''}`} 
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[13px] font-[600] text-[#111110]">Phone Number *</label>
+              <div className={`flex h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] overflow-hidden focus-within:border-[rgba(27,107,47,0.5)] focus-within:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] transition-all ${shakeFields && !formData.phone ? 'border-[#DC2626] shake-animation' : ''}`}>
+                <div className="px-3 bg-[rgba(17,17,16,0.03)] border-r border-[rgba(17,17,16,0.1)] flex items-center text-[14px] font-[500] text-[rgba(17,17,16,0.5)]">+91</div>
+                <input 
+                  required 
+                  type="tel" 
+                  placeholder="10-digit mobile number" 
+                  minLength={10} 
+                  value={formData.phone} 
+                  onChange={e => setFormData({...formData, phone: e.target.value})} 
+                  className="flex-1 bg-transparent px-3 text-[14px] outline-none" 
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[13px] font-[600] text-[#111110]">Email Address *</label>
+              <input 
+                required 
+                type="email" 
+                placeholder="partner@company.com" 
+                value={formData.email} 
+                onChange={e => setFormData({...formData, email: e.target.value})} 
+                className={`h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] transition-all ${shakeFields && !formData.email ? 'border-[#DC2626] shake-animation' : ''}`} 
+              />
+            </div>
+          </div>
+
+          <div className="bg-[rgba(27,107,47,0.04)] border border-[rgba(27,107,47,0.12)] rounded-[10px] p-[14px] px-4 mt-2 flex justify-between items-center">
+            <div>
+              <div className="text-[12px] font-[600] text-[#1B6B2F] mb-1.5">Auto-generated temporary password</div>
+              <div className="text-[18px] font-[700] text-[#111110] font-mono tracking-[0.05em]">{generateTempPassword(formData.phone)}</div>
+              <div className="text-[11px] text-[rgba(17,17,16,0.4)] mt-1">This password will be used for welcome activation</div>
+            </div>
+            <button type="button" onClick={copyPassword} className="px-3 py-1.5 bg-white border border-[rgba(27,107,47,0.25)] rounded-full text-[12px] font-[600] text-[#1B6B2F] hover:bg-[#F9F8F5] transition-colors">
+              Copy
+            </button>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-3 mt-4 pt-4 border-t border-[rgba(17,17,16,0.06)]">
+            <button type="button" onClick={() => navigate('/admin/partners')} className="w-full sm:w-auto h-[44px] px-6 rounded-full bg-transparent text-[rgba(17,17,16,0.6)] font-[600] text-[14px] hover:bg-[rgba(17,17,16,0.04)] transition-colors order-2 sm:order-1">
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              disabled={loading} 
+              className="w-full sm:w-auto h-[44px] px-6 rounded-full bg-[#1B6B2F] text-white font-[600] text-[14px] hover:bg-[#145324] transition-colors ml-auto flex justify-center items-center order-1 sm:order-2 disabled:opacity-70"
+            >
+              {loading ? (
+                <div className="flex gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+                  <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse delay-75"></span>
+                  <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse delay-150"></span>
+                </div>
+              ) : 'Create Partner & Send Welcome Email →'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// 2. PARTNERS LIST VIEW
+function AdminPartners() {
+  const [partners, setPartners] = useState([]);
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'partners'), (snap) => {
+      const arr = [];
+      snap.forEach(d => {
+        arr.push({ id: d.id, ...d.data() });
+      });
+      setPartners(arr);
+      setLoading(false);
+    }, (err) => {
+      console.error(err);
+      setLoading(false);
+    });
+    return () => unsub();
+  }, []);
+
+  const filtered = partners.filter(p => {
+    const s = search.toLowerCase();
+    return p.name?.toLowerCase().includes(s) || p.email?.toLowerCase().includes(s) || p.phone?.includes(s);
+  });
+
+  const formatDate = (ts) => {
+    if (!ts) return '';
+    const date = ts.toDate ? ts.toDate() : new Date(ts);
+    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  };
+
+  return (
+    <div className="fade-up-enter max-w-[1200px] h-full flex flex-col">
+      <div className="mb-7 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div>
+          <h1 className="text-[20px] font-[800] text-[#111110]">All Partners</h1>
+          <p className="text-[13px] text-[rgba(17,17,16,0.45)] mt-1">Manage partner accounts and referrals</p>
+        </div>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="relative w-full sm:w-[340px]">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[rgba(17,17,16,0.3)]" size={16} />
+            <input 
+              type="text" 
+              placeholder="Search by name, email or phone..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full h-[44px] bg-white border border-[rgba(17,17,16,0.1)] rounded-[10px] pl-10 pr-4 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] transition-all"
+            />
+          </div>
+          <button onClick={() => navigate('/admin/partners/add')} className="h-[44px] px-5 rounded-[100px] bg-[#1B6B2F] text-white text-[13px] font-[600] flex items-center gap-1.5 hover:bg-[#145324] whitespace-nowrap">
+            <Plus size={16} /> Add New Partner
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-[14px] border border-[rgba(17,17,16,0.08)] flex-1 flex flex-col overflow-hidden shadow-sm">
+        <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-3 bg-[#F9F8F5] border-b border-[rgba(17,17,16,0.06)] text-[11px] font-[600] tracking-[0.08em] text-[rgba(17,17,16,0.4)]">
+          <div className="col-span-4">PARTNER NAME</div>
+          <div className="col-span-3">EMAIL</div>
+          <div className="col-span-2">PHONE</div>
+          <div className="col-span-2 text-center">JOINED</div>
+          <div className="col-span-1 text-right">ACTIONS</div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          {loading ? (
+             <div className="w-full flex flex-col">
+               {[1,2,3,4,5].map(i => (
+                 <div key={i} className="h-[70px] w-full border-b border-[rgba(17,17,16,0.05)] skeleton-shimmer"></div>
+               ))}
+             </div>
+          ) : filtered.length === 0 ? (
+            <div className="p-16 flex flex-col items-center justify-center text-center">
+              <Users size={32} className="text-[rgba(17,17,16,0.15)] mb-3" />
+              <div className="text-[15px] font-[500] text-[rgba(17,17,16,0.4)]">No partners found</div>
+            </div>
+          ) : (
+            filtered.map((partner) => (
+              <div key={partner.id} onClick={() => navigate(`/admin/partners/${partner.id}`)} className="border-b border-[rgba(17,17,16,0.05)] last:border-0 hover:bg-[rgba(27,107,47,0.02)] transition-colors cursor-pointer">
+                {/* Mobile */}
+                <div className="md:hidden p-4 flex flex-col gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[rgba(27,107,47,0.1)] text-[#1B6B2F] font-[700] text-[14px] flex items-center justify-center shrink-0">
+                      {partner.name?.substring(0,2).toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-[14px] font-[600] text-[#111110]">{partner.name}</div>
+                      <div className="text-[12px] text-[rgba(17,17,16,0.45)]">{partner.email}</div>
+                      <div className="text-[12px] text-[rgba(17,17,16,0.45)]">{partner.phone}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Desktop */}
+                <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-4 items-center">
+                  <div className="col-span-4 flex items-center gap-3">
+                    <div className="w-[38px] h-[38px] rounded-full bg-[rgba(27,107,47,0.1)] text-[#1B6B2F] font-[700] text-[14px] flex items-center justify-center shrink-0">
+                      {partner.name?.substring(0,2).toUpperCase()}
+                    </div>
+                    <div className="truncate">
+                      <div className="text-[14px] font-[600] text-[#111110] truncate">{partner.name}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="col-span-3 text-[13px] text-[rgba(17,17,16,0.7)] truncate">
+                    {partner.email}
+                  </div>
+
+                  <div className="col-span-2 text-[13px] text-[rgba(17,17,16,0.7)]">
+                    {partner.phone}
+                  </div>
+
+                  <div className="col-span-2 text-center text-[13px] text-[rgba(17,17,16,0.45)]">
+                    {formatDate(partner.createdAt)}
+                  </div>
+
+                  <div className="col-span-1 flex justify-end">
+                    <button onClick={(e) => { e.stopPropagation(); navigate(`/admin/partners/${partner.id}`); }} className="h-[30px] px-3 rounded-[100px] border border-[rgba(27,107,47,0.2)] bg-transparent hover:bg-[rgba(27,107,47,0.05)] text-[#1B6B2F] text-[12px] font-[600] transition-colors whitespace-nowrap">
+                      View →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 3. PARTNER DETAIL VIEW
+function PartnerDetailView({ showConfirm }) {
+  const { uid } = useParams();
+  const navigate = useNavigate();
+  const { addToast } = useToast();
+  const [partner, setPartner] = useState(null);
+  const [referrals, setReferrals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddEditModal, setShowAddEditModal] = useState(false);
+  const [selectedReferral, setSelectedReferral] = useState(null);
+
+  useEffect(() => {
+    const fetchPartnerData = async () => {
+      try {
+        const data = await getPartner(uid);
+        if (data) {
+          setPartner(data);
+        } else {
+          addToast('error', 'Partner not found');
+          navigate('/admin/partners');
+        }
+      } catch (e) {
+        console.error(e);
+        addToast('error', 'Error loading partner profile');
+      }
+    };
+    fetchPartnerData();
+
+    // Set up real-time listener for referrals
+    const unsubscribe = getPartnerReferrals(uid, (data) => {
+      setReferrals(data);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [uid]);
+
+  if (loading || !partner) {
+    return (
+      <div className="fade-up-enter max-w-[1000px] mx-auto pb-20">
+        <div className="h-[104px] w-full bg-white rounded-[16px] border border-[rgba(17,17,16,0.08)] mb-6 skeleton-shimmer"></div>
+        <div className="h-[300px] w-full bg-white rounded-[14px] border border-[rgba(17,17,16,0.08)] skeleton-shimmer"></div>
+      </div>
+    );
+  }
+
+  const formatDate = (ts) => {
+    if (!ts) return '';
+    const date = ts.toDate ? ts.toDate() : new Date(ts);
+    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  };
+
+  const handleAddClick = () => {
+    setSelectedReferral(null);
+    setShowAddEditModal(true);
+  };
+
+  const handleEditClick = (referral) => {
+    setSelectedReferral(referral);
+    setShowAddEditModal(true);
+  };
+
+  const getGSTPill = (status) => {
+    if (status === 'Approved') {
+      return <span className="bg-[rgba(27,107,47,0.1)] text-[#1B6B2F] px-2.5 py-0.5 rounded-[100px] text-[12px] font-[600]">Approved</span>;
+    } else if (status === 'Rejected') {
+      return <span className="bg-red-50 text-[#DC2626] px-2.5 py-0.5 rounded-[100px] text-[12px] font-[600]">Rejected</span>;
+    }
+    return <span className="bg-[rgba(244,131,31,0.1)] text-[#F4831F] px-2.5 py-0.5 rounded-[100px] text-[12px] font-[600]">Pending</span>;
+  };
+
+  const getPaymentPill = (status) => {
+    if (status === 'Paid') {
+      return <span className="bg-[rgba(27,107,47,0.1)] text-[#1B6B2F] px-2.5 py-0.5 rounded-[100px] text-[12px] font-[600]">Paid</span>;
+    }
+    return <span className="bg-[rgba(244,131,31,0.1)] text-[#F4831F] px-2.5 py-0.5 rounded-[100px] text-[12px] font-[600]">Pending</span>;
+  };
+
+  return (
+    <div className="fade-up-enter max-w-[1000px] mx-auto pb-20">
+      <div 
+        onClick={() => navigate('/admin/partners')} 
+        className="mb-5 flex items-center gap-2 text-[13px] text-[rgba(17,17,16,0.5)] hover:text-[#111110] transition-colors cursor-pointer w-fit"
+      >
+        <ArrowLeft size={16} /> Back to Partners
+      </div>
+
+      {/* Partner Header Card */}
+      <div className="bg-white border border-[rgba(17,17,16,0.08)] rounded-[16px] p-6 md:p-7 mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-sm">
+        <div className="flex items-center gap-5">
+          <div className="w-[56px] h-[56px] rounded-full bg-[rgba(27,107,47,0.1)] text-[#1B6B2F] font-[700] text-[20px] flex items-center justify-center shrink-0">
+            {partner.name?.substring(0,2).toUpperCase()}
+          </div>
+          <div>
+            <h1 className="text-[20px] font-[800] text-[#111110] leading-none mb-1.5">{partner.name}</h1>
+            <div className="text-[14px] text-[rgba(17,17,16,0.5)] mb-1.5">{partner.email} • {partner.phone}</div>
+            <div className="text-[12px] text-[rgba(17,17,16,0.35)]">Joined on {formatDate(partner.createdAt)}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Referrals Section */}
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-[16px] font-[700] text-[#111110]">REFERRALS</h2>
+        <button 
+          onClick={handleAddClick} 
+          className="h-[36px] px-4 rounded-full border border-[rgba(27,107,47,0.25)] text-[#1B6B2F] text-[13px] font-[600] hover:bg-[#F0F5EA] transition-colors flex items-center gap-1.5 whitespace-nowrap"
+        >
+          <Plus size={16} /> Add Referral
+        </button>
+      </div>
+
+      <div className="bg-white rounded-[14px] border border-[rgba(17,17,16,0.08)] overflow-hidden shadow-sm">
+        <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-3 bg-[#F9F8F5] border-b border-[rgba(17,17,16,0.06)] text-[11px] font-[600] tracking-[0.08em] text-[rgba(17,17,16,0.4)]">
+          <div className="col-span-3">CLIENT NAME</div>
+          <div className="col-span-2">ARN NUMBER</div>
+          <div className="col-span-2 text-center">GST STATUS</div>
+          <div className="col-span-2 text-center">PAYMENT STATUS</div>
+          <div className="col-span-2 text-center">MONTH</div>
+          <div className="col-span-1 text-right">ACTIONS</div>
+        </div>
+
+        <div className="divide-y divide-[rgba(17,17,16,0.05)]">
+          {referrals.length === 0 ? (
+            <div className="p-16 flex flex-col items-center justify-center text-center">
+              <Users size={32} className="text-[rgba(17,17,16,0.15)] mb-3" />
+              <div className="text-[15px] font-[500] text-[rgba(17,17,16,0.4)]">No referrals added yet</div>
+            </div>
+          ) : (
+            referrals.map((ref) => (
+              <div key={ref.id}>
+                {/* Mobile View */}
+                <div className="md:hidden p-4 flex flex-col gap-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="text-[14px] font-[600] text-[#111110]">{ref.clientName}</div>
+                      <div className="text-[12px] text-[rgba(17,17,16,0.5)]">ARN: {ref.arnNumber || 'N/A'}</div>
+                    </div>
+                    <button 
+                      onClick={() => handleEditClick(ref)} 
+                      className="p-2 text-[rgba(17,17,16,0.4)] hover:text-[#1B6B2F] transition-colors"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                  </div>
+                  <div className="flex gap-2 mt-1.5">
+                    {getGSTPill(ref.gstStatus)}
+                    {getPaymentPill(ref.paymentStatus)}
+                    <span className="bg-[#F4F3EE] text-[rgba(17,17,16,0.6)] px-2.5 py-0.5 rounded-[100px] text-[12px] font-[500]">{ref.month}</span>
+                  </div>
+                </div>
+
+                {/* Desktop View */}
+                <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-4 items-center">
+                  <div className="col-span-3 text-[14px] font-[600] text-[#111110] truncate">
+                    {ref.clientName}
+                  </div>
+                  <div className="col-span-2 text-[13px] text-[rgba(17,17,16,0.6)] font-mono truncate">
+                    {ref.arnNumber || 'N/A'}
+                  </div>
+                  <div className="col-span-2 text-center">
+                    {getGSTPill(ref.gstStatus)}
+                  </div>
+                  <div className="col-span-2 text-center">
+                    {getPaymentPill(ref.paymentStatus)}
+                  </div>
+                  <div className="col-span-2 text-center text-[13px] text-[rgba(17,17,16,0.7)] font-[500]">
+                    {ref.month}
+                  </div>
+                  <div className="col-span-1 flex justify-end">
+                    <button 
+                      onClick={() => handleEditClick(ref)} 
+                      className="w-8 h-8 flex items-center justify-center rounded-full text-[rgba(17,17,16,0.4)] hover:text-[#1B6B2F] hover:bg-[rgba(27,107,47,0.05)] transition-colors"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {showAddEditModal && (
+        <AddEditReferralModal 
+          partnerUid={uid} 
+          referral={selectedReferral} 
+          onClose={() => setShowAddEditModal(false)} 
+        />
+      )}
+    </div>
+  );
+}
+
+// 4. ADD / EDIT REFERRAL MODAL
+function AddEditReferralModal({ partnerUid, referral, onClose }) {
+  const { addToast } = useToast();
+  const [clientName, setClientName] = useState(referral ? referral.clientName : '');
+  const [arnNumber, setArnNumber] = useState(referral ? referral.arnNumber : '');
+  const [month, setMonth] = useState(referral ? referral.month : 'June 2026');
+  const [gstStatus, setGstStatus] = useState(referral ? referral.gstStatus : 'Pending');
+  const [paymentStatus, setPaymentStatus] = useState(referral ? referral.paymentStatus : 'Pending');
+  const [loading, setLoading] = useState(false);
+
+  const isEdit = !!referral;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!clientName || !month) {
+      addToast('error', 'Client Name and Month are required');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = {
+        clientName,
+        arnNumber,
+        month,
+        gstStatus,
+        paymentStatus
+      };
+
+      if (isEdit) {
+        await updateReferralStatus(partnerUid, referral.id, data);
+        addToast('success', 'Referral updated successfully');
+      } else {
+        await addReferral(partnerUid, data);
+        addToast('success', 'Referral added successfully');
+      }
+      onClose();
+    } catch (e) {
+      console.error(e);
+      addToast('error', isEdit ? 'Failed to update referral' : 'Failed to add referral');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-[4px]" onClick={onClose}></div>
+      <div className="bg-white rounded-[16px] p-7 w-full max-w-[440px] relative z-10 fade-up-enter shadow-xl border border-[rgba(17,17,16,0.08)]">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-[18px] font-[800] text-[#111110]">
+            {isEdit ? 'Edit Referral' : 'Add Referral'}
+          </h3>
+          <button onClick={onClose} className="text-[rgba(17,17,16,0.4)] hover:text-[#111110]">
+            <XIcon size={20}/>
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-[600] text-[#111110]">Client Name *</label>
+            <input 
+              required
+              type="text" 
+              placeholder="e.g. John Doe Enterprises"
+              value={clientName} 
+              onChange={e => setClientName(e.target.value)} 
+              className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] transition-all"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-[600] text-[#111110]">ARN Number</label>
+            <input 
+              type="text" 
+              placeholder="e.g. AA1234567890123"
+              value={arnNumber} 
+              onChange={e => setArnNumber(e.target.value)} 
+              className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] transition-all"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-[600] text-[#111110]">Month *</label>
+            <input 
+              required
+              type="text" 
+              placeholder="e.g. June 2026"
+              value={month} 
+              onChange={e => setMonth(e.target.value)} 
+              className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] transition-all"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-[600] text-[#111110]">GST Status</label>
+              <select 
+                value={gstStatus} 
+                onChange={e => setGstStatus(e.target.value)} 
+                className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)]"
+              >
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+            </div>
+            
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-[600] text-[#111110]">Payment Status</label>
+              <select 
+                value={paymentStatus} 
+                onChange={e => setPaymentStatus(e.target.value)} 
+                className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)]"
+              >
+                <option value="Pending">Pending</option>
+                <option value="Paid">Paid</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex gap-3 justify-end mt-6 pt-4 border-t border-[rgba(17,17,16,0.06)]">
+            <button 
+              type="button"
+              onClick={onClose} 
+              className="px-5 h-10 rounded-full font-[600] text-[14px] text-[rgba(17,17,16,0.55)] hover:bg-[#F9F8F5]"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit"
+              disabled={loading} 
+              className="px-5 h-10 rounded-full bg-[#1B6B2F] text-white font-[600] text-[14px] hover:bg-[#145324] disabled:opacity-70 flex justify-center items-center"
+            >
+              {loading ? 'Saving...' : (isEdit ? 'Save Changes →' : 'Add Referral →')}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

@@ -18,6 +18,7 @@ import Login from './pages/Login'
 import SetPassword from './pages/SetPassword'
 import Dashboard from './pages/Dashboard'
 import Admin from './pages/Admin'
+import PartnerDashboard from './pages/PartnerDashboard'
 
 import BlogListing from './pages/BlogListing'
 import BlogPost from './pages/BlogPost'
@@ -55,6 +56,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/set-password" element={<SetPassword />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/partner-dashboard" element={<PartnerDashboard />} />
               <Route path="/admin/*" element={<Admin />} />
               <Route path="/drafts" element={<DraftGenerator />} />
             </Routes>

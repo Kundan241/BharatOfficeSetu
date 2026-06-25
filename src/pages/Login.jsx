@@ -22,6 +22,9 @@ export default function Login() {
   const [forgotError, setForgotError] = useState('');
   const [forgotSuccess, setForgotSuccess] = useState(false);
 
+  const [loginRole, setLoginRole] = useState('client'); // 'client' | 'partner'
+
+
   const navigate = useNavigate();
   const { addToast } = useToast();
 
@@ -72,7 +75,12 @@ export default function Login() {
       if (adminSnap.exists()) {
         navigate('/admin');
       } else {
-        navigate('/dashboard');
+        const partnerSnap = await getDoc(doc(db, 'partners', result.user.uid));
+        if (partnerSnap.exists()) {
+          navigate('/partner-dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       }
     } catch (err) {
       console.error("Login Error:", err);
@@ -126,7 +134,24 @@ export default function Login() {
 
         <div className="w-full max-w-[400px] bg-white rounded-[20px] p-10 shadow-[0_4px_24px_rgba(0,0,0,0.06)] relative z-10 fade-up-enter">
           <h1 className="font-display text-2xl font-bold text-[#111110] mb-2">Welcome back</h1>
-          <p className="text-[14px] text-[rgba(17,17,16,0.45)] mb-8">Log in to your BOS account</p>
+          <p className="text-[14px] text-[rgba(17,17,16,0.45)] mb-6">Log in to your BOS account</p>
+
+          <div className="flex bg-[#F9F8F5] p-1 rounded-[12px] mb-8 relative">
+            <button
+              type="button"
+              onClick={() => setLoginRole('client')}
+              className={`flex-1 h-10 rounded-[10px] text-[13px] font-[600] transition-all z-10 ${loginRole === 'client' ? 'bg-white text-[#1B6B2F] shadow-[0_2px_8px_rgba(0,0,0,0.04)]' : 'text-[rgba(17,17,16,0.45)] hover:text-[#111110]'}`}
+            >
+              Client Login
+            </button>
+            <button
+              type="button"
+              onClick={() => setLoginRole('partner')}
+              className={`flex-1 h-10 rounded-[10px] text-[13px] font-[600] transition-all z-10 ${loginRole === 'partner' ? 'bg-white text-[#1B6B2F] shadow-[0_2px_8px_rgba(0,0,0,0.04)]' : 'text-[rgba(17,17,16,0.45)] hover:text-[#111110]'}`}
+            >
+              Partner Login
+            </button>
+          </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div className="flex flex-col gap-1.5">
