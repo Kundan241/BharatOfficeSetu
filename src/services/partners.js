@@ -40,6 +40,7 @@ export const createPartner = async (formData) => {
     email: formData.email,
     phone: formattedPhone,
     role: 'partner',
+    tempPasswordUsed: true,
     createdAt: serverTimestamp()
   });
 

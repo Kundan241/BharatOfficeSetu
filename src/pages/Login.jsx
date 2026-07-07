@@ -71,16 +71,55 @@ export default function Login() {
         return;
       }
 
-      const adminSnap = await getDoc(doc(db, 'admins', result.user.uid));
-      if (adminSnap.exists()) {
-        navigate('/admin');
-      } else {
-        const partnerSnap = await getDoc(doc(db, 'partners', result.user.uid));
-        if (partnerSnap.exists()) {
-          navigate('/partner-dashboard');
-        } else {
-          navigate('/dashboard');
+      const uid = result.user.uid;
+      let userRole = null;
+      let userData = null;
+
+      // 1. Check Admin
+      try {
+        const adminSnap = await getDoc(doc(db, 'admins', uid));
+        if (adminSnap.exists()) { 
+          userRole = 'admin'; 
         }
+      } catch(e) { /* Ignore read error */ }
+
+      // 2. Check Partner (if not admin)
+      if (!userRole) {
+        try {
+          const partnerSnap = await getDoc(doc(db, 'partners', uid));
+          if (partnerSnap.exists()) { 
+            userRole = 'partner'; 
+            userData = partnerSnap.data(); 
+          }
+        } catch(e) { /* Ignore read error */ }
+      }
+
+      // 3. Check Client (if neither admin nor partner)
+      if (!userRole) {
+        try {
+          const clientSnap = await getDoc(doc(db, 'clients', uid));
+          if (clientSnap.exists()) { 
+            userRole = 'client'; 
+            userData = clientSnap.data(); 
+          }
+        } catch(e) { /* Ignore read error */ }
+      }
+
+      // 4. Final Routing
+      if (userRole === 'admin') {
+        navigate('/admin');
+      } else if (userRole === 'partner' || userRole === 'client') {
+        // Check forced password reset flag
+        if (userData?.tempPasswordUsed === true) {
+          navigate('/change-password', { state: { role: userRole } });
+        } else {
+          navigate(userRole === 'partner' ? '/partner-dashboard' : '/dashboard');
+        }
+      } else {
+        setErrorMessage('Account setup incomplete. Please contact support.');
+        setErrorField('password');
+        const { signOut } = await import('firebase/auth');
+        await signOut(auth);
       }
     } catch (err) {
       console.error("Login Error:", err);

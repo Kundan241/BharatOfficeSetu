@@ -23,6 +23,7 @@ import PartnerDashboard from './pages/PartnerDashboard'
 import BlogListing from './pages/BlogListing'
 import BlogPost from './pages/BlogPost'
 import DraftGenerator from './pages/DraftGenerator'
+import ChangePassword from './pages/ChangePassword'
 
 function LandingPage() {
   return (
@@ -59,6 +60,7 @@ function App() {
               <Route path="/partner-dashboard" element={<PartnerDashboard />} />
               <Route path="/admin/*" element={<Admin />} />
               <Route path="/drafts" element={<DraftGenerator />} />
+              <Route path="/change-password" element={<ChangePassword />} />
             </Routes>
           </div>
         </ToastProvider>

@@ -34,6 +34,12 @@ const TEMPLATES = [
     name: 'Gurgaon NOC',
     description: 'NOC from True Work Lounge, Gurugram',
     icon: FileCheck
+  },
+  {
+    id: 'dwarka-template',
+    name: 'Dwarka Template',
+    description: 'Workspace agreement for Jupiter SPACE, Dwarka / New Delhi',
+    icon: FileSignature
   }
 ];
 
@@ -139,6 +145,20 @@ export default function DraftGenerator() {
         directorAddress: '',
         aadharNumber: ''
       });
+    } else if (templateId === 'dwarka-template') {
+      setFormData({
+        agreementDate: today,
+        clientCompanyName: '',
+        companyType: 'Private Limited Company',
+        representativeType: 'Director',
+        representativeName: '',
+        representativeFatherName: '',
+        representativeAddress: '',
+        panNumber: '',
+        mobileNumber: '',
+        startDate: today,
+        businessNature: ''
+      });
     }
   };
 
@@ -152,7 +172,8 @@ export default function DraftGenerator() {
       'noc': ['ownerName', 'ownerAddress', 'businessName', 'propertyAddress', 'purpose', 'state'],
       'authorization': ['companyName', 'authorizedByName', 'authorizedPersonName', 'purpose', 'validUntil'],
       'gurgaon-workspace-agreement': ['clientCompanyName', 'directorName', 'directorAddress', 'panNumber', 'mobileNumber', 'aadharNumber', 'startDate'],
-      'gurgaon-noc': ['clientCompanyName', 'directorName', 'directorAddress', 'aadharNumber']
+      'gurgaon-noc': ['clientCompanyName', 'directorName', 'directorAddress', 'aadharNumber'],
+      'dwarka-template': ['clientCompanyName', 'representativeName', 'representativeAddress', 'panNumber', 'mobileNumber', 'startDate']
     };
     
     const reqFields = required[selectedTemplate.id];
@@ -219,7 +240,8 @@ export default function DraftGenerator() {
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
-      doc.text(template.name.toUpperCase(), pageWidth / 2, 8, { align: 'center' });
+      const headerText = template.id === 'dwarka-template' ? 'WORKSPACE SERVICE AGREEMENT' : template.name.toUpperCase();
+      doc.text(headerText, pageWidth / 2, 8, { align: 'center' });
       doc.setTextColor(40, 40, 40);
     };
 
@@ -228,17 +250,19 @@ export default function DraftGenerator() {
     let yPos = 30;
 
     if (!isGurgaonTemplate) {
-      doc.setTextColor(17, 17, 16);
-      doc.setFontSize(16);
-      doc.setFont('helvetica', 'bold');
-      const titleLines = doc.splitTextToSize(template.name.toUpperCase(), contentWidth);
-      doc.text(titleLines, pageWidth / 2, yPos, { align: 'center' });
-      yPos += (titleLines.length * 8) + 10;
-
-      doc.setDrawColor(17, 17, 16);
-      doc.setLineWidth(0.5);
-      doc.line(margin, yPos - 4, pageWidth - margin, yPos - 4);
-      yPos += 8;
+      if (template.id !== 'dwarka-template') {
+        doc.setTextColor(17, 17, 16);
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        const titleLines = doc.splitTextToSize(template.name.toUpperCase(), contentWidth);
+        doc.text(titleLines, pageWidth / 2, yPos, { align: 'center' });
+        yPos += (titleLines.length * 8) + 10;
+  
+        doc.setDrawColor(17, 17, 16);
+        doc.setLineWidth(0.5);
+        doc.line(margin, yPos - 4, pageWidth - margin, yPos - 4);
+        yPos += 8;
+      }
     }
 
     const addSectionHeading = (text) => {
@@ -292,6 +316,8 @@ export default function DraftGenerator() {
       buildGurgaonWorkspaceAgreement(doc, formData, helpers);
     } else if (template.id === 'gurgaon-noc') {
       buildGurgaonNOC(doc, formData, helpers);
+    } else if (template.id === 'dwarka-template') {
+      buildDwarkaTemplate(doc, formData, helpers);
     }
 
     const nameKey = formData.clientCompanyName || formData.businessName || formData.companyName || 'Document';
@@ -853,6 +879,211 @@ export default function DraftGenerator() {
   };
 
 
+  
+  const buildDwarkaTemplate = (doc, data, h) => {
+    let y = h.yPos();
+    doc.setTextColor(17, 17, 16);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PARTIES TO THIS AGREEMENT', h.pageWidth / 2, y, { align: 'center' });
+    doc.setLineWidth(0.5);
+    doc.line(h.margin, y + 2, h.pageWidth - h.margin, y + 2);
+    h.setY(y + 15);
+
+    h.addParagraph(
+      'This Agreement is executed on this ' + formatDate(data.agreementDate) + ', by and between:\n\n' +
+      'JUPITER SPACE, having its registered office at PLOT NO. RZ-L-1, SECOND FLOOR, MAIN ROAD, KHASRA NO. 84/12/2, MAHAVIR ENCLAVE, PALAM, OPPOSITE YAMAHA SHOWROOM, NEW DELHI - 110045, hereinafter referred to as the "Service Provider", which expression shall, unless repugnant to the context or meaning thereof, be deemed to include its successors, legal representatives, and permitted assigns.'
+    );
+    
+    h.addParagraph('AND', { align: 'center' });
+
+    const companyTypeString = data.companyType === 'LLP' ? 'a Limited Liability Partnership' :
+                              data.companyType === 'Proprietorship' ? 'a Proprietorship firm' :
+                              data.companyType === 'Trust' ? 'a registered Trust' :
+                              'a company incorporated under the provisions of the Companies Act, 2013';
+
+    h.addParagraph(
+      (data.clientCompanyName || '___________') + ', ' + companyTypeString + ', through its ' + (data.representativeType || 'Director') + ' ' + (data.representativeName || '___________') + ', S/o ' + (data.representativeFatherName || '___________') + ', residing at ' + (data.representativeAddress || '___________') + ', holding PAN ' + (data.panNumber || '___________') + ' and reachable at Mobile Number ' + (data.mobileNumber || '___________') + ', hereinafter referred to as the "Client", which expression shall, unless repugnant to the context or meaning thereof, be deemed to include its successors, legal representatives, and permitted assigns.'
+    );
+
+    h.addSectionHeading('SCOPE AND NATURE OF THE AGREEMENT');
+    h.addParagraph('The Client hereby expresses its intention to utilize the Mailbox Services as offered by the Service Provider, namely Jupiter SPACE, situated at Plot No. RZ-L-1, Second Floor, Main Road, Khasra No. 84/12/2, Mahavir Enclave, Palam, Opposite Yamaha Showroom, New Delhi - 110045, for the sole and limited purpose of using the said premises as its official communication and correspondence address. The Client expressly acknowledges, affirms, and agrees that the entire premises, including the designated mailbox area and all ancillary facilities, remain the exclusive and absolute property of the Service Provider, who retains complete ownership, possession, control, and managerial authority over the same at all times.');
+    h.addParagraph('It is further acknowledged and agreed by the Client that its right of access and usage shall be strictly confined to the specific services expressly agreed upon under this Agreement, and that no tenancy, leasehold interest, license, possessory right, proprietary entitlement, or any other legal or equitable claim of whatsoever nature shall arise or be deemed to arise in favour of the Client by virtue of this arrangement. The Client’s usage shall not, under any circumstances, be construed as granting any legal interest in the said premises, and the Service Provider shall remain at liberty to impose reasonable terms, limitations, or conditions, as it deems appropriate in the due course of business or security.');
+
+    h.addSectionHeading('ACKNOWLEDGMENT AND ACCEPTANCE OF TERMS OF USE');
+    h.addParagraph('The Client hereby acknowledges that all services provided under this Agreement by Jupiter SPACE (hereinafter referred to as the "Service Provider") are extended strictly in accordance with the terms and conditions as stipulated herein and/or as may be notified from time to time by the Service Provider in writing. The Client’s access to or use of the services shall constitute complete, unqualified, and irrevocable acceptance of all such terms and conditions, and no waiver, deviation, or exception shall be deemed to exist unless explicitly confirmed in writing by the Service Provider.');
+    h.addParagraph('It is further acknowledged and agreed that any person executing this Agreement or utilizing the services on behalf of an employer, organization, partnership, or third party does so under express representation and legal assurance that such person is duly authorized and empowered to bind such entity to the obligations set forth herein. The Service Provider shall not be liable to verify such authority, and reliance thereon shall be deemed sufficient. Unless otherwise expressly excluded or modified in writing by the Service Provider, these Terms of Use shall apply uniformly and without limitation to any subsequent, amended, renewed, or additional services availed by the Client under this arrangement. In the event of any violation, breach, or non-compliance with the terms of this Agreement, the Service Provider reserves the absolute and unfettered right to immediately suspend or terminate the Client’s access to the services without prior notice, and to initiate any and all legal, civil, or equitable remedies available under law, including but not limited to recovery of damages, injunctive relief, and enforcement of contractual obligations.');
+
+    h.addSectionHeading('PERMITTED USE OF ADDRESS');
+    h.addParagraph('The Client shall be permitted to utilize the address provided by the Service Provider, namely Jupiter SPACE, situated at Plot No. RZ-L-1, Second Floor, Main Road, Khasra No. 84/12/2, Mahavir Enclave, Palam, Opposite Yamaha Showroom, New Delhi - 110045, strictly and exclusively for the purpose of business-related communication and correspondence.');
+    h.addParagraph('The Client may, at its sole discretion, risk, and legal responsibility, elect to designate the aforesaid address as its Principal Place of Business for the purposes of registration with the Registrar of Companies (ROC), Goods and Services Tax (GST), opening of bank accounts, or for any other statutory or regulatory filings before central or state government departments or any other competent authorities.');
+    h.addParagraph('The Service Provider hereby expressly disclaims any and all responsibility, liability, or accountability, whether civil, criminal, regulatory, or otherwise, that may arise directly or indirectly out of such use of the address by the Client. It is clearly understood and accepted by the Client that no representation, assurance, or legal guarantee is made by the Service Provider regarding the validity, recognition, or acceptability of the address by any governmental or regulatory body. The Client shall remain wholly and exclusively responsible for ensuring that all such use of the address is in strict compliance with applicable laws, rules, regulations, and statutory requirements, and shall indemnify and hold harmless the Service Provider from any claims, liabilities, losses, proceedings, penalties, or demands arising out of or in connection with such usage.');
+
+    h.addSectionHeading('FEE STRUCTURE AND PAYMENT OBLIGATIONS');
+    h.addParagraph('The Client hereby agrees and undertakes to remit to the Service Provider, namely Jupiter SPACE, the full and advance payment of the rent and/or subscription fees, for a fixed term of eleven (11) months, calculated as per the mutually agreed rate and scope of services.');
+    h.addParagraph('It is expressly understood and acknowledged by the Client that the said payment shall be made prior to the commencement of the service period, and shall cover the entire duration of eleven (11) calendar months, irrespective of the Client\'s actual or continued usage of the services during such period.');
+    h.addParagraph('The advance payment made by the Client shall be non-refundable and non-adjustable, except where otherwise mandated by law or specifically agreed to in writing by the Service Provider.');
+    h.addParagraph('The Service Provider shall have the unconditional right to suspend or withhold services in the event of any delay, default, or insufficiency in payment, without prejudice to its other legal remedies, including the right to terminate this Agreement and recover outstanding dues with applicable interest and legal costs.');
+
+    h.addSectionHeading('AGREEMENT RENEWAL');
+    h.addParagraph('The Client expressly agrees and undertakes to initiate the process of renewal of this Agreement during the eleventh (11th) month from the date of its commencement, should the Client intend to continue availing the services beyond the initial term. It is clearly understood that timely renewal is the sole responsibility of the Client, and the Service Provider shall not be under any obligation to issue reminders, notices, or extensions in this regard. Failure on the part of the Client to effect such renewal within the stipulated period shall entitle the Service Provider, or any entity or representative duly authorized by it, to treat the Agreement as automatically expiring upon the completion of the original term, and to terminate all services forthwith, without requirement of further notice or formal communication.');
+    h.addParagraph('The Service Provider shall further retain the right to allocate, reassign, or dispose of the address or facilities assigned to the Client, and the Client shall have no claim, lien, or entitlement thereto post-expiry');
+
+    h.addSectionHeading('TAX INVOICE AND SETTLEMENT');
+    h.addParagraph('The Service Provider, namely Jupiter SPACE, shall raise a tax-compliant invoice in accordance with applicable law, reflecting the services rendered to the Client for the preceding billing period or as otherwise agreed in writing. All such invoices shall be deemed valid unless disputed in writing by the Client within seven (7) days from the date of receipt, failing which the same shall be treated as undisputed and fully accepted by the Client. The Client hereby agrees and undertakes to settle all undisputed invoices in full within a period of thirty (30) calendar days from the date of receipt of each such invoice. All payments shall be made without deduction, set-off, or delay, except where required by applicable law or agreed to in writing by the Service Provider.');
+    h.addParagraph('In the event of any delay or default in payment beyond the stipulated period, the Service Provider shall be entitled to levy interest at the rate of 22% per annum on the outstanding amount, without prejudice to its right to suspend services, terminate the Agreement, or initiate recovery proceedings as may be warranted in law. All applicable taxes, levies, and statutory charges (including but not limited to GST) shall be borne by the Client and reflected accordingly in each tax invoice.');
+
+    h.addSectionHeading('TERMINATION FOR NON-PAYMENT');
+    h.addParagraph('In the event that the Client fails to remit the agreed rent and in accordance with the terms set forth in this Agreement, the Service Provider, namely Jupiter SPACE, shall be entitled, without the requirement of further notice or demand, to terminate the provision of services forthwith upon the expiry of the term originally agreed to at the time of subscription or initial payment. It is expressly agreed that such termination shall become effective automatically upon the expiration date, unless payment is received in full prior thereto, and the Service Provider shall not be under any obligation to provide extensions, grace periods, or continued access to services. Upon such termination, the Service Provider shall have the unrestricted right to revoke access, reassign the Client’s designated address or mailbox, and discontinue any associated services without incurring any liability, obligation, or consequence whatsoever.');
+    h.addParagraph('This provision shall be without prejudice to the Service Provider’s right to recover any outstanding dues, interest, damages, or costs, and to exercise all such remedies as may be available in law or equity.');
+
+    h.addSectionHeading('LATE PAYMENT INTEREST');
+    h.addParagraph('In the event of any delay by the Client in remitting payments due under this Agreement beyond the stipulated period of thirty (30) days from the date of invoice, the Service Provider, namely Jupiter SPACE, shall be entitled to levy interest on the overdue amount at the rate of twelve percent (12%) per annum, calculated on a pro-rata daily basis, commencing from the date such payment became due and continuing until the date of full and final settlement.');
+    h.addParagraph('Such interest shall be deemed an independent contractual obligation, recoverable as a debt due, and the accrual thereof shall in no manner prejudice or restrict the Service Provider’s right to initiate termination or legal proceedings for recovery or other remedies available under law.');
+
+    h.addSectionHeading('COMPLIANCE WITH LAWS');
+    h.addParagraph('The Client hereby undertakes and affirms that it shall, at all times during the subsistence of this Agreement, be solely and exclusively responsible for ensuring full and strict compliance with all applicable laws, rules, regulations, notifications, and governmental directives, including but not limited to the provisions of the Companies Act, 2013, the Goods and Services Tax Act, 2017, and all other relevant central, state, and municipal enactments as may be in force from time to time.');
+    h.addParagraph('The Service Provider, namely Jupiter SPACE, shall bear no liability or obligation whatsoever in respect of any acts, omissions, filings, declarations, or regulatory affairs conducted by the Client while using the address or services provided under this Agreement.');
+    h.addParagraph('The Client expressly agrees to indemnify, defend, and hold harmless the Service Provider, along with its directors, officers, employees, affiliates, and agents, from and against any and all claims, proceedings, penalties, liabilities, losses, damages, costs, and legal expenses that may arise, directly or indirectly, from:\n(a) The Client’s use of the services in violation of any applicable law;\n(b) Any false, incomplete, or misleading declarations made by the Client to any statutory authority;\n(c) Any regulatory action, prosecution, or inquiry initiated due to the Client\'s conduct or omissions;\n(d) Any breach of obligations under this Agreement or under any statute governing the Client’s business operations.');
+    h.addParagraph('This indemnity shall remain in full force and effect notwithstanding the expiration or earlier termination of this Agreement.');
+
+    h.addSectionHeading('INDEMNIFICATION');
+    h.addParagraph('The Client expressly undertakes not to use the premises address provided under this Agreement for the purpose of applying for any loans, credit facilities, credit cards, or other financial instruments or services from any bank, NBFC, or financial institution.');
+    h.addParagraph('The Service Provider, namely Jupiter SPACE, shall be fully indemnified and held harmless from and against any and all claims, liabilities, proceedings, losses, or damages, whether civil or regulatory, arising directly or indirectly from such unauthorized use or from any financial dealings, defaults, or obligations attributable to the Client.');
+
+    h.addSectionHeading('LIMITED SCOPE OF SERVICE');
+    h.addParagraph('The Service Provider, Jupiter SPACE, is engaged solely in the provision of mailbox and address services to the Client under this Agreement. It is expressly clarified that the Service Provider bears no responsibility or liability whatsoever for the Client’s business operations, representations, transactions, or activities, and shall not be held accountable for any consequences, claims, or proceedings arising therefrom, whether civil, regulatory, or criminal in nature.');
+
+    h.addSectionHeading('VISITOR RESPONSIBILITY');
+    h.addParagraph('The Client shall be solely responsible for ensuring that any visitors, clients, or representatives entering the premises of Jupiter SPACE do so only upon prior notice to the Service Provider and in strict compliance with all rules, policies, and security protocols prescribed by the Service Provider. The Service Provider shall bear no liability whatsoever for the conduct, actions, or omissions of such visitors, nor for any breach of house rules or disruption caused by them.');
+    h.addParagraph('It is expressly acknowledged by the Client that it does not possess or occupy any physical space on the premises under this Agreement. For any in-person meetings or use of workspace, the Client shall be required to pre-book a cabin or facility on an hourly basis, as the subscription granted herein is strictly limited to virtual office services.');
+
+    h.addSectionHeading('GUEST POLICY');
+    h.addParagraph('The Service Provider, Vselek Co-working and Co-Warehousing Private Limited, permits the Client to host guests for meetings or project-related purposes, subject to prior coordination and availability. The Client shall remain solely responsible for ensuring that all guests strictly adhere to the Service Provider’s workspace rules, code of conduct, and operational policies.');
+    h.addParagraph('Any breach or violation of such policies by the Client’s guests shall be deemed a breach by the Client, who shall bear full responsibility and liability for the same.');
+
+    h.addSectionHeading('FINANCIAL TRANSACTIONS');
+    h.addParagraph('The Client shall bear sole and exclusive responsibility for all financial transactions, payments, and commercial dealings conducted with its own clients, vendors, or third parties. The Service Provider, Jupiter SPACE, shall have no involvement or liability whatsoever in relation to such financial matters, including but not limited to payment disputes, service defaults, or transactional failures arising therefrom.');
+
+    h.addSectionHeading('PREVENTION OF MONEY LAUNDERING ACT, 2002 (PMLA)');
+    h.addParagraph('The Client hereby unequivocally affirms and undertakes that the premises, address, or any service availed under this Agreement shall not, under any circumstances, be utilized for any unlawful, illegitimate, or criminal purpose, including but not limited to activities that constitute offences under the Prevention of Money Laundering Act, 2002 (PMLA), and all other applicable anti-money laundering statutes, regulations, and guidelines in force in India or internationally. Any attempt, whether direct or indirect, to misuse the said services or address for financial fraud, layering, benami transactions, terrorist financing, or any other act that may attract penal consequences under the PMLA shall render this Agreement null and void ab initio, without prejudice to the Service Provider’s right to terminate the Agreement forthwith and report the matter to the competent statutory or enforcement authorities.');
+    h.addParagraph('The Client shall be singularly and fully liable for all legal, civil, or penal consequences arising from such misuse and shall unconditionally indemnify and hold harmless the Service Provider, its directors, officers, employees, and agents, against any loss, damage, claim, cost, or liability (including reasonable legal fees) arising therefrom. The Service Provider shall not be under any obligation to provide notice prior to termination or reporting, and any decision taken in this regard shall be final and binding.');
+
+    h.addSectionHeading('DISPUTE RESOLUTION (THIRD-PARTY MATTERS)');
+    h.addParagraph('In the event of any dispute, claim, or disagreement arising between the Client and its own clients, customers, or business associates, the Service Provider, Jupiter SPACE, shall bear no responsibility or obligation to intervene, mediate, or resolve such matters. The Client shall remain solely and fully accountable for addressing and resolving any such disputes independently, in a manner that is both timely and professionally appropriate.');
+
+    h.addSectionHeading('WORKSPACE ENVIRONMENT');
+    h.addParagraph('The Client and all individuals acting on their behalf, including visitors and guests, shall at all times maintain strict adherence to the rules, policies, and code of conduct prescribed by Jupiter SPACE, with a view to upholding a professional, secure, and disruption-free workspace environment. Any violation of such policies may, at the sole discretion of the Service Provider, result in the levy of penalties, suspension of services, or immediate termination of this Agreement without further notice.');
+    h.addParagraph('It is expressly reiterated that the Service Provider is engaged solely in the provision of mailbox and virtual office services, and bears no responsibility or liability for the Client’s business activities or operations. The Client shall be solely responsible for ensuring that all visitors or invitees comply fully with the Service Provider’s guidelines while on the premises.');
+
+    h.addSectionHeading('TERMINATION BY SERVICE PROVIDER');
+    h.addParagraph('The Service Provider, Jupiter SPACE, reserves the absolute right to terminate this Agreement at its sole discretion, by providing the Client with no less than thirty (30) days’ prior written notice, without assigning any reason therefore. Upon such termination, and subject to compliance by the Client with all obligations under this Agreement, any security deposit paid shall be refunded in full, net of any lawful deductions.');
+
+    h.addSectionHeading('AUTOMATIC TERMINATION');
+    h.addParagraph('Unless duly renewed by the Client prior to the expiry date, all services under this Agreement shall stand automatically terminated upon the conclusion of the subscribed term. The Service Provider, Jupiter SPACE, shall bear no responsibility or liability for any loss, disruption, or inconvenience arising from the Client’s failure to renew the subscription in a timely manner.');
+
+    h.addSectionHeading('OBLIGATIONS UPON TERMINATION');
+    h.addParagraph('Upon termination or expiry of this Agreement, the Client shall immediately cease all use of the address and any telephone numbers provided by the Service Provider.');
+    h.addParagraph('The Client shall forthwith remove and desist from displaying such address or contact details on all materials, including but not limited to business cards, websites, stationery, advertising collateral, certificates, and any public or private platforms. Failure to comply with these obligations shall render the Client liable for all consequences arising therefrom.');
+
+    h.addSectionHeading('CHANGE OF ADDRESS FOR REGISTRATIONS');
+    h.addParagraph('In the event the Client has utilized the provided address for registrations with the Registrar of Companies, GST authorities, banks, or any other governmental or regulatory bodies, the Client shall, within thirty (30) days of termination or expiry of this Agreement, effectuate all necessary updates to reflect an alternate address. The Service Provider expressly reserves the right to initiate appropriate legal proceedings against any Client who fails to comply with this obligation, including for any consequential damages or liabilities arising therefrom.');
+
+    h.addSectionHeading('TERMINATION WITHOUT NOTICE FOR ILLEGAL ACTIVITIES');
+    h.addParagraph('The Service Provider reserves the absolute right to terminate this Agreement with immediate effect and without prior notice upon any reasonable suspicion or confirmation that the Client is engaged in illegal activities or is conducting business in a manner detrimental to the Service Provider’s reputation or operations. Such termination shall be without prejudice to the Service Provider’s right to pursue all available legal and equitable remedies.');
+
+    h.addSectionHeading('TERMINATION FOR VIOLATION OR FRAUD');
+    h.addParagraph('The Service Provider reserves the right to terminate this Agreement upon thirty (30) days’ prior written notice if the Client is found to have materially violated any provision herein, or if the Client’s conduct is reasonably reported or determined to be fraudulent, unlawful, or detrimental to the interests of the Service Provider. Such termination shall be without prejudice to the Service Provider’s entitlement to seek all applicable remedies under law.');
+
+    h.addSectionHeading('RENEWAL REQUIREMENT');
+    h.addParagraph('The Client is expressly obligated to renew the subscription on or before the eleventh (11th) month from the commencement date of this Agreement, irrespective of whether the Client’s engagement is through an aggregator platform or any third-party intermediary. Failure to renew within the stipulated period shall result in automatic termination of the Agreement, rendering it null and void. The Service Provider shall bear no responsibility or liability for any loss, disruption, or adverse consequences arising from such non-renewal. Notwithstanding the involvement of any intermediary, the Service Provider reserves the unequivocal right to directly communicate with the Client to offer renewal opportunities.');
+
+    h.addSectionHeading('NO LIABILITY POST-TERMINATION');
+    h.addParagraph('Upon termination of services—whether automatic or initiated by the Service Provider—the Client hereby irrevocably and unconditionally releases and discharges the Service Provider from any and all liability, claims, or demands arising out of or in connection with such termination. The Client shall immediately cease all use of the provided address, removing it from all documents, platforms, communications, and any other media where it was utilized pursuant to this Agreement. Further, the Client shall furnish a written declaration to the Service Provider affirming the cessation of such use. Non-compliance with these obligations shall entitle the Service Provider to initiate appropriate legal proceedings and seek remedies as deemed fit.');
+
+    h.addSectionHeading('CONFIDENTIALITY');
+    h.addParagraph('The Client acknowledges that during the course of availing the Services, it may acquire access to certain Confidential and Proprietary Information (“Confidential Information”) of the Service Provider. The Client agrees that, both during the term of this Agreement and thereafter:\n\n• (a) The Client shall exercise no less than a reasonable standard of care—at minimum equivalent to that employed in protecting its own confidential information—to prevent unauthorized disclosure or use of such Confidential Information;\n• (b) The Client shall use Confidential Information solely for purposes strictly related to this Agreement; and\n• (c) The Client shall not disclose Confidential Information to any third party without the prior express written consent of the Service Provider.\n\nReciprocally, the Service Provider acknowledges that it may, in the course of performing its obligations, access Confidential Information of the Client, and undertakes to exercise at least the same level of care in safeguarding such information. In the event of any transfer or sale of the Service Provider’s business or relevant business segment, the Service Provider is expressly authorized to transfer all user information, including Confidential Information, to its lawful successor.');
+
+    h.addSectionHeading('OWNERSHIP');
+    h.addParagraph('All programs, services, processes, designs, software, technologies, trademarks, trade names, inventions, and materials constituting the Service are the exclusive property of the Service Provider, except where expressly stated otherwise. This Agreement shall not be construed as a lease or transfer of ownership.');
+    h.addParagraph('The Client acknowledges that any phone number assigned by the Service Provider remains the sole property of the Service Provider and is not leased or owned by the Client. Upon termination of the Client’s account for any reason, such phone number may be reassigned at the Service Provider’s sole discretion.\n\nConversely, all intellectual property and proprietary materials of the Client shall remain the sole property of the Client.');
+
+    h.addSectionHeading('NATURE OF BUSINESS');
+    h.addParagraph('The Client shall provide a written description of the nature of its business in Annexure-1 to this Agreement. The Client undertakes not to engage in or conduct any business activity that is illegal, defamatory, immoral, obscene, or otherwise unlawful. Furthermore, the Client agrees not to utilize the Service Provider’s address, whether directly or indirectly, for any such prohibited purposes. The Client confirms that the business described in Annexure-1 constitutes the activities to be conducted using the virtual office services under this Agreement. Any subsequent change in the nature of business shall be promptly communicated to the Service Provider in writing.');
+
+    doc.addPage();
+    h.addOrangeHeaderOnPage();
+    
+    let py = 30;
+    doc.setTextColor(17, 17, 16);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PAYMENT TERM AND TENURE AGREEMENT PERIODS: 11 MONTHS', h.margin, py);
+    py += 10;
+    doc.text('EFFECTIVE FROM', h.margin, py);
+    py += 8;
+    const endDate = new Date(data.startDate);
+    endDate.setMonth(endDate.getMonth() + 11);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(formatDate(data.startDate) + ' TO ' + formatDate(endDate.toISOString()), h.margin, py);
+    py += 15;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('AGREEMENT IS VALID FROM', h.margin, py);
+    py += 8;
+    doc.setFont('helvetica', 'normal');
+    doc.text('Service provider’s Address is: C/O Jupiter SPACE, Plot No. RZ-L-1, Second Floor, Main Road, Khasra No. 84/12/2, Mahavir Enclave, Palam, Opposite Yamaha Showroom, New Delhi - 110045.', h.margin, py, { maxWidth: h.contentWidth });
+    py += 20;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('THIS IS FORMAL AGREEMENT ON THE CLIENT’S TERMS AND CONDITIONS.', h.margin, py);
+    py += 8;
+    doc.text('THIS IS NOT A LEASE OR DEED OR CAN NOT BE USED AS LEASE AGREEMENT.', h.margin, py);
+    py += 20;
+
+    doc.setFont('helvetica', 'normal');
+    doc.text('I AGREE TO ABOVE THESE TERMS AND CONDITIONS', h.margin, py);
+    py += 15;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('FOR CLIENT:', h.margin, py);
+    py += 8;
+    doc.setFont('helvetica', 'normal');
+    doc.text('Name : ' + (data.representativeName || '___________'), h.margin, py);
+    py += 8;
+    doc.text('Signature :', h.margin, py);
+    py += 8;
+    doc.text('Designation/Title : ' + (data.representativeType || 'Authorized Signatory'), h.margin, py);
+    py += 8;
+    doc.text('Date of Sign : ' + formatDate(data.agreementDate), h.margin, py);
+    py += 15;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('WITNESS 1', h.margin, py);
+    py += 8;
+    doc.setFont('helvetica', 'normal');
+    doc.text('Name:', h.margin, py);
+    py += 8;
+    doc.text('Signature :', h.margin, py);
+    py += 8;
+    doc.text('Aadhaar No :', h.margin, py);
+    py += 15;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('WITNESS 2', h.margin, py);
+    py += 8;
+    doc.setFont('helvetica', 'normal');
+    doc.text('Name :', h.margin, py);
+    py += 8;
+    doc.text('Signature :', h.margin, py);
+    py += 8;
+    doc.text('Aadhaar No :', h.margin, py);
+    py += 25;
+
+    doc.text('For Service Provider (Jupiter SPACE)', h.margin, py);
+  };
+
   const getCalculatedEndDate = () => {
     if (!formData.startDate) return '';
     const date = new Date(formData.startDate);
@@ -1141,6 +1372,35 @@ export default function DraftGenerator() {
             </div>
           </>
         );
+      } else if (selectedTemplate.id === 'dwarka-template') {
+        return (
+          <>
+            <p style={{ textAlign: 'center', fontWeight: 'bold' }}>WORKSPACE SERVICE AGREEMENT</p>
+            <hr style={{ margin: '10px 0 20px 0', borderTop: '1px solid black' }} />
+            <p style={{ textAlign: 'center', fontWeight: 'bold', textDecoration: 'underline' }}>PARTIES TO THIS AGREEMENT</p>
+            <p>This Agreement is executed on this {formatDate(formData.agreementDate)}, by and between:</p>
+            <p><strong>JUPITER SPACE</strong>, having its registered office at PLOT NO. RZ-L-1, SECOND FLOOR, MAIN ROAD, KHASRA NO. 84/12/2, MAHAVIR ENCLAVE, PALAM, OPPOSITE YAMAHA SHOWROOM, NEW DELHI - 110045, hereinafter referred to as the "Service Provider".</p>
+            <p style={{ textAlign: 'center' }}><strong>AND</strong></p>
+            {(() => {
+              const companyTypeString = formData.companyType === 'LLP' ? 'a Limited Liability Partnership' :
+                                        formData.companyType === 'Proprietorship' ? 'a Proprietorship firm' :
+                                        formData.companyType === 'Trust' ? 'a registered Trust' :
+                                        'a company incorporated under the provisions of the Companies Act, 2013';
+              return (
+                <p><strong>{formData.clientCompanyName || '___________'}</strong>, {companyTypeString}, through its {formData.representativeType || 'Director'} {formData.representativeName || '___________'}, S/o {formData.representativeFatherName || '___________'}, residing at {formData.representativeAddress || '___________'}, holding PAN {formData.panNumber || '___________'} and reachable at Mobile Number {formData.mobileNumber || '___________'}, hereinafter referred to as the "Client".</p>
+              );
+            })()}
+            <p><strong>SCOPE AND NATURE OF THE AGREEMENT</strong><br/>
+            The Client hereby expresses its intention to utilize the Mailbox Services as offered by the Service Provider, namely Jupiter SPACE...</p>
+            <p><em>(The full preview text is truncated for brevity, but the final PDF will contain all clauses and details.)</em></p>
+            <div style={{ marginTop: '30px' }}>
+              <p>For Client:<br/>Name: {formData.representativeName || '___________'}<br/>Designation: {formData.representativeType || 'Authorized Signatory'}</p>
+            </div>
+            <div style={{ marginTop: '30px' }}>
+              <p>For Service Provider (Jupiter SPACE)</p>
+            </div>
+          </>
+        );
       }
     };
 
@@ -1344,6 +1604,31 @@ export default function DraftGenerator() {
                   {renderField('Father\'s Name (S/O)', 'directorFatherName', 'text', { placeholder: 'S/O ...' })}
                   {renderField('Director\'s Address', 'directorAddress', 'textarea', { rows: 2, placeholder: 'Residential address' })}
                   {renderField('Aadhar Number', 'aadharNumber', 'text', { placeholder: '12-digit aadhar' })}
+                </div>
+              )}
+
+              {selectedTemplate.id === 'dwarka-template' && (
+                <div className="flex flex-col gap-1">
+                  <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
+                    {renderField('Agreement Date', 'agreementDate', 'date')}
+                    {renderField('Agreement Start Date', 'startDate', 'date')}
+                  </div>
+                  {renderField('Client Company Name', 'clientCompanyName', 'text', { placeholder: 'e.g. HAGER STONE INTERNATIONAL PRIVATE LIMITED' })}
+                  {renderField('Company Type', 'companyType', 'select', { options: ['Private Limited Company', 'LLP', 'Proprietorship', 'Trust'] })}
+                  <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
+                    {renderField('Representative Type', 'representativeType', 'select', { options: ['Director', 'Authorized Signatory'] })}
+                    {renderField('Representative Name', 'representativeName', 'text', { placeholder: 'Name of the representative' })}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
+                    {renderField('Father\'s Name (S/o)', 'representativeFatherName', 'text', { placeholder: 'Father\'s Name' })}
+                    {renderField('PAN Number', 'panNumber', 'text', { placeholder: 'e.g. AAGCT7723A' })}
+                  </div>
+                  {renderField('Residential Address', 'representativeAddress', 'textarea', { rows: 2, placeholder: 'Residential address' })}
+                  <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
+                    {renderField('Mobile Number', 'mobileNumber', 'text', { placeholder: '10-digit mobile' })}
+                    {renderField('Agreement End Date', 'endDate', 'text', { value: `Auto: ${getCalculatedEndDate()}`, readOnly: true, className: 'bg-[rgba(17,17,16,0.03)] border border-[rgba(17,17,16,0.1)] rounded-[8px] p-[10px_12px] text-[14px] text-[rgba(17,17,16,0.6)] w-full font-sans h-[42px] cursor-not-allowed' })}
+                  </div>
+                  {renderField('Nature of Business (Annexure-1)', 'businessNature', 'textarea', { rows: 3, placeholder: 'Brief description of client\'s business...' })}
                 </div>
               )}
 

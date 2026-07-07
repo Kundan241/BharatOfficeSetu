@@ -21,6 +21,7 @@ import { updateServiceStatus, addService } from '../services/services';
 import { uploadDocument, deleteDocument } from '../services/documents';
 import { uploadFile } from '../services/cloudinary';
 import AdminBlog from './AdminBlog';
+import emailjs from '@emailjs/browser';
 import { 
   createPartner, 
   getAllPartners, 
@@ -705,26 +706,27 @@ function AddClientForm({ showConfirm }) {
         timestamp: serverTimestamp()
       });
 
-      // 7. Send Welcome Email via Google Apps Script (Isolated in its own try/catch)
+      // 7. Send Welcome Email via EmailJS
       try {
         await sendPasswordResetEmail(auth, formData.email, {
           url: 'https://bharatofficesetu.com/login'
         });
 
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyV3FGQHAjeSoeCYm0o4Z_QXQ1f1_W6jSJl4W7yxjUzrqI5bCPs850kTrE-cgYC2Brf_A/exec';
-        await fetch(SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
+        await emailjs.send(
+          'service_cvv25jk',
+          'template_ka458pf',
+          {
             type: 'welcome_email',
             name: formData.name,
             email: formData.email,
             phone: '+91' + formData.phone,
             service: formData.serviceType,
-            tempPassword: tempPassword,
+            role: 'client',
+            temp_password: tempPassword,
             loginUrl: 'https://bharatofficesetu.com/login'
-          })
-        });
+          },
+          'WNoyI0WLOcvaOrbX_'
+        );
       } catch (emailError) {
         console.error("Database updated successfully, but email dispatch failed:", emailError);
       }
@@ -1498,6 +1500,27 @@ function AddPartnerForm() {
     setLoading(true);
     try {
       const res = await createPartner(formData);
+      
+      try {
+        const tempPassword = generateTempPassword(formData.phone);
+        await emailjs.send(
+          'service_cvv25jk',
+          'template_ka458pf',
+          {
+            type: 'welcome_email',
+            name: formData.name,
+            email: formData.email,
+            phone: '+91' + formData.phone,
+            role: 'partner',
+            temp_password: tempPassword,
+            loginUrl: 'https://bharatofficesetu.com/login'
+          },
+          'WNoyI0WLOcvaOrbX_'
+        );
+      } catch (emailError) {
+        console.error("Partner created successfully, but welcome email dispatch failed:", emailError);
+      }
+
       addToast('success', `Partner created! Welcome email sent to ${formData.email}`);
       navigate(`/admin/partners/${res.uid}`);
     } catch (err) {
