@@ -25,6 +25,10 @@ import BlogPost from './pages/BlogPost'
 import DraftGenerator from './pages/DraftGenerator'
 import ChangePassword from './pages/ChangePassword'
 
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import Terms from './pages/Terms'
+import RefundPolicy from './pages/RefundPolicy'
+
 function LandingPage() {
   return (
     <div className="bg-[var(--color-bg-warm)] text-[var(--color-text-dark)]">
@@ -61,6 +65,9 @@ function App() {
               <Route path="/admin/*" element={<Admin />} />
               <Route path="/drafts" element={<DraftGenerator />} />
               <Route path="/change-password" element={<ChangePassword />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-and-conditions" element={<Terms />} />
+              <Route path="/refund-policy" element={<RefundPolicy />} />
             </Routes>
           </div>
         </ToastProvider>
