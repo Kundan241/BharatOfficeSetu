@@ -10,6 +10,7 @@ import InfoSections from './components/InfoSections'
 import BlogPreview from './components/BlogPreview'
 import FooterBanner from './components/FooterBanner'
 import WhatsAppWidget from './components/WhatsAppWidget'
+import PWAInstallPrompt from './components/PWAInstallPrompt'
 
 import { ToastProvider } from './components/ToastContext'
 import { AuthProvider } from './components/AuthContext'
@@ -54,6 +55,7 @@ function App() {
       <AuthProvider>
         <ToastProvider>
           <div className="min-h-screen">
+            <PWAInstallPrompt />
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/blog" element={<BlogListing />} />
