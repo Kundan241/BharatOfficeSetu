@@ -9,13 +9,14 @@ export default function WhatsAppWidget() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with us on WhatsApp"
+      className="whatsapp-floating-btn"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
         position: 'fixed',
         bottom: '24px',
         right: '24px',
-        zIndex: 9999,
+        zIndex: 50,
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
@@ -62,6 +63,13 @@ export default function WhatsAppWidget() {
           0%, 88%, 94%, 100% { transform: translateY(0) scale(1); }
           91% { transform: translateY(-12px) scale(1); }
           97% { transform: translateY(-6px) scale(1); }
+        }
+
+        /* Shifting state when PWA banner is visible on mobile screens (< 768px) */
+        @media (max-width: 767px) {
+          body.pwa-banner-active .whatsapp-floating-btn {
+            bottom: 110px !important;
+          }
         }
       `}</style>
     </a>

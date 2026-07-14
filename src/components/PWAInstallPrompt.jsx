@@ -81,10 +81,22 @@ const PWAInstallPrompt = () => {
     setShowBanner(false);
   };
 
+  useEffect(() => {
+    if (showBanner) {
+      document.body.classList.add('pwa-banner-active');
+    } else {
+      document.body.classList.remove('pwa-banner-active');
+    }
+    
+    return () => {
+      document.body.classList.remove('pwa-banner-active');
+    };
+  }, [showBanner]);
+
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-6 left-4 right-4 z-[9999] flex items-center justify-between p-4 bg-white rounded-[16px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 max-w-lg mx-auto transform transition-all">
+    <div className="fixed bottom-6 left-4 right-4 z-40 flex items-center justify-between p-4 bg-white rounded-[16px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 max-w-lg mx-auto transform transition-all">
       <div className="flex items-center gap-3">
         <img 
           src="/logo.png" 
