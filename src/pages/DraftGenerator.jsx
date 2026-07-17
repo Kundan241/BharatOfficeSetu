@@ -903,7 +903,7 @@ export default function DraftGenerator() {
                               'a company incorporated under the provisions of the Companies Act, 2013';
 
     h.addParagraph(
-      (data.clientCompanyName || '___________') + ', ' + companyTypeString + ', through its ' + (data.representativeType || 'Director') + ' ' + (data.representativeName || '___________') + ', S/o ' + (data.representativeFatherName || '___________') + ', residing at ' + (data.representativeAddress || '___________') + ', holding PAN ' + (data.panNumber || '___________') + ' and reachable at Mobile Number ' + (data.mobileNumber || '___________') + ', hereinafter referred to as the "Client", which expression shall, unless repugnant to the context or meaning thereof, be deemed to include its successors, legal representatives, and permitted assigns.'
+      (data.clientCompanyName || '___________') + ', ' + companyTypeString + ', through its ' + (data.representativeType || 'Director') + ' ' + (data.representativeName || '___________') + ', C/o ' + (data.representativeFatherName || '___________') + ', residing at ' + (data.representativeAddress || '___________') + ', holding PAN ' + (data.panNumber || '___________') + ' and reachable at Mobile Number ' + (data.mobileNumber || '___________') + ', hereinafter referred to as the "Client", which expression shall, unless repugnant to the context or meaning thereof, be deemed to include its successors, legal representatives, and permitted assigns.'
     );
 
     h.addSectionHeading('SCOPE AND NATURE OF THE AGREEMENT');
