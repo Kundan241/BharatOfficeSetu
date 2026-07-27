@@ -110,7 +110,7 @@ export default function Admin() {
             return;
           }
           
-          const verified = sessionStorage.getItem('bos_admin_verified');
+          const verified = localStorage.getItem('bos_admin_verified');
           if (verified === 'true') {
             setAdminAuthenticated(true);
           }
@@ -127,7 +127,7 @@ export default function Admin() {
   const handleAdminLogin = (e) => {
     e.preventDefault();
     if (adminPassword === ADMIN_GATE_PASSWORD) {
-      sessionStorage.setItem('bos_admin_verified', 'true');
+      localStorage.setItem('bos_admin_verified', 'true');
       setAdminAuthenticated(true);
       setPasswordError(false);
     } else {
@@ -139,7 +139,7 @@ export default function Admin() {
   const handleLogout = async () => {
     try {
       await auth.signOut();
-      sessionStorage.removeItem('bos_admin_verified');
+      localStorage.removeItem('bos_admin_verified');
       navigate('/login');
     } catch (err) {
       console.error(err);

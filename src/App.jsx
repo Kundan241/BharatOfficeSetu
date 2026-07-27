@@ -65,6 +65,7 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/partner-dashboard" element={<PartnerDashboard />} />
               <Route path="/admin/*" element={<Admin />} />
+              
               <Route path="/drafts" element={<DraftGenerator />} />
               <Route path="/change-password" element={<ChangePassword />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />

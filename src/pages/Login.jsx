@@ -77,8 +77,9 @@ export default function Login() {
 
       // 1. Check Admin
       try {
+        const adminEmails = ['admin@bos.com', 'mu8ndan@gmail.com'];
         const adminSnap = await getDoc(doc(db, 'admins', uid));
-        if (adminSnap.exists()) { 
+        if (adminSnap.exists() || adminEmails.includes(result.user.email)) { 
           userRole = 'admin'; 
         }
       } catch(e) { /* Ignore read error */ }
