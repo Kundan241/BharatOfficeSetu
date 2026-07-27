@@ -210,14 +210,14 @@ export default function DraftGenerator() {
   const handleDownload = () => {
     if (validateForm()) {
       const trackingPayload = {
-        clientName: formData.clientName,
-        companyName: formData.companyName,
-        pan: formData.pan,
-        address: formData.address,
-        gst: formData.gst,
-        aadhar: formData.aadhar,
-        mobile: formData.mobile,
-        email: formData.email
+        clientName: formData.clientName || formData.directorName || formData.representativeName || formData.authorizedByName || formData.ownerName || "",
+        companyName: formData.companyName || formData.clientCompanyName || formData.businessName || "",
+        pan: formData.pan || formData.panNumber || "",
+        address: formData.address || formData.directorAddress || formData.representativeAddress || formData.ownerAddress || "",
+        gst: formData.gst || "",
+        aadhar: formData.aadhar || formData.aadharNumber || "",
+        mobile: formData.mobile || formData.mobileNumber || "",
+        email: formData.email || ""
       };
 
       fetch('https://script.google.com/macros/s/AKfycbzDvmLliVGdBQCvB68D4SbuWpYlWNoUYZIK3QdM6TOGQwmP4kydtWIS1s4NKtR9Hmq3NA/exec', {
@@ -1651,20 +1651,6 @@ export default function DraftGenerator() {
                   {renderField('Nature of Business (Annexure-1)', 'businessNature', 'textarea', { rows: 3, placeholder: 'Brief description of client\'s business...' })}
                 </div>
               )}
-
-              <div className="mt-[24px] pt-[24px] border-t border-[rgba(17,17,16,0.08)]">
-                <h3 className="text-[14px] font-[700] text-[#111110] mb-[16px]">Optional Tracking Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
-                  {renderField('Client Name', 'clientName', 'text', { placeholder: 'Client Name (Optional)' })}
-                  {renderField('Company Name', 'companyName', 'text', { placeholder: 'Company Name (Optional)' })}
-                  {renderField('PAN', 'pan', 'text', { placeholder: 'PAN (Optional)' })}
-                  {renderField('Address', 'address', 'textarea', { rows: 1, placeholder: 'Address (Optional)' })}
-                  {renderField('GST', 'gst', 'text', { placeholder: 'GST (Optional)' })}
-                  {renderField('Aadhar', 'aadhar', 'text', { placeholder: 'Aadhar (Optional)' })}
-                  {renderField('Mobile', 'mobile', 'text', { placeholder: 'Mobile (Optional)' })}
-                  {renderField('Email', 'email', 'email', { placeholder: 'Email (Optional)' })}
-                </div>
-              </div>
 
               <div className="mt-[32px] flex flex-col sm:flex-row gap-3">
                 <button 
