@@ -225,6 +225,8 @@ export default function DraftGenerator() {
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(trackingPayload)
+      }).then(() => {
+        addToast('success', 'Data saved successfully');
       }).catch(err => console.error('Silent sync error', err));
 
       generatePDF(selectedTemplate, formData);
