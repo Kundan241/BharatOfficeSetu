@@ -1650,9 +1650,9 @@ export default function DraftGenerator() {
                     {renderField('Agreement Start Date', 'startDate', 'date')}
                   </div>
                   {renderField('Client Company Name', 'clientCompanyName', 'text', { placeholder: 'e.g. HAGER STONE INTERNATIONAL PRIVATE LIMITED' })}
-                  {renderField('Company Type', 'companyType', 'select', { options: ['Private Limited Company', 'LLP', 'Proprietorship', 'Trust'] })}
+                  {renderField('Company Type', 'companyType', 'select', { options: ['Private Limited Company', 'LLP', 'Proprietorship', 'Trust', 'Partnership Firm'] })}
                   <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
-                    {renderField('Representative Type', 'representativeType', 'select', { options: ['Director', 'Authorized Signatory'] })}
+                    {renderField('Representative Type', 'representativeType', 'select', { options: ['Director', 'Authorized Signatory', 'Partner', 'Proprietor'] })}
                     {renderField('Representative Name', 'representativeName', 'text', { placeholder: 'Name of the representative' })}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
