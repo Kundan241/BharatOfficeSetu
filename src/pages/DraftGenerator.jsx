@@ -210,6 +210,8 @@ export default function DraftGenerator() {
   const handleDownload = () => {
     if (validateForm()) {
       const trackingPayload = {
+        timestamp: new Date().toISOString(),
+        documentType: selectedTemplate.name || "",
         clientName: formData.clientName || formData.directorName || formData.representativeName || formData.authorizedByName || formData.ownerName || "",
         companyName: formData.companyName || formData.clientCompanyName || formData.businessName || "",
         pan: formData.pan || formData.panNumber || "",
