@@ -175,7 +175,7 @@ export default function DraftGenerator() {
       'gurgaon-noc': ['clientCompanyName', 'directorName', 'directorAddress', 'aadharNumber'],
       'dwarka-template': ['clientCompanyName', 'representativeName', 'representativeAddress', 'panNumber', 'mobileNumber', 'startDate']
     };
-    
+
     const reqFields = required[selectedTemplate.id];
     let isValid = true;
     let firstErrorField = null;
@@ -210,7 +210,21 @@ export default function DraftGenerator() {
   const handleDownload = () => {
     if (validateForm()) {
       const trackingPayload = {
+        "Timestamp": new Date().toISOString(),
         timestamp: new Date().toISOString(),
+
+        // Exact mappings based on user's exact Column requests
+        "Document Type": selectedTemplate.name || "",
+        "Client Name": formData.clientName || formData.directorName || formData.representativeName || formData.authorizedByName || formData.ownerName || "",
+        "Company Name": formData.companyName || formData.clientCompanyName || formData.businessName || "",
+        "PAN": formData.pan || formData.panNumber || "",
+        "Address": formData.address || formData.directorAddress || formData.representativeAddress || formData.ownerAddress || "",
+        "GST": formData.gst || "",
+        "Aadhar": formData.aadhar || formData.aadharNumber || "",
+        "Mobile": formData.mobile || formData.mobileNumber || "",
+        "Email": formData.email || "",
+
+        // camelCase mappings as explicitly requested for variable names
         documentType: selectedTemplate.name || "",
         clientName: formData.clientName || formData.directorName || formData.representativeName || formData.authorizedByName || formData.ownerName || "",
         companyName: formData.companyName || formData.clientCompanyName || formData.businessName || "",
@@ -279,7 +293,7 @@ export default function DraftGenerator() {
         const titleLines = doc.splitTextToSize(template.name.toUpperCase(), contentWidth);
         doc.text(titleLines, pageWidth / 2, yPos, { align: 'center' });
         yPos += (titleLines.length * 8) + 10;
-  
+
         doc.setDrawColor(17, 17, 16);
         doc.setLineWidth(0.5);
         doc.line(margin, yPos - 4, pageWidth - margin, yPos - 4);
@@ -715,7 +729,7 @@ export default function DraftGenerator() {
     h.addParagraph('• The Licensor bearing address 02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102 has full and unfettered rights to lease/let out the said Premises (or a portion thereof) on such terms and conditions as it may think fit at its sole discretion.\n• The Client/ Licensee desire to take a property on lease so as to use the said property as its registered office for a period of eleven (11) months.\n• That the annually rent of the above said premises has been settled in between both the parties at a sum of Rupees 10,000/per annual in advance.\n• Pursuant thereto, the Licensor has agreed to permit the LICENSEE/ CLIENT to use the Licensed Premises on a Leave and License basis, and the LICENSEE/ CLIENT has agreed to take the Licensed Premises on license subject to the terms, covenants, conditions and agreements hereinafter contained.');
 
     h.addSectionHeading('EFFECTIVE DATE: ' + formatDate(data.startDate) + '   TERM: 11 Months');
-    
+
     h.addSectionHeading('USE OF AND ACCESS TO THE LICENSED PREMISES');
     h.addParagraph('The Client/ Licensee is interested in using the office space (hereinafter referred to as the "Services") from the Licensor at its premise located at 02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102 (hereinafter referred to as the "Premise").The whole of the Premise remains the property of the Service Provider and remains in the Licensor’s possession and control. The allowed usage for Licensee is mentioned in the clause ‘Terms of Usage’. This Agreement is personal to the Client/ Licensee and cannot be transferred to anyone else.');
 
@@ -754,14 +768,14 @@ export default function DraftGenerator() {
 
     doc.addPage();
     h.addOrangeHeaderOnPage();
-    
+
     let y = 30;
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(17, 17, 16);
     doc.text('Brief about Company Operations (up to 200 words)', h.margin, y);
     y += 8;
-    
+
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(40, 40, 40);
@@ -771,7 +785,7 @@ export default function DraftGenerator() {
       y += 6;
     });
     y += 10;
-    
+
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(17, 17, 16);
     doc.text('Client/Licensee’s Address will be:', h.margin, y);
@@ -875,7 +889,7 @@ export default function DraftGenerator() {
     doc.text('Dear Sir,', h.margin, y);
     y += 10;
 
-    const nocText = 
+    const nocText =
       'We True Work lounge LLP having its office space at "02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102" hereby declare and confirm that we are the legal lease owner of the above mentioned office premises and hereby allow Company "' + (data.clientCompanyName || '___________') + '" to use the above-mentioned address as the Registered Office (GST Address office/Office) of Company ' + (data.clientCompanyName || '___________') + '.\n\n' +
       'Further, we have no objection if Company "' + (data.clientCompanyName || '___________') + '" carries any business-related activity in the above-mentioned address.\n\n' +
       (data.directorName || '___________') + ', (Aadhar Number : ' + (data.aadharNumber || '___________') + ' ) further agrees that this above address can only be used till the expiry of Office use at this premise including renewal period, if any. On expiry or termination of Registered Office Membership Letter-Terms of Offer ' + (data.directorName || '___________') + ' has to immediately take all steps to remove / de-list the company address ' + (data.clientCompanyName || '___________') + ' of the premises "02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102" from the records of above mentioned appropriate authority and from all registrations / filings etc. with statutory / government authorities and mandatorily shall keep True Work lounge LLP informed of the same in writing and also shall provide a proof of such removal to True Work lounge LLP within 2 weeks prior to termination or expiration of the membership agreement.\n\n' +
@@ -901,7 +915,7 @@ export default function DraftGenerator() {
   };
 
 
-  
+
   const buildDwarkaTemplate = (doc, data, h) => {
     let y = h.yPos();
     doc.setTextColor(17, 17, 16);
@@ -916,13 +930,13 @@ export default function DraftGenerator() {
       'This Agreement is executed on this ' + formatDate(data.agreementDate) + ', by and between:\n\n' +
       'JUPITER SPACE, having its registered office at PLOT NO. RZ-L-1, SECOND FLOOR, MAIN ROAD, KHASRA NO. 84/12/2, MAHAVIR ENCLAVE, PALAM, OPPOSITE YAMAHA SHOWROOM, NEW DELHI - 110045, hereinafter referred to as the "Service Provider", which expression shall, unless repugnant to the context or meaning thereof, be deemed to include its successors, legal representatives, and permitted assigns.'
     );
-    
+
     h.addParagraph('AND', { align: 'center' });
 
     const companyTypeString = data.companyType === 'LLP' ? 'a Limited Liability Partnership' :
-                              data.companyType === 'Proprietorship' ? 'a Proprietorship firm' :
-                              data.companyType === 'Trust' ? 'a registered Trust' :
-                              'a company incorporated under the provisions of the Companies Act, 2013';
+      data.companyType === 'Proprietorship' ? 'a Proprietorship firm' :
+        data.companyType === 'Trust' ? 'a registered Trust' :
+          'a company incorporated under the provisions of the Companies Act, 2013';
 
     h.addParagraph(
       (data.clientCompanyName || '___________') + ', ' + companyTypeString + ', through its ' + (data.representativeType || 'Director') + ' ' + (data.representativeName || '___________') + ', C/o ' + (data.representativeFatherName || '___________') + ', residing at ' + (data.representativeAddress || '___________') + ', holding PAN ' + (data.panNumber || '___________') + ' and reachable at Mobile Number ' + (data.mobileNumber || '___________') + ', hereinafter referred to as the "Client", which expression shall, unless repugnant to the context or meaning thereof, be deemed to include its successors, legal representatives, and permitted assigns.'
@@ -1035,7 +1049,7 @@ export default function DraftGenerator() {
 
     doc.addPage();
     h.addOrangeHeaderOnPage();
-    
+
     let py = 30;
     doc.setTextColor(17, 17, 16);
     doc.setFontSize(11);
@@ -1160,117 +1174,117 @@ export default function DraftGenerator() {
           <>
             <p style={{ textAlign: 'center', fontWeight: 'bold' }}>WORK SPACE SERVICE CONTRACT</p>
             <hr style={{ margin: '10px 0 20px 0', borderTop: '1px solid black' }} />
-            
+
             <p><strong>THE TWO PARTIES TO THE AGREEMENT ARE AS FOLLOWS</strong></p>
             <p>This AGREEMENT made on {formatDate(formData.agreementDate)} between {formData.serviceProviderName || '___________'} herein after referred to as Service Provider having office at {formData.serviceProviderAddress || '___________'} and {formData.clientCompanyName || '___________'} through it’s Director {formData.directorName || '___________'}, S/O {formData.directorFatherName || '___________'}, R/O {formData.directorAddress || '___________'} PAN Number {formData.panNumber || '___________'} with Mobile Number {formData.mobileNumber || '___________'} here in after referred to as "Client".</p>
-            
-            <p><strong>THE NATURE OF THE AGREEMENT</strong><br/>
-            The Client intends to use the Mailbox Services provided by {formData.serviceProviderName || '___________'} , located at {formData.serviceProviderAddress || '___________'}, as their communication and mailing address. The Client acknowledges that the entire premises, including the mailbox, remain the exclusive property of the Service Provider, {formData.serviceProviderName || '___________'}, who retains full possession, control, and authority over the space. The Client further acknowledges that their usage is limited solely to the agreed-upon services, and no rights or claims to the property or its facilities are transferred to them.</p>
-            
-            <p><strong>ACKNOWLEDGMENT AND ACCEPTANCE OF TERMS OF USE</strong><br/>
-            The Services are provided to the Client strictly under the terms and conditions set by {formData.serviceProviderName || '___________'} (the "Service Provider"). The Client's use of these Services constitutes full and unconditional acceptance of all terms and conditions outlined in this Agreement, without exception.<br/><br/>
-            Any individual utilizing the Services or entering a contract, whether in writing or online, on behalf of their employer or a third party, affirms that they have the full legal authority to bind their employer or the third party to these terms. Unless explicitly stated by the Service Provider, these Terms of Service will apply to any new features, services, or resources introduced by {formData.serviceProviderName || '___________'}, including the release of new offerings that augment or enhance the current Services.</p>
 
-            <p><strong>USAGE OF ADDRESS</strong><br/>
-            The Client may use the provided address solely for business correspondence purposes. The Client may also choose, at their own risk and liability, to designate the address as their "Principal Place of Business for ROC Registration, GST Registrations, opening bank accounts, or dealings with central/state governments or any other authorities.<br/><br/>
-            The Service Provider, {formData.serviceProviderName || '___________'}, holds no responsibility or liability for any consequences, legal or otherwise, arising from such use. The Client assumes full responsibility for ensuring compliance with all legal and regulatory requirements in connection with the use of the address under this agreement.</p>
+            <p><strong>THE NATURE OF THE AGREEMENT</strong><br />
+              The Client intends to use the Mailbox Services provided by {formData.serviceProviderName || '___________'} , located at {formData.serviceProviderAddress || '___________'}, as their communication and mailing address. The Client acknowledges that the entire premises, including the mailbox, remain the exclusive property of the Service Provider, {formData.serviceProviderName || '___________'}, who retains full possession, control, and authority over the space. The Client further acknowledges that their usage is limited solely to the agreed-upon services, and no rights or claims to the property or its facilities are transferred to them.</p>
 
-            <p><strong>RENT / SUBSCRIPTION FEES</strong><br/>
-            The Client agrees to pay the rent/subscription fees for a period of 11 months in advance to the Service Provider. This implies that the Client pays upfront for the services to be received over the next 11 months.</p>
+            <p><strong>ACKNOWLEDGMENT AND ACCEPTANCE OF TERMS OF USE</strong><br />
+              The Services are provided to the Client strictly under the terms and conditions set by {formData.serviceProviderName || '___________'} (the "Service Provider"). The Client's use of these Services constitutes full and unconditional acceptance of all terms and conditions outlined in this Agreement, without exception.<br /><br />
+              Any individual utilizing the Services or entering a contract, whether in writing or online, on behalf of their employer or a third party, affirms that they have the full legal authority to bind their employer or the third party to these terms. Unless explicitly stated by the Service Provider, these Terms of Service will apply to any new features, services, or resources introduced by {formData.serviceProviderName || '___________'}, including the release of new offerings that augment or enhance the current Services.</p>
 
-            <p><strong>AGREEMENT RENEWAL</strong><br/>
-            The Client must renew the agreement in the 11th month from the date of commencement. Failure to do so allows the Service Provider or any designated party to terminate the contract.</p>
+            <p><strong>USAGE OF ADDRESS</strong><br />
+              The Client may use the provided address solely for business correspondence purposes. The Client may also choose, at their own risk and liability, to designate the address as their "Principal Place of Business for ROC Registration, GST Registrations, opening bank accounts, or dealings with central/state governments or any other authorities.<br /><br />
+              The Service Provider, {formData.serviceProviderName || '___________'}, holds no responsibility or liability for any consequences, legal or otherwise, arising from such use. The Client assumes full responsibility for ensuring compliance with all legal and regulatory requirements in connection with the use of the address under this agreement.</p>
 
-            <p><strong>TAX INVOICE AND SETTLEMENT</strong><br/>
-            The Service Provider will issue a tax invoice for the services rendered in the previous month. The Client is required to settle all valid invoices within 30 days of receipt.</p>
+            <p><strong>RENT / SUBSCRIPTION FEES</strong><br />
+              The Client agrees to pay the rent/subscription fees for a period of 11 months in advance to the Service Provider. This implies that the Client pays upfront for the services to be received over the next 11 months.</p>
 
-            <p><strong>TERMINATION FOR NON-PAYMENT</strong><br/>
-            Failure to pay the rent/subscription fees will result in the termination of services on the specified expiration date agreed upon during signup or payment.</p>
+            <p><strong>AGREEMENT RENEWAL</strong><br />
+              The Client must renew the agreement in the 11th month from the date of commencement. Failure to do so allows the Service Provider or any designated party to terminate the contract.</p>
 
-            <p><strong>LATE PAYMENT INTEREST</strong><br/>
-            In the case of late payments, the Client/agreement holder may be charged an additional amount as interest. The interest rate for delays exceeding 30 days is set at 12% per annum on a pro-rata basis.</p>
+            <p><strong>TAX INVOICE AND SETTLEMENT</strong><br />
+              The Service Provider will issue a tax invoice for the services rendered in the previous month. The Client is required to settle all valid invoices within 30 days of receipt.</p>
 
-            <p><strong>INDEMNITY</strong><br/>
-            <strong>1. COMPLIANCE WITH LAWS</strong><br/>
-            The Client is solely responsible for ensuring full compliance with all applicable laws, including but not limited to the Companies Act, GST, and other relevant regulations. The Client agrees to indemnify and hold {formData.serviceProviderName || '___________'} (the "Service Provider") fully indemnified and harmless against any claims, proceedings, damages, losses, actions, costs, or expenses arising from this agreement or any breach of applicable laws.</p>
+            <p><strong>TERMINATION FOR NON-PAYMENT</strong><br />
+              Failure to pay the rent/subscription fees will result in the termination of services on the specified expiration date agreed upon during signup or payment.</p>
 
-            <p><strong>2. INDEMNIFICATION</strong><br/>
-            The Client agrees not to use the premises address to apply for any loans, credit cards, or financial services. The Service Provider is fully indemnified against any liabilities arising from such use or any claims related to the Client’s financial dealings or obligations.</p>
+            <p><strong>LATE PAYMENT INTEREST</strong><br />
+              In the case of late payments, the Client/agreement holder may be charged an additional amount as interest. The interest rate for delays exceeding 30 days is set at 12% per annum on a pro-rata basis.</p>
 
-            <p><strong>3. LIMITED SCOPE OF SERVICE</strong><br/>
-            {formData.serviceProviderName || '___________'} is only providing mailbox services to the Client. The Service Provider does not hold any responsibility for the Client's business activities, and any consequences arising from those activities are solely the Client's responsibility.</p>
+            <p><strong>INDEMNITY</strong><br />
+              <strong>1. COMPLIANCE WITH LAWS</strong><br />
+              The Client is solely responsible for ensuring full compliance with all applicable laws, including but not limited to the Companies Act, GST, and other relevant regulations. The Client agrees to indemnify and hold {formData.serviceProviderName || '___________'} (the "Service Provider") fully indemnified and harmless against any claims, proceedings, damages, losses, actions, costs, or expenses arising from this agreement or any breach of applicable laws.</p>
 
-            <p><strong>4. VISITOR RESPONSIBILITY</strong><br/>
-            The client is responsible for ensuring that any visitors or clients entering {formData.serviceProviderName || '___________'}’s workspace for any purpose must provide prior notice to {formData.serviceProviderName || '___________'} and ensure compliance with the Service Provider's policies and guidelines. {formData.serviceProviderName || '___________'} shall not be held liable for the actions or conduct of the client's visitors, nor for any breaches of workspace rules by them. It is acknowledged that the client does not hold any physical possession of the premises. The client is required to book a cabin on an hourly basis to conduct meetings within the premises, as the client holds only a virtual office subscription.</p>
+            <p><strong>2. INDEMNIFICATION</strong><br />
+              The Client agrees not to use the premises address to apply for any loans, credit cards, or financial services. The Service Provider is fully indemnified against any liabilities arising from such use or any claims related to the Client’s financial dealings or obligations.</p>
 
-            <p><strong>5. GUEST POLICY</strong><br/>
-            While {formData.serviceProviderName || '___________'} welcomes the Client’s guests for meetings or project work, it is the Client’s duty to ensure their guests comply with all workspace policies. Any violations of these policies will be the responsibility of the Client.</p>
+            <p><strong>3. LIMITED SCOPE OF SERVICE</strong><br />
+              {formData.serviceProviderName || '___________'} is only providing mailbox services to the Client. The Service Provider does not hold any responsibility for the Client's business activities, and any consequences arising from those activities are solely the Client's responsibility.</p>
 
-            <p><strong>6. FINACIAL TRANSACTIONS</strong><br/>
-            The Client is solely responsible for all financial transactions conducted with their clients, including payments for services or products. {formData.serviceProviderName || '___________'} assumes no responsibility for any financial dealings between the Client and their clients.</p>
+            <p><strong>4. VISITOR RESPONSIBILITY</strong><br />
+              The client is responsible for ensuring that any visitors or clients entering {formData.serviceProviderName || '___________'}’s workspace for any purpose must provide prior notice to {formData.serviceProviderName || '___________'} and ensure compliance with the Service Provider's policies and guidelines. {formData.serviceProviderName || '___________'} shall not be held liable for the actions or conduct of the client's visitors, nor for any breaches of workspace rules by them. It is acknowledged that the client does not hold any physical possession of the premises. The client is required to book a cabin on an hourly basis to conduct meetings within the premises, as the client holds only a virtual office subscription.</p>
 
-            <p><strong>7. DISPUTE RESOLUTION</strong><br/>
-            In the event of a dispute between the Client and their clients, {formData.serviceProviderName || '___________'} holds no responsibility for resolving such disputes. The Client is fully responsible for managing and resolving any disputes in a timely and professional manner.</p>
+            <p><strong>5. GUEST POLICY</strong><br />
+              While {formData.serviceProviderName || '___________'} welcomes the Client’s guests for meetings or project work, it is the Client’s duty to ensure their guests comply with all workspace policies. Any violations of these policies will be the responsibility of the Client.</p>
 
-            <p><strong>8. WORKSPACE ENVIRONMENT</strong><br/>
-            To maintain a professional and productive environment, the Client and their visitors are expected to adhere to {formData.serviceProviderName || '___________'}'s policies at all times. Any failure to comply with these guidelines may result in penalties or termination of services by {formData.serviceProviderName || '___________'}, at its sole discretion.<br/><br/>
-            Please note that {formData.serviceProviderName || '___________'} is only providing mailbox services to the Client. As such, the Service Provider does not hold any responsibility for the Client’s business activities. It is the Client’s responsibility to ensure that their visitors follow our policies and guidelines while using the workspace.</p>
+            <p><strong>6. FINACIAL TRANSACTIONS</strong><br />
+              The Client is solely responsible for all financial transactions conducted with their clients, including payments for services or products. {formData.serviceProviderName || '___________'} assumes no responsibility for any financial dealings between the Client and their clients.</p>
 
-            <p><strong>TERMINATION OF SERVICE</strong><br/>
-            <strong>1. TERMINATION BY SERVICE PROVIDER</strong><br/>
-            The Service Provider reserves the right to terminate the service at any time with at least 30 days' prior written notice. In such cases, any security deposit paid by the Client will be refunded.</p>
+            <p><strong>7. DISPUTE RESOLUTION</strong><br />
+              In the event of a dispute between the Client and their clients, {formData.serviceProviderName || '___________'} holds no responsibility for resolving such disputes. The Client is fully responsible for managing and resolving any disputes in a timely and professional manner.</p>
 
-            <p><strong>2. AUTOMATIC TERMINATION</strong><br/>
-            Services will be automatically terminated on the expiry date unless the Client renews the subscription before that date. The Service Provider holds no responsibility for any loss or disruption caused by the Client’s failure to renew.</p>
+            <p><strong>8. WORKSPACE ENVIRONMENT</strong><br />
+              To maintain a professional and productive environment, the Client and their visitors are expected to adhere to {formData.serviceProviderName || '___________'}'s policies at all times. Any failure to comply with these guidelines may result in penalties or termination of services by {formData.serviceProviderName || '___________'}, at its sole discretion.<br /><br />
+              Please note that {formData.serviceProviderName || '___________'} is only providing mailbox services to the Client. As such, the Service Provider does not hold any responsibility for the Client’s business activities. It is the Client’s responsibility to ensure that their visitors follow our policies and guidelines while using the workspace.</p>
 
-            <p><strong>3. OBLIGATIONS AFTER TERMINATION</strong><br/>
-            Upon termination of the service, the Client must immediately cease the use of the provided address and any phone numbers issued by the Service Provider. This includes removing the address from all materials, including but not limited to business cards, websites, stationery, advertising material, certificates, and any public or private platforms.</p>
+            <p><strong>TERMINATION OF SERVICE</strong><br />
+              <strong>1. TERMINATION BY SERVICE PROVIDER</strong><br />
+              The Service Provider reserves the right to terminate the service at any time with at least 30 days' prior written notice. In such cases, any security deposit paid by the Client will be refunded.</p>
 
-            <p><strong>4. CHANGE OF ADDRESS FOR REGISTRATIONS</strong><br/>
-            If the Client has used the address for registrations with the ROC, GST authorities, banks, or any other official purposes, the Client is required to update the address within 30 days of termination. The Service Provider reserves the right to take legal action against any Client found in breach of this requirement.</p>
+            <p><strong>2. AUTOMATIC TERMINATION</strong><br />
+              Services will be automatically terminated on the expiry date unless the Client renews the subscription before that date. The Service Provider holds no responsibility for any loss or disruption caused by the Client’s failure to renew.</p>
 
-            <p><strong>5. TERMINATION WITHOUT NOTICE FOR ILLEGAL ACTIVITIES</strong><br/>
-            The Service Provider reserves the right to terminate the service and agreement immediately, without prior notice, if the Client engages in any illegal activities or conducts business in a manner that could damage the Service Provider's reputation or disrupt its operations.</p>
+            <p><strong>3. OBLIGATIONS AFTER TERMINATION</strong><br />
+              Upon termination of the service, the Client must immediately cease the use of the provided address and any phone numbers issued by the Service Provider. This includes removing the address from all materials, including but not limited to business cards, websites, stationery, advertising material, certificates, and any public or private platforms.</p>
 
-            <p><strong>6. TERMINATION FOR VIOLATION OR FRAUD</strong><br/>
-            The Service Provider may terminate the service with 30 days’ written notice if the Client violates any clause in this agreement or if the Client's activities are reported to be fraudulent or harmful to the Service Provider's interests.</p>
+            <p><strong>4. CHANGE OF ADDRESS FOR REGISTRATIONS</strong><br />
+              If the Client has used the address for registrations with the ROC, GST authorities, banks, or any other official purposes, the Client is required to update the address within 30 days of termination. The Service Provider reserves the right to take legal action against any Client found in breach of this requirement.</p>
 
-            <p><strong>7. RENEWAL REQUIREMENT</strong><br/>
-            The Client is obligated to renew the subscription by the 11th month from the contract start date. This requirement applies regardless of whether the Client has engaged through an aggregator platform or a third-party intermediary. Failure to renew the subscription within this specified period will result in the automatic termination of the contract, rendering it null and void. In such circumstances, the Service Provider assumes no responsibility or liability for any disruptions, losses, or consequences incurred by the Client due to the lapse in subscription renewal.<br/><br/>
-            Even if the Client has come through an aggregator platform or a third-party intermediary, the Service Provider reserves the right to directly reach out to the Client and offer them the opportunity to renew the subscription directly as well.</p>
+            <p><strong>5. TERMINATION WITHOUT NOTICE FOR ILLEGAL ACTIVITIES</strong><br />
+              The Service Provider reserves the right to terminate the service and agreement immediately, without prior notice, if the Client engages in any illegal activities or conducts business in a manner that could damage the Service Provider's reputation or disrupt its operations.</p>
 
-            <p><strong>8. NO LIABILITY POST-TERMINATION</strong><br/>
-            Upon termination of the service, whether automatically or by action of the Service Provider, the Client fully and irrevocably releases the Service Provider from any and all responsibility, liability, or claims for any consequences, losses, or damages arising from the termination. Furthermore, the Client is required to immediately cease the use of the provided address in all forms and remove it from all platforms, documents, and communications where it was utilized under the valid agreement. The Client must also provide a formal declaration to the Service Provider, affirming that the address is no longer in use. Failure to comply with this requirement may result in legal action and additional penalties as determined by the Service Provider.</p>
+            <p><strong>6. TERMINATION FOR VIOLATION OR FRAUD</strong><br />
+              The Service Provider may terminate the service with 30 days’ written notice if the Client violates any clause in this agreement or if the Client's activities are reported to be fraudulent or harmful to the Service Provider's interests.</p>
 
-            <p><strong>CONFIDENTIALITY</strong><br/>
-            The Client recognizes that it may, in the course of obtaining or using the Services, come into possession of or learn confidential and proprietary business information ("Confidential Information") about the Service Provider. The Client agrees that during the Term of this Agreement and thereafter:<br/><br/>
-            (a) The Client shall provide, at a minimum, the same level of care to avoid disclosure or unauthorized use of Confidential Information as it does with respect to its own similar information, but in no event less than a reasonable standard of care.<br/>
-            (b) The Client will use Confidential Information solely for the purposes of this Agreement; and<br/>
-            (c) The Client will not disclose Confidential Information to any third party without the express prior written consent of the Service Provider.<br/><br/>
-            Similarly, the Service Provider recognizes that it may, in the course of providing the Services, come into possession of or learn confidential and proprietary business information ("Confidential Information") about the Client. The Service Provider agrees that during the Term of this Agreement and thereafter, the Service Provider shall provide, at a minimum, the same level of care to avoid disclosure or unauthorized use of Confidential Information as it does with respect to its own similar information. If the Service Provider transfers its business or any business segment that provides services to the Client, the Service Provider is authorized to transfer all user information to the Service Provider’s successor.</p>
+            <p><strong>7. RENEWAL REQUIREMENT</strong><br />
+              The Client is obligated to renew the subscription by the 11th month from the contract start date. This requirement applies regardless of whether the Client has engaged through an aggregator platform or a third-party intermediary. Failure to renew the subscription within this specified period will result in the automatic termination of the contract, rendering it null and void. In such circumstances, the Service Provider assumes no responsibility or liability for any disruptions, losses, or consequences incurred by the Client due to the lapse in subscription renewal.<br /><br />
+              Even if the Client has come through an aggregator platform or a third-party intermediary, the Service Provider reserves the right to directly reach out to the Client and offer them the opportunity to renew the subscription directly as well.</p>
 
-            <p><strong>OWNERSHIP</strong><br/>
-            All programs, services, processes, designs, software, technologies, trademarks, trade names, inventions and materials comprising the Service are wholly owned by the Service provider. Service provider except where expressly stated otherwise. This is not a lease document. Client agrees that the client is not the service provider of any phone number assigned to them by service provider. Upon termination of account for any reason, such number may be re assigned to another client.<br/><br/>
-            Similarly, all programs, services, processes, designs, software, technologies, trademarks, trade names, inventions and materials of the client shall be owned by the client only.</p>
+            <p><strong>8. NO LIABILITY POST-TERMINATION</strong><br />
+              Upon termination of the service, whether automatically or by action of the Service Provider, the Client fully and irrevocably releases the Service Provider from any and all responsibility, liability, or claims for any consequences, losses, or damages arising from the termination. Furthermore, the Client is required to immediately cease the use of the provided address in all forms and remove it from all platforms, documents, and communications where it was utilized under the valid agreement. The Client must also provide a formal declaration to the Service Provider, affirming that the address is no longer in use. Failure to comply with this requirement may result in legal action and additional penalties as determined by the Service Provider.</p>
 
-            <p><strong>NATURE OF BUSINESS</strong><br/>
-            The Client must explain the nature of their business in writing in ANNEXURE-1 of this agreement<br/><br/>
-            The Client agrees not to conduct or engage in any business that could be construed as illegal, defamatory, immoral, or obscene. Additionally, the Client agrees not to use the address of the Service Provider, whether directly or indirectly, for any such purposes.<br/><br/>
-            The Client has described the nature of the business they plan to conduct at {formData.serviceProviderName || '___________'} as a virtual office in connection with this agreement<br/><br/>
-            If the Client changes the nature of their business, they are required to notify the Service Provider in writing.</p>
+            <p><strong>CONFIDENTIALITY</strong><br />
+              The Client recognizes that it may, in the course of obtaining or using the Services, come into possession of or learn confidential and proprietary business information ("Confidential Information") about the Service Provider. The Client agrees that during the Term of this Agreement and thereafter:<br /><br />
+              (a) The Client shall provide, at a minimum, the same level of care to avoid disclosure or unauthorized use of Confidential Information as it does with respect to its own similar information, but in no event less than a reasonable standard of care.<br />
+              (b) The Client will use Confidential Information solely for the purposes of this Agreement; and<br />
+              (c) The Client will not disclose Confidential Information to any third party without the express prior written consent of the Service Provider.<br /><br />
+              Similarly, the Service Provider recognizes that it may, in the course of providing the Services, come into possession of or learn confidential and proprietary business information ("Confidential Information") about the Client. The Service Provider agrees that during the Term of this Agreement and thereafter, the Service Provider shall provide, at a minimum, the same level of care to avoid disclosure or unauthorized use of Confidential Information as it does with respect to its own similar information. If the Service Provider transfers its business or any business segment that provides services to the Client, the Service Provider is authorized to transfer all user information to the Service Provider’s successor.</p>
 
-            <p><strong>CONFLICTING BUSINESS</strong><br/>
-            The client should not directly or indirectly or though agents operate a business that competes with Service provider’s business of providing serviced offices and virtual offices, shared conference rooms and meeting rooms.</p>
+            <p><strong>OWNERSHIP</strong><br />
+              All programs, services, processes, designs, software, technologies, trademarks, trade names, inventions and materials comprising the Service are wholly owned by the Service provider. Service provider except where expressly stated otherwise. This is not a lease document. Client agrees that the client is not the service provider of any phone number assigned to them by service provider. Upon termination of account for any reason, such number may be re assigned to another client.<br /><br />
+              Similarly, all programs, services, processes, designs, software, technologies, trademarks, trade names, inventions and materials of the client shall be owned by the client only.</p>
 
-            <p><strong>GOVERNING LAW</strong><br/>
-            This Agreement shall be governed by the laws of India. The Courts in Gurugram shall have exclusive jurisdiction over the subject matter of this Agreement. In the event of any dispute or differences arising out of or in connection with this agreement, the parties hereto agree that all such disputes shall be resolved exclusively by the Courts in Gurugram. The decision of the Courts in Gurugram shall be final and binding on both parties.</p>
+            <p><strong>NATURE OF BUSINESS</strong><br />
+              The Client must explain the nature of their business in writing in ANNEXURE-1 of this agreement<br /><br />
+              The Client agrees not to conduct or engage in any business that could be construed as illegal, defamatory, immoral, or obscene. Additionally, the Client agrees not to use the address of the Service Provider, whether directly or indirectly, for any such purposes.<br /><br />
+              The Client has described the nature of the business they plan to conduct at {formData.serviceProviderName || '___________'} as a virtual office in connection with this agreement<br /><br />
+              If the Client changes the nature of their business, they are required to notify the Service Provider in writing.</p>
+
+            <p><strong>CONFLICTING BUSINESS</strong><br />
+              The client should not directly or indirectly or though agents operate a business that competes with Service provider’s business of providing serviced offices and virtual offices, shared conference rooms and meeting rooms.</p>
+
+            <p><strong>GOVERNING LAW</strong><br />
+              This Agreement shall be governed by the laws of India. The Courts in Gurugram shall have exclusive jurisdiction over the subject matter of this Agreement. In the event of any dispute or differences arising out of or in connection with this agreement, the parties hereto agree that all such disputes shall be resolved exclusively by the Courts in Gurugram. The decision of the Courts in Gurugram shall be final and binding on both parties.</p>
 
             <div style={{ marginTop: '30px' }}>
               <p><strong>PAYMENT TERMS AND TENURE AGREEMENT PERIOD : 11 MONTHS</strong></p>
               <p>EFFECTIVE FROM</p>
               <p>{formatDate(formData.startDate)} To {formatDate(getCalculatedEndDate())}</p>
             </div>
-            
+
             <div style={{ marginTop: '30px' }}>
               <p><strong>AGREEMENT IS VALID FORM</strong></p>
               <p>Service provider’s Address is: {formData.serviceProviderAddress || '___________'}</p>
@@ -1308,7 +1322,7 @@ export default function DraftGenerator() {
                 <p>Name : ___________________</p>
               </div>
             </div>
-            
+
             <div style={{ marginTop: '40px' }}>
               <p>FOR Service Provider ({formData.serviceProviderName || '___________'})</p>
             </div>
@@ -1372,10 +1386,10 @@ export default function DraftGenerator() {
             <p><strong>TERMS OF USAGE</strong></p>
             <p>The Client may use the address for its business correspondence. Clients may also use the Office Address for obtaining GST, with the understanding that the client assumes the responsibility for complying with all the required provisions of applicable acts and laws.</p>
             <div style={{ marginTop: '30px' }}>
-              <p>For Licensor:<br/>Name: Manoj Yadav<br/>Designation/Title: Authorised Signatory</p>
+              <p>For Licensor:<br />Name: Manoj Yadav<br />Designation/Title: Authorised Signatory</p>
             </div>
             <div style={{ marginTop: '30px' }}>
-              <p>For Licensee:<br/>Name: {formData.directorName || '___________'}<br/>Designation/Title: Authorized person</p>
+              <p>For Licensee:<br />Name: {formData.directorName || '___________'}<br />Designation/Title: Authorized person</p>
             </div>
           </>
         );
@@ -1385,12 +1399,12 @@ export default function DraftGenerator() {
             <p style={{ textAlign: 'center', fontWeight: 'bold' }}>NO OBJECTION CERTIFICATE</p>
             <hr style={{ margin: '10px 0 20px 0', borderTop: '1px solid black' }} />
             <p>Date: {formatDate(formData.nocDate)}</p>
-            <p>To<br/>{formData.directorName || '___________'} S/O {formData.directorFatherName || '___________'},<br/>Address: R/o {formData.directorAddress || '___________'}<br/>Company Name: {formData.clientCompanyName || '___________'}<br/>Aadhaar No.: {formData.aadharNumber || '___________'}</p>
+            <p>To<br />{formData.directorName || '___________'} S/O {formData.directorFatherName || '___________'},<br />Address: R/o {formData.directorAddress || '___________'}<br />Company Name: {formData.clientCompanyName || '___________'}<br />Aadhaar No.: {formData.aadharNumber || '___________'}</p>
             <p>We True Work lounge LLP having its office space at "02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102" hereby declare and confirm that we are the legal lease owner of the above mentioned office premises and hereby allow Company "{formData.clientCompanyName || '___________'}" to use the above-mentioned address as the Registered Office (GST Address office/Office) of Company {formData.clientCompanyName || '___________'}.</p>
             <div style={{ marginTop: '30px' }}>
               <p>For True Work lounge LLP</p>
-              <br/><br/>
-              <p>Authorized Signatory<br/>Gurgaon</p>
+              <br /><br />
+              <p>Authorized Signatory<br />Gurgaon</p>
             </div>
           </>
         );
@@ -1405,18 +1419,18 @@ export default function DraftGenerator() {
             <p style={{ textAlign: 'center' }}><strong>AND</strong></p>
             {(() => {
               const companyTypeString = formData.companyType === 'LLP' ? 'a Limited Liability Partnership' :
-                                        formData.companyType === 'Proprietorship' ? 'a Proprietorship firm' :
-                                        formData.companyType === 'Trust' ? 'a registered Trust' :
-                                        'a company incorporated under the provisions of the Companies Act, 2013';
+                formData.companyType === 'Proprietorship' ? 'a Proprietorship firm' :
+                  formData.companyType === 'Trust' ? 'a registered Trust' :
+                    'a company incorporated under the provisions of the Companies Act, 2013';
               return (
                 <p><strong>{formData.clientCompanyName || '___________'}</strong>, {companyTypeString}, through its {formData.representativeType || 'Director'} {formData.representativeName || '___________'}, S/o {formData.representativeFatherName || '___________'}, residing at {formData.representativeAddress || '___________'}, holding PAN {formData.panNumber || '___________'} and reachable at Mobile Number {formData.mobileNumber || '___________'}, hereinafter referred to as the "Client".</p>
               );
             })()}
-            <p><strong>SCOPE AND NATURE OF THE AGREEMENT</strong><br/>
-            The Client hereby expresses its intention to utilize the Mailbox Services as offered by the Service Provider, namely Jupiter SPACE...</p>
+            <p><strong>SCOPE AND NATURE OF THE AGREEMENT</strong><br />
+              The Client hereby expresses its intention to utilize the Mailbox Services as offered by the Service Provider, namely Jupiter SPACE...</p>
             <p><em>(The full preview text is truncated for brevity, but the final PDF will contain all clauses and details.)</em></p>
             <div style={{ marginTop: '30px' }}>
-              <p>For Client:<br/>Name: {formData.representativeName || '___________'}<br/>Designation: {formData.representativeType || 'Authorized Signatory'}</p>
+              <p>For Client:<br />Name: {formData.representativeName || '___________'}<br />Designation: {formData.representativeType || 'Authorized Signatory'}</p>
             </div>
             <div style={{ marginTop: '30px' }}>
               <p>For Service Provider (Jupiter SPACE)</p>
@@ -1466,7 +1480,7 @@ export default function DraftGenerator() {
           <Lock className="w-[40px] h-[40px] text-[#1B6B2F] mx-auto mb-[16px]" />
           <h1 className="text-[22px] font-[800] text-[#111110] mb-[6px]">Document Draft Generator</h1>
           <p className="text-[14px] text-[rgba(17,17,16,0.45)] mb-[28px]">Enter the access password to continue</p>
-          
+
           <input
             type="password"
             placeholder="Enter password"
@@ -1478,7 +1492,7 @@ export default function DraftGenerator() {
           {passwordError && (
             <div className="text-[#DC2626] text-[12px] mb-3 -mt-2">Incorrect password</div>
           )}
-          <button 
+          <button
             onClick={handlePasswordSubmit}
             className="bg-[#1B6B2F] text-white h-[48px] w-full rounded-[100px] text-[14px] font-[700] hover:bg-[#155526] hover:-translate-y-[1px] transition-all"
           >
@@ -1495,7 +1509,7 @@ export default function DraftGenerator() {
       <div className="max-w-[1100px] mx-auto p-[40px_24px] fade-up-enter">
         <div className="flex justify-between items-center mb-[40px]">
           <img src="/logo.png" alt="BOS Logo" className="h-[30px] object-contain" />
-          <button 
+          <button
             onClick={handleLogout}
             className="flex items-center gap-2 text-[13px] font-[600] text-[rgba(17,17,16,0.45)] hover:text-[#111110] transition-colors bg-white px-4 py-2 rounded-full border border-[rgba(17,17,16,0.08)] hover:shadow-sm"
           >
@@ -1510,7 +1524,7 @@ export default function DraftGenerator() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-[340px_1fr] gap-[32px] items-start">
-          
+
           <div className="flex flex-col gap-[10px] md:order-1">
             <div className="text-[11px] font-[600] text-[rgba(17,17,16,0.4)] tracking-[0.1em] mb-[6px]">SELECT TEMPLATE</div>
             <div className="flex md:flex-col gap-[10px] overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
@@ -1518,7 +1532,7 @@ export default function DraftGenerator() {
                 const isSelected = selectedTemplate.id === t.id;
                 const Icon = t.icon;
                 return (
-                  <div 
+                  <div
                     key={t.id}
                     onClick={() => setSelectedTemplate(t)}
                     className={`min-w-[240px] md:min-w-0 flex items-start gap-4 p-[16px_18px] rounded-[14px] cursor-pointer transition-all duration-200 ${isSelected ? 'border-[1.5px] border-[#1B6B2F] bg-[rgba(27,107,47,0.02)]' : 'border border-[rgba(17,17,16,0.08)] bg-white hover:border-[rgba(27,107,47,0.2)] hover:translate-x-[2px]'}`}
@@ -1537,7 +1551,7 @@ export default function DraftGenerator() {
           <div className="md:order-2">
             <div className="bg-white rounded-[16px] border border-[rgba(17,17,16,0.08)] p-[28px] shadow-sm">
               <h2 className="text-[18px] font-[700] text-[#111110] mb-[20px]">{selectedTemplate.name}</h2>
-              
+
               {selectedTemplate.id === 'workspace-agreement' && (
                 <div className="flex flex-col gap-1">
                   <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
@@ -1655,13 +1669,13 @@ export default function DraftGenerator() {
               )}
 
               <div className="mt-[32px] flex flex-col sm:flex-row gap-3">
-                <button 
+                <button
                   onClick={handlePreview}
                   className="flex-1 h-[48px] rounded-[100px] border border-[rgba(27,107,47,0.25)] text-[#1B6B2F] bg-transparent font-[600] text-[14px] hover:bg-[#F0F5EA] transition-colors"
                 >
                   Preview Draft
                 </button>
-                <button 
+                <button
                   onClick={handleDownload}
                   className="flex-1 h-[48px] rounded-[100px] border-none text-white bg-[#1B6B2F] font-[700] text-[14px] hover:bg-[#145324] transition-colors flex items-center justify-center gap-2"
                 >
