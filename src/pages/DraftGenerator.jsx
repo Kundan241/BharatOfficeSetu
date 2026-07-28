@@ -210,6 +210,7 @@ export default function DraftGenerator() {
   const handleDownload = () => {
     if (validateForm()) {
       const trackingPayload = {
+        documentType: formData.documentType || "Draft",
         "Timestamp": new Date().toISOString(),
         timestamp: new Date().toISOString(),
 
