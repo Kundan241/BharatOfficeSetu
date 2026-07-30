@@ -405,7 +405,7 @@ export default function DraftGenerator() {
       data.serviceProviderAddress +
       ' and ' + data.clientCompanyName +
       ' through it’s Director ' + data.directorName +
-      ', S/O ' + data.directorFatherName +
+      ', C/O ' + data.directorFatherName +
       ', R/O ' + data.directorAddress +
       ' PAN Number ' + data.panNumber +
       ' with Mobile Number ' + data.mobileNumber +
@@ -720,7 +720,7 @@ export default function DraftGenerator() {
       'This LEAVE AND LICENSE AGREEMENT is made on ' + formatDate(data.agreementDate) +
       ' between True Work Lounge, always be registered office address at 02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102 through its Authorised Signator, Manoj Yadav, hereinafter referred to as "Licensor/ Services Provider", who has leased the premises and ' + (data.clientCompanyName || '___________') +
       ' through its Authorized person, ' + (data.directorName || '___________') +
-      ' S/O ' + (data.directorFatherName || '___________') +
+      ' C/O ' + (data.directorFatherName || '___________') +
       ', R/O ' + (data.directorAddress || '___________') +
       ' with PAN No. ' + (data.panNumber || '___________') +
       ' and hereinafter referred to as "Client/ Licensee". (KYC is attached)'
@@ -869,7 +869,7 @@ export default function DraftGenerator() {
 
     doc.text('To', h.margin, y);
     y += 6;
-    doc.text((data.directorName || '___________') + ' S/O ' + (data.directorFatherName || '___________') + ',', h.margin, y);
+    doc.text((data.directorName || '___________') + ' C/O ' + (data.directorFatherName || '___________') + ',', h.margin, y);
     y += 6;
     doc.text('Address: R/o ' + (data.directorAddress || '___________'), h.margin, y);
     y += 6;
@@ -1177,7 +1177,7 @@ export default function DraftGenerator() {
             <hr style={{ margin: '10px 0 20px 0', borderTop: '1px solid black' }} />
 
             <p><strong>THE TWO PARTIES TO THE AGREEMENT ARE AS FOLLOWS</strong></p>
-            <p>This AGREEMENT made on {formatDate(formData.agreementDate)} between {formData.serviceProviderName || '___________'} herein after referred to as Service Provider having office at {formData.serviceProviderAddress || '___________'} and {formData.clientCompanyName || '___________'} through it’s Director {formData.directorName || '___________'}, S/O {formData.directorFatherName || '___________'}, R/O {formData.directorAddress || '___________'} PAN Number {formData.panNumber || '___________'} with Mobile Number {formData.mobileNumber || '___________'} here in after referred to as "Client".</p>
+            <p>This AGREEMENT made on {formatDate(formData.agreementDate)} between {formData.serviceProviderName || '___________'} herein after referred to as Service Provider having office at {formData.serviceProviderAddress || '___________'} and {formData.clientCompanyName || '___________'} through it’s Director {formData.directorName || '___________'}, C/O {formData.directorFatherName || '___________'}, R/O {formData.directorAddress || '___________'} PAN Number {formData.panNumber || '___________'} with Mobile Number {formData.mobileNumber || '___________'} here in after referred to as "Client".</p>
 
             <p><strong>THE NATURE OF THE AGREEMENT</strong><br />
               The Client intends to use the Mailbox Services provided by {formData.serviceProviderName || '___________'} , located at {formData.serviceProviderAddress || '___________'}, as their communication and mailing address. The Client acknowledges that the entire premises, including the mailbox, remain the exclusive property of the Service Provider, {formData.serviceProviderName || '___________'}, who retains full possession, control, and authority over the space. The Client further acknowledges that their usage is limited solely to the agreed-upon services, and no rights or claims to the property or its facilities are transferred to them.</p>
@@ -1380,7 +1380,7 @@ export default function DraftGenerator() {
           <>
             <p style={{ textAlign: 'center', fontWeight: 'bold' }}>LEAVE AND LICENSE AGREEMENT</p>
             <hr style={{ margin: '10px 0 20px 0', borderTop: '1px solid black' }} />
-            <p>This LEAVE AND LICENSE AGREEMENT is made on {formatDate(formData.agreementDate)} between True Work Lounge, always be registered office address at 02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102 through its Authorised Signator, Manoj Yadav, hereinafter referred to as "Licensor/ Services Provider", who has leased the premises and {formData.clientCompanyName || '___________'} through its Authorized person, {formData.directorName || '___________'} S/O {formData.directorFatherName || '___________'}, R/O {formData.directorAddress || '___________'} with PAN No. {formData.panNumber || '___________'} and hereinafter referred to as "Client/ Licensee". (KYC is attached)</p>
+            <p>This LEAVE AND LICENSE AGREEMENT is made on {formatDate(formData.agreementDate)} between True Work Lounge, always be registered office address at 02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102 through its Authorised Signator, Manoj Yadav, hereinafter referred to as "Licensor/ Services Provider", who has leased the premises and {formData.clientCompanyName || '___________'} through its Authorized person, {formData.directorName || '___________'} C/O {formData.directorFatherName || '___________'}, R/O {formData.directorAddress || '___________'} with PAN No. {formData.panNumber || '___________'} and hereinafter referred to as "Client/ Licensee". (KYC is attached)</p>
             <p><strong>EFFECTIVE DATE:</strong> {formatDate(formData.startDate)} <strong>TERM:</strong> 11 Months</p>
             <p><strong>USE OF AND ACCESS TO THE LICENSED PREMISES</strong></p>
             <p>The Client/ Licensee is interested in using the office space (hereinafter referred to as the "Services") from the Licensor at its premise located at 02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102 (hereinafter referred to as the "Premise"). The whole of the Premise remains the property of the Service Provider and remains in the Licensor's possession and control.</p>
@@ -1400,7 +1400,7 @@ export default function DraftGenerator() {
             <p style={{ textAlign: 'center', fontWeight: 'bold' }}>NO OBJECTION CERTIFICATE</p>
             <hr style={{ margin: '10px 0 20px 0', borderTop: '1px solid black' }} />
             <p>Date: {formatDate(formData.nocDate)}</p>
-            <p>To<br />{formData.directorName || '___________'} S/O {formData.directorFatherName || '___________'},<br />Address: R/o {formData.directorAddress || '___________'}<br />Company Name: {formData.clientCompanyName || '___________'}<br />Aadhaar No.: {formData.aadharNumber || '___________'}</p>
+            <p>To<br />{formData.directorName || '___________'} C/O {formData.directorFatherName || '___________'},<br />Address: R/o {formData.directorAddress || '___________'}<br />Company Name: {formData.clientCompanyName || '___________'}<br />Aadhaar No.: {formData.aadharNumber || '___________'}</p>
             <p>We True Work lounge LLP having its office space at "02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102" hereby declare and confirm that we are the legal lease owner of the above mentioned office premises and hereby allow Company "{formData.clientCompanyName || '___________'}" to use the above-mentioned address as the Registered Office (GST Address office/Office) of Company {formData.clientCompanyName || '___________'}.</p>
             <div style={{ marginTop: '30px' }}>
               <p>For True Work lounge LLP</p>
@@ -1424,7 +1424,7 @@ export default function DraftGenerator() {
                   formData.companyType === 'Trust' ? 'a registered Trust' :
                     'a company incorporated under the provisions of the Companies Act, 2013';
               return (
-                <p><strong>{formData.clientCompanyName || '___________'}</strong>, {companyTypeString}, through its {formData.representativeType || 'Director'} {formData.representativeName || '___________'}, S/o {formData.representativeFatherName || '___________'}, residing at {formData.representativeAddress || '___________'}, holding PAN {formData.panNumber || '___________'} and reachable at Mobile Number {formData.mobileNumber || '___________'}, hereinafter referred to as the "Client".</p>
+                <p><strong>{formData.clientCompanyName || '___________'}</strong>, {companyTypeString}, through its {formData.representativeType || 'Director'} {formData.representativeName || '___________'}, C/o {formData.representativeFatherName || '___________'}, residing at {formData.representativeAddress || '___________'}, holding PAN {formData.panNumber || '___________'} and reachable at Mobile Number {formData.mobileNumber || '___________'}, hereinafter referred to as the "Client".</p>
               );
             })()}
             <p><strong>SCOPE AND NATURE OF THE AGREEMENT</strong><br />
@@ -1564,7 +1564,7 @@ export default function DraftGenerator() {
                   {renderField('Client Company Name', 'clientCompanyName', 'text', { placeholder: 'e.g. TOPMIND COMMUNICATION PRIVATE LIMITED' })}
                   {renderField('Director / Authorized Person Name', 'directorName', 'text', { placeholder: 'e.g. GEORGE THARIAN' })}
                   <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
-                    {renderField('Father\'s Name (S/O)', 'directorFatherName', 'text', { placeholder: 'S/O ...' })}
+                    {renderField('Father\'s Name (C/O)', 'directorFatherName', 'text', { placeholder: 'C/O ...' })}
                     {renderField('PAN Number', 'panNumber', 'text', { placeholder: 'e.g. AAGCT7723A' })}
                   </div>
                   {renderField('Director\'s Residential Address', 'directorAddress', 'textarea', { rows: 2, placeholder: 'Residential address of director' })}
@@ -1621,7 +1621,7 @@ export default function DraftGenerator() {
                   {renderField('Client Company Name', 'clientCompanyName', 'text', { placeholder: 'e.g. COMPANY PRIVATE LIMITED' })}
                   {renderField('Authorized Person Name', 'directorName', 'text', { placeholder: 'e.g. JOHN DOE' })}
                   <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
-                    {renderField('Father\'s Name (S/O)', 'directorFatherName', 'text', { placeholder: 'S/O ...' })}
+                    {renderField('Father\'s Name (C/O)', 'directorFatherName', 'text', { placeholder: 'C/O ...' })}
                     {renderField('PAN Number', 'panNumber', 'text', { placeholder: 'e.g. ABCDE1234F' })}
                   </div>
                   {renderField('Authorized Person\'s Address', 'directorAddress', 'textarea', { rows: 2, placeholder: 'Residential address' })}
@@ -1638,7 +1638,7 @@ export default function DraftGenerator() {
                   {renderField('NOC Date', 'nocDate', 'date')}
                   {renderField('Company Name', 'clientCompanyName', 'text', { placeholder: 'Company / business name' })}
                   {renderField('Director / Authorized Person', 'directorName', 'text', { placeholder: 'Name' })}
-                  {renderField('Father\'s Name (S/O)', 'directorFatherName', 'text', { placeholder: 'S/O ...' })}
+                  {renderField('Father\'s Name (C/O)', 'directorFatherName', 'text', { placeholder: 'C/O ...' })}
                   {renderField('Director\'s Address', 'directorAddress', 'textarea', { rows: 2, placeholder: 'Residential address' })}
                   {renderField('Aadhar Number', 'aadharNumber', 'text', { placeholder: '12-digit aadhar' })}
                 </div>
@@ -1657,7 +1657,7 @@ export default function DraftGenerator() {
                     {renderField('Representative Name', 'representativeName', 'text', { placeholder: 'Name of the representative' })}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
-                    {renderField('Father\'s Name (S/o)', 'representativeFatherName', 'text', { placeholder: 'Father\'s Name' })}
+                    {renderField('Father\'s Name (C/o)', 'representativeFatherName', 'text', { placeholder: 'Father\'s Name' })}
                     {renderField('PAN Number', 'panNumber', 'text', { placeholder: 'e.g. AAGCT7723A' })}
                   </div>
                   {renderField('Residential Address', 'representativeAddress', 'textarea', { rows: 2, placeholder: 'Residential address' })}
