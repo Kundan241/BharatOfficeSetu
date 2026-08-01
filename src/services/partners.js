@@ -36,12 +36,13 @@ export const createPartner = async (formData) => {
 
   // 2. Save profile to partners/{uid}
   await setDoc(doc(db, 'partners', uid), {
-    name: formData.name,
+    name: formData.partnerBusinessName, // CRITICAL: This acts as our unique key
+    contactPerson: formData.fullName,
     email: formData.email,
     phone: formattedPhone,
     role: 'partner',
-    tempPasswordUsed: true,
-    createdAt: serverTimestamp()
+    createdAt: serverTimestamp(),
+    tempPasswordUsed: false
   });
 
   // 3. Send welcome email (password reset)

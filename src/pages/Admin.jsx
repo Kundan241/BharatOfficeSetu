@@ -71,7 +71,7 @@ function ConfirmDialog({ isOpen, options, onClose }) {
 
 // --- Main Admin Component ---
 export default function Admin() {
-  const { user, loading } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { addToast } = useToast();
@@ -96,33 +96,18 @@ export default function Admin() {
         return;
       }
       
-      const checkAdmin = async () => {
-        try {
-          let isAdmin = ['admin@bos.com', 'mu8ndan@gmail.com'].includes(user.email);
-          
-          if (!isAdmin) {
-            const adminSnap = await getDoc(doc(db, 'admins', user.uid));
-            isAdmin = adminSnap.exists();
-          }
-          
-          if (!isAdmin) {
-            navigate('/login');
-            return;
-          }
-          
-          const verified = localStorage.getItem('bos_admin_verified');
-          if (verified === 'true') {
-            setAdminAuthenticated(true);
-          }
-          setAuthChecked(true);
-        } catch (err) {
-          console.error('Admin check failed:', err);
-          navigate('/login');
-        }
-      };
-      checkAdmin();
+      if (!isAdmin) {
+        navigate('/login');
+        return;
+      }
+      
+      const verified = localStorage.getItem('bos_admin_verified');
+      if (verified === 'true') {
+        setAdminAuthenticated(true);
+      }
+      setAuthChecked(true);
     }
-  }, [user, loading, navigate]);
+  }, [user, isAdmin, loading, navigate]);
 
   const handleAdminLogin = (e) => {
     e.preventDefault();
@@ -221,6 +206,7 @@ export default function Admin() {
   const getActiveTab = () => {
     if (location.pathname === '/admin' || location.pathname === '/admin/') return 'dashboard';
     if (location.pathname.startsWith('/admin/blog')) return 'blog';
+    if (location.pathname.startsWith('/admin/cases')) return 'cases';
     if (location.pathname.startsWith('/admin/clients/add')) return 'add-client';
     if (location.pathname.startsWith('/admin/clients')) return 'clients';
     if (location.pathname.startsWith('/admin/partners/add')) return 'add-partner';
@@ -272,6 +258,14 @@ export default function Admin() {
           </Link>
 
           <div className="text-[10px] font-[600] tracking-[0.1em] text-[rgba(255,255,255,0.25)] px-5 pt-4 pb-1">
+            CASES
+          </div>
+          <Link to="/admin/cases" onClick={() => setMobileMenuOpen(false)} className={`mx-2 my-[2px] px-3 py-2.5 rounded-[8px] text-[13px] font-[500] flex items-center gap-2.5 transition-all
+            ${activeTab === 'cases' ? 'bg-[rgba(255,255,255,0.08)] text-white' : 'text-[rgba(255,255,255,0.5)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[rgba(255,255,255,0.75)]'}`}>
+            <FileText size={16} /> Cases & Drafts
+          </Link>
+
+          <div className="text-[10px] font-[600] tracking-[0.1em] text-[rgba(255,255,255,0.25)] px-5 pt-4 pb-1">
             PARTNERS
           </div>
           <Link to="/admin/partners" onClick={() => setMobileMenuOpen(false)} className={`mx-2 my-[2px] px-3 py-2.5 rounded-[8px] text-[13px] font-[500] flex items-center gap-2.5 transition-all
@@ -320,6 +314,7 @@ export default function Admin() {
             <Route path="/clients" element={<AdminClients />} />
             <Route path="/clients/add" element={<AddClientForm showConfirm={showConfirm} />} />
             <Route path="/clients/:uid" element={<ClientDetailView showConfirm={showConfirm} />} />
+            <Route path="/cases" element={<AdminCases />} />
             <Route path="/partners" element={<AdminPartners />} />
             <Route path="/partners/add" element={<AddPartnerForm />} />
             <Route path="/partners/:uid" element={<PartnerDetailView showConfirm={showConfirm} />} />
@@ -1477,7 +1472,7 @@ function AddPartnerForm() {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const [formData, setFormData] = useState({
-    name: '', phone: '', email: ''
+    partnerBusinessName: '', fullName: '', phone: '', email: ''
   });
   const [loading, setLoading] = useState(false);
   const [shakeFields, setShakeFields] = useState(false);
@@ -1491,7 +1486,7 @@ function AddPartnerForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.phone || !formData.email) {
+    if (!formData.partnerBusinessName || !formData.fullName || !formData.phone || !formData.email) {
       setShakeFields(true);
       setTimeout(() => setShakeFields(false), 500);
       return;
@@ -1508,7 +1503,7 @@ function AddPartnerForm() {
           'template_ka458pf',
           {
             type: 'welcome_email',
-            name: formData.name,
+            name: formData.fullName,
             email: formData.email,
             phone: '+91' + formData.phone,
             role: 'partner',
@@ -1549,14 +1544,26 @@ function AddPartnerForm() {
           <div className="text-[11px] font-[600] tracking-[0.08em] text-[rgba(17,17,16,0.4)] mb-1">PARTNER DETAILS</div>
           
           <div className="flex flex-col gap-1.5">
+            <label className="text-[13px] font-[600] text-[#111110]">Partner Business Name *</label>
+            <input 
+              required 
+              type="text" 
+              placeholder="e.g., SATYAM FAB" 
+              value={formData.partnerBusinessName} 
+              onChange={e => setFormData({...formData, partnerBusinessName: e.target.value})} 
+              className={`h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] transition-all ${shakeFields && !formData.partnerBusinessName ? 'border-[#DC2626] shake-animation' : ''}`} 
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
             <label className="text-[13px] font-[600] text-[#111110]">Full Name *</label>
             <input 
               required 
               type="text" 
               placeholder="e.g. Rahul Sharma" 
-              value={formData.name} 
-              onChange={e => setFormData({...formData, name: e.target.value})} 
-              className={`h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] transition-all ${shakeFields && !formData.name ? 'border-[#DC2626] shake-animation' : ''}`} 
+              value={formData.fullName} 
+              onChange={e => setFormData({...formData, fullName: e.target.value})} 
+              className={`h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] transition-all ${shakeFields && !formData.fullName ? 'border-[#DC2626] shake-animation' : ''}`} 
             />
           </div>
 
@@ -1956,9 +1963,8 @@ function PartnerDetailView({ showConfirm }) {
 function AddEditReferralModal({ partnerUid, referral, onClose }) {
   const { addToast } = useToast();
   const [clientName, setClientName] = useState(referral ? referral.clientName : '');
-  const [arnNumber, setArnNumber] = useState(referral ? referral.arnNumber : '');
-  const [month, setMonth] = useState(referral ? referral.month : 'June 2026');
-  const [gstStatus, setGstStatus] = useState(referral ? referral.gstStatus : 'Pending');
+  const [companyName, setCompanyName] = useState(referral ? referral.companyName : '');
+  const [pan, setPan] = useState(referral ? referral.pan : '');
   const [paymentStatus, setPaymentStatus] = useState(referral ? referral.paymentStatus : 'Pending');
   const [loading, setLoading] = useState(false);
 
@@ -1966,8 +1972,8 @@ function AddEditReferralModal({ partnerUid, referral, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!clientName || !month) {
-      addToast('error', 'Client Name and Month are required');
+    if (!clientName || !pan) {
+      addToast('error', 'Client Name and PAN/GST are required');
       return;
     }
 
@@ -1975,10 +1981,10 @@ function AddEditReferralModal({ partnerUid, referral, onClose }) {
     try {
       const data = {
         clientName,
-        arnNumber,
-        month,
-        gstStatus,
-        paymentStatus
+        companyName,
+        pan,
+        paymentStatus,
+        timestamp: new Date().toISOString()
       };
 
       if (isEdit) {
@@ -2024,41 +2030,29 @@ function AddEditReferralModal({ partnerUid, referral, onClose }) {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[12px] font-[600] text-[#111110]">ARN Number</label>
+            <label className="text-[12px] font-[600] text-[#111110]">Company Name</label>
             <input 
               type="text" 
-              placeholder="e.g. AA1234567890123"
-              value={arnNumber} 
-              onChange={e => setArnNumber(e.target.value)} 
+              placeholder="e.g. Acme Corp"
+              value={companyName} 
+              onChange={e => setCompanyName(e.target.value)} 
               className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] transition-all"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[12px] font-[600] text-[#111110]">Month *</label>
+            <label className="text-[12px] font-[600] text-[#111110]">PAN/GST Number *</label>
             <input 
               required
               type="text" 
-              placeholder="e.g. June 2026"
-              value={month} 
-              onChange={e => setMonth(e.target.value)} 
+              placeholder="e.g. ABCDE1234F"
+              value={pan} 
+              onChange={e => setPan(e.target.value)} 
               className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] transition-all"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[12px] font-[600] text-[#111110]">GST Status</label>
-              <select 
-                value={gstStatus} 
-                onChange={e => setGstStatus(e.target.value)} 
-                className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)]"
-              >
-                <option value="Pending">Pending</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-            </div>
+          <div className="grid grid-cols-1 gap-4">
             
             <div className="flex flex-col gap-1.5">
               <label className="text-[12px] font-[600] text-[#111110]">Payment Status</label>
@@ -2090,6 +2084,155 @@ function AddEditReferralModal({ partnerUid, referral, onClose }) {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+function AdminCases() {
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedPartner, setSelectedPartner] = useState('All');
+  const { addToast } = useToast();
+
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzDvmLliVGdBQCvB68D4SbuWpYlWNoUYZIK3QdM6TOGQwmP4kydtWIS1s4NKtR9Hmq3NA/exec';
+
+  useEffect(() => {
+    const fetchLedger = async () => {
+      try {
+        const res = await fetch(SCRIPT_URL + '?action=getLedger');
+        const data = await res.json();
+        const recs = data.records || data || [];
+        setRecords(recs);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLedger();
+  }, []);
+
+  // Group by partner
+  const partners = ['All', ...new Set((records || []).map(r => r?.['Partner Name'] || 'Unknown Partner'))];
+  
+  const partnerCounts = (records || []).reduce((acc, r) => {
+    const p = r['Partner Name'] || 'Unknown Partner';
+    acc[p] = (acc[p] || 0) + 1;
+    return acc;
+  }, {});
+
+  const displayedRecords = selectedPartner === 'All' 
+    ? (records || [])
+    : (records || []).filter(r => (r?.['Partner Name'] || 'Unknown Partner') === selectedPartner);
+
+  const handleStatusChange = async (index, pan, newStatus) => {
+    if (!pan) {
+      addToast('Cannot update status: PAN is missing.', 'error');
+      return;
+    }
+    
+    // Optimistic UI
+    const originalRecords = [...records];
+    const newRecords = [...records];
+    
+    // Find index in main records array
+    const recordIndex = newRecords.findIndex(r => r['PAN'] === pan);
+    if (recordIndex !== -1) {
+      newRecords[recordIndex] = { ...newRecords[recordIndex], 'Payment Status': newStatus };
+      setRecords(newRecords);
+    }
+
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'updateStatus',
+          pan: pan,
+          paymentStatus: newStatus
+        })
+      });
+      addToast('Status updated successfully!', 'success');
+    } catch (err) {
+      console.error(err);
+      setRecords(originalRecords); // Revert
+      addToast('Failed to update status.', 'error');
+    }
+  };
+
+  return (
+    <div className="fade-up-enter max-w-[1200px] h-full flex flex-col md:flex-row gap-6">
+      {/* Sidebar / Summary */}
+      <div className="w-full md:w-[260px] bg-white border border-[rgba(17,17,16,0.08)] rounded-[14px] p-4 flex flex-col h-fit">
+        <h2 className="text-[16px] font-bold text-[#111110] mb-4">Partner Summary</h2>
+        <div className="flex flex-col gap-2">
+          {partners.map(p => (
+            <button
+              key={p}
+              onClick={() => setSelectedPartner(p)}
+              className={`flex items-center justify-between px-3 py-2 rounded-[8px] text-[13px] font-[500] transition-colors ${
+                selectedPartner === p ? 'bg-[rgba(27,107,47,0.08)] text-[#1B6B2F]' : 'hover:bg-[#F9F8F5] text-[rgba(17,17,16,0.6)]'
+              }`}
+            >
+              <span className="truncate">{p}</span>
+              <span className="bg-[#F4F3EE] px-2 py-0.5 rounded-full text-[11px]">
+                {p === 'All' ? records.length : (partnerCounts[p] || 0)}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Table */}
+      <div className="flex-1 bg-white border border-[rgba(17,17,16,0.08)] rounded-[14px] overflow-hidden flex flex-col">
+        <div className="px-5 py-4 border-b border-[rgba(17,17,16,0.05)] flex justify-between items-center">
+          <h2 className="text-[16px] font-bold text-[#111110]">
+            Cases: {selectedPartner}
+          </h2>
+        </div>
+        <div className="flex-1 overflow-x-auto">
+          {loading ? (
+             <div className="p-8 text-center text-[13px] text-[rgba(17,17,16,0.4)]">Loading cases...</div>
+          ) : (!displayedRecords || displayedRecords.length === 0) ? (
+            <div className="p-8 text-center text-[13px] text-[rgba(17,17,16,0.4)]">No cases found.</div>
+          ) : (
+            <table className="w-full text-left border-collapse min-w-[600px]">
+              <thead>
+                <tr className="bg-[#F9F8F5] text-[11px] font-[600] tracking-[0.08em] text-[rgba(17,17,16,0.4)] border-b border-[rgba(17,17,16,0.06)]">
+                  <th className="px-5 py-3 font-medium">CLIENT NAME</th>
+                  <th className="px-5 py-3 font-medium">COMPANY</th>
+                  <th className="px-5 py-3 font-medium">PAN</th>
+                  <th className="px-5 py-3 font-medium">PAYMENT STATUS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(displayedRecords || []).map((r, i) => (
+                  <tr key={i} className="border-b border-[rgba(17,17,16,0.05)] hover:bg-[#F9F8F5] transition-colors text-[13px] text-[#111110]">
+                    <td className="px-5 py-3 font-[500]">{r?.['Client Name'] || 'N/A'}</td>
+                    <td className="px-5 py-3 text-[rgba(17,17,16,0.6)]">{r?.['Company Name'] || 'N/A'}</td>
+                    <td className="px-5 py-3 font-mono text-[rgba(17,17,16,0.45)]">{r?.['PAN'] || 'N/A'}</td>
+                    <td className="px-5 py-3">
+                      <select 
+                        value={r?.['Payment Status'] || 'In Process'}
+                        onChange={(e) => handleStatusChange(i, r?.['PAN'], e.target.value)}
+                        className={`text-[12px] font-[600] px-3 py-1 rounded-full outline-none border border-transparent hover:border-[rgba(17,17,16,0.1)] transition-colors cursor-pointer appearance-none text-center
+                          ${(r?.['Payment Status'] || 'In Process').toLowerCase() === 'payment done' ? 'bg-[#E8F5E9] text-[#1B6B2F]' : 
+                            (r?.['Payment Status'] || 'In Process').toLowerCase() === 'client revoked' ? 'bg-[#FFEBEE] text-[#DC2626]' : 
+                            'bg-[#FFF3E0] text-[#F4831F]'}`}
+                        style={{ paddingRight: '12px' }}
+                      >
+                        <option value="In Process">In Process</option>
+                        <option value="Payment Done">Payment Done</option>
+                        <option value="Client Revoked">Client Revoked</option>
+                      </select>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
     </div>
   );

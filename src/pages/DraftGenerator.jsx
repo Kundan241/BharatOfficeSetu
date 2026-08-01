@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Lock, FileSignature, FileCheck, FileText, Download, X } from 'lucide-react';
 import { useToast } from '../components/ToastContext';
-
+import { useAuth } from '../components/AuthContext';
+import { db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 const ACCESS_PASSWORD = 'BOS@Drafts2026';
 
 const TEMPLATES = [
@@ -45,11 +47,14 @@ const TEMPLATES = [
 
 export default function DraftGenerator() {
   const { addToast } = useToast();
+  const { user, partnerName } = useAuth();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [enteredPassword, setEnteredPassword] = useState('');
   const [passwordError, setPasswordError] = useState(false);
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(TEMPLATES[0]);
+
   const [formData, setFormData] = useState({});
   const [showPreview, setShowPreview] = useState(false);
 
@@ -234,7 +239,9 @@ export default function DraftGenerator() {
         gst: formData.gst || "",
         aadhar: formData.aadhar || formData.aadharNumber || "",
         mobile: formData.mobile || formData.mobileNumber || "",
-        email: formData.email || ""
+        email: formData.email || "",
+        partnerName: partnerName || 'Admin/Self',
+        paymentStatus: "In Process"
       };
 
       fetch('https://script.google.com/macros/s/AKfycbzDvmLliVGdBQCvB68D4SbuWpYlWNoUYZIK3QdM6TOGQwmP4kydtWIS1s4NKtR9Hmq3NA/exec', {

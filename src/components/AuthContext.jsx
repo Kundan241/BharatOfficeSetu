@@ -10,6 +10,8 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [role, setRole] = useState(null);
+  const [partnerName, setPartnerName] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,13 +20,34 @@ export const AuthProvider = ({ children }) => {
       if (currentUser) {
         try {
           const adminSnap = await getDoc(doc(db, 'admins', currentUser.uid));
-          setIsAdmin(adminSnap.exists());
+          const isHardcodedAdmin = ['admin@bos.com', 'mu8ndan@gmail.com'].includes(currentUser.email);
+          
+          if (adminSnap.exists() || isHardcodedAdmin) {
+            setIsAdmin(true);
+            setRole('admin');
+            setPartnerName('Admin/Self');
+          } else {
+            const partnerSnap = await getDoc(doc(db, 'partners', currentUser.uid));
+            if (partnerSnap.exists()) {
+              setIsAdmin(false);
+              setRole('partner');
+              setPartnerName(partnerSnap.data().name || currentUser.email);
+            } else {
+              setIsAdmin(false);
+              setRole(null);
+              setPartnerName('');
+            }
+          }
         } catch (error) {
-          console.error("Error checking admin status in context:", error);
+          console.error("Error checking roles in context:", error);
           setIsAdmin(false);
+          setRole(null);
+          setPartnerName('');
         }
       } else {
         setIsAdmin(false);
+        setRole(null);
+        setPartnerName('');
       }
       setLoading(false);
     });
@@ -33,7 +56,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAdmin, loading }}>
+    <AuthContext.Provider value={{ user, isAdmin, role, partnerName, loading }}>
       {children}
     </AuthContext.Provider>
   );
