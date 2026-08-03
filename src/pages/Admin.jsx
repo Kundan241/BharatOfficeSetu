@@ -1962,18 +1962,20 @@ function PartnerDetailView({ showConfirm }) {
 // 4. ADD / EDIT REFERRAL MODAL
 function AddEditReferralModal({ partnerUid, referral, onClose }) {
   const { addToast } = useToast();
+  const today = new Date().toISOString().split('T')[0];
   const [clientName, setClientName] = useState(referral ? referral.clientName : '');
   const [companyName, setCompanyName] = useState(referral ? referral.companyName : '');
   const [pan, setPan] = useState(referral ? referral.pan : '');
   const [paymentStatus, setPaymentStatus] = useState(referral ? referral.paymentStatus : 'Pending');
+  const [manualDate, setManualDate] = useState(referral?.timestamp ? referral.timestamp.split('T')[0] : today);
   const [loading, setLoading] = useState(false);
 
   const isEdit = !!referral;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!clientName || !pan) {
-      addToast('error', 'Client Name and PAN/GST are required');
+    if (!clientName || !pan || !manualDate) {
+      addToast('error', 'Client Name, PAN/GST, and Date are required');
       return;
     }
 
@@ -1984,7 +1986,7 @@ function AddEditReferralModal({ partnerUid, referral, onClose }) {
         companyName,
         pan,
         paymentStatus,
-        timestamp: new Date().toISOString()
+        timestamp: manualDate
       };
 
       if (isEdit) {
@@ -2048,6 +2050,17 @@ function AddEditReferralModal({ partnerUid, referral, onClose }) {
               placeholder="e.g. ABCDE1234F"
               value={pan} 
               onChange={e => setPan(e.target.value)} 
+              className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] transition-all"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-[600] text-[#111110]">Date *</label>
+            <input 
+              required
+              type="date" 
+              value={manualDate} 
+              onChange={e => setManualDate(e.target.value)} 
               className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] transition-all"
             />
           </div>
