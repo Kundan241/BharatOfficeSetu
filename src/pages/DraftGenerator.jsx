@@ -42,11 +42,17 @@ const TEMPLATES = [
     name: 'Dwarka Template',
     description: 'Workspace agreement for Jupiter SPACE, Dwarka / New Delhi',
     icon: FileSignature
+  },
+  {
+    id: 'asset-sense',
+    name: 'Asset Sense',
+    description: 'Combined Leave & License Agreement and NOC for Asset Sense',
+    icon: FileSignature
   }
 ];
 
 export default function DraftGenerator() {
-  const { addToast } = useToast();
+  const { addToast } = useToast()
   const { user, partnerName } = useAuth();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [enteredPassword, setEnteredPassword] = useState('');
@@ -164,6 +170,22 @@ export default function DraftGenerator() {
         startDate: today,
         businessNature: ''
       });
+    } else if (templateId === 'asset-sense') {
+      setFormData({
+        agreementDate: today,
+        startDate: today,
+        seatNumber: '',
+        clientCompanyName: '',
+        companyType: 'Private Limited Company',
+        representativeType: 'Director',
+        directorName: '',
+        directorFatherName: '',
+        directorAddress: '',
+        panNumber: '',
+        mobileNumber: '',
+        aadharNumber: '',
+        businessNature: ''
+      });
     }
   };
 
@@ -178,7 +200,8 @@ export default function DraftGenerator() {
       'authorization': ['companyName', 'authorizedByName', 'authorizedPersonName', 'purpose', 'validUntil'],
       'gurgaon-workspace-agreement': ['clientCompanyName', 'directorName', 'directorAddress', 'panNumber', 'mobileNumber', 'aadharNumber', 'startDate'],
       'gurgaon-noc': ['clientCompanyName', 'directorName', 'directorAddress', 'aadharNumber'],
-      'dwarka-template': ['clientCompanyName', 'representativeName', 'representativeAddress', 'panNumber', 'mobileNumber', 'startDate']
+      'dwarka-template': ['clientCompanyName', 'representativeName', 'representativeAddress', 'panNumber', 'mobileNumber', 'startDate'],
+      'asset-sense': ['clientCompanyName', 'directorName', 'directorAddress', 'panNumber', 'mobileNumber', 'aadharNumber', 'startDate', 'seatNumber']
     };
 
     const reqFields = required[selectedTemplate.id];
@@ -362,6 +385,70 @@ export default function DraftGenerator() {
       buildGurgaonNOC(doc, formData, helpers);
     } else if (template.id === 'dwarka-template') {
       buildDwarkaTemplate(doc, formData, helpers);
+    } else if (template.id === 'asset-sense') {
+      buildAssetSenseAgreement(doc, formData, helpers);
+      const nameKey = formData.clientCompanyName || formData.businessName || formData.companyName || 'Document';
+      doc.save(`GurgaonAS--${nameKey.replace(/\\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
+
+      const docNoc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      let yPosNoc = 30;
+      const addOrangeHeaderNoc = () => {
+        docNoc.setFillColor(244, 131, 31);
+        docNoc.rect(0, 0, pageWidth, 12, 'F');
+        docNoc.setTextColor(255, 255, 255);
+        docNoc.setFontSize(9);
+        docNoc.setFont('helvetica', 'bold');
+        docNoc.text('ASSET SENSE', pageWidth / 2, 8, { align: 'center' });
+        docNoc.setTextColor(40, 40, 40);
+      };
+
+      addOrangeHeaderNoc();
+
+      const helpersNoc = {
+        addSectionHeading: (text) => {
+          if (yPosNoc > pageHeight - 40) {
+            docNoc.addPage();
+            addOrangeHeaderNoc();
+            yPosNoc = 25;
+          }
+          docNoc.setFontSize(11);
+          docNoc.setFont('helvetica', 'bold');
+          docNoc.setTextColor(17, 17, 16);
+          docNoc.text(text, margin, yPosNoc);
+          yPosNoc += 8;
+        },
+        addParagraph: (text) => {
+          docNoc.setFontSize(10);
+          docNoc.setFont('helvetica', 'normal');
+          docNoc.setTextColor(40, 40, 40);
+          const lines = docNoc.splitTextToSize(text, contentWidth);
+          lines.forEach(line => {
+            if (yPosNoc > pageHeight - 25) {
+              docNoc.addPage();
+              addOrangeHeaderNoc();
+              yPosNoc = 25;
+            }
+            docNoc.text(line, margin, yPosNoc);
+            yPosNoc += 6;
+          });
+          yPosNoc += 4;
+        },
+        margin,
+        pageWidth,
+        contentWidth,
+        yPos: () => yPosNoc,
+        setY: (y) => { yPosNoc = y; },
+        addOrangeHeaderOnPage: () => addOrangeHeaderNoc()
+      };
+
+      buildAssetSenseNOC(docNoc, formData, helpersNoc);
+      docNoc.save(`GurgaonAS-NOC--${nameKey.replace(/\\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
+      return;
     }
 
     const nameKey = formData.clientCompanyName || formData.businessName || formData.companyName || 'Document';
@@ -1128,6 +1215,233 @@ export default function DraftGenerator() {
     doc.text('For Service Provider (Jupiter SPACE)', h.margin, py);
   };
 
+  const buildAssetSenseAgreement = (doc, data, h) => {
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('LEAVE AND LICENSE AGREEMENT', h.pageWidth / 2, h.yPos(), { align: 'center' });
+    doc.setLineWidth(0.5);
+    doc.line(h.margin, h.yPos() + 2, h.pageWidth - h.margin, h.yPos() + 2);
+    h.setY(h.yPos() + 15);
+
+    h.addParagraph(
+      'This LEAVE AND LICENSE AGREEMENT (the "Agreement") is made and executed on this ' + formatDate(data.agreementDate) + ' at Gurugram.'
+    );
+
+    h.addParagraph('BY AND BETWEEN:');
+
+    h.addParagraph(
+      'M/S ASSET SENSE PVT LTD, a company incorporated under the provisions of the Companies Act, having its office at 213 & 214, 2nd Floor, Welldone Tech Park, Sohna Road, Gurgaon 122001, represented herein by its Authorized Signatory / Director, Sandeep Mohan (hereinafter referred to as the "LICENSOR", which expression shall, unless repugnant to the context or meaning thereof, be deemed to mean and include its legal successors and permitted assigns) of the FIRST PART;'
+    );
+
+    h.addParagraph('AND', { align: 'center' });
+
+    const companyTypeString = data.companyType === 'LLP' ? 'a Limited Liability Partnership' :
+      data.companyType === 'Proprietorship' ? 'a sole proprietorship firm' :
+      data.companyType === 'Trust' ? 'a registered Trust' :
+      data.companyType === 'Partnership Firm' ? 'a partnership firm' :
+      'a company incorporated under the provisions of the Companies Act, 2013';
+
+    h.addParagraph(
+      (data.clientCompanyName || '___________') + ', ' + companyTypeString + ' having its principal place of business at ' + (data.directorAddress || '___________') + ', represented herein by its ' + (data.representativeType || 'Director') + ', ' + (data.directorName || '___________') + ' (Aadhaar No.: ' + (data.aadharNumber || '___________') + ', PAN: ' + (data.panNumber || '___________') + ', Contact: ' + (data.mobileNumber || '___________') + ') (hereinafter referred to as the "LICENSEE", which expression shall, unless repugnant to the context or meaning thereof, be deemed to mean and include his/its legal heirs, successors, and permitted assigns) of the SECOND PART.'
+    );
+
+    h.addParagraph('(The Licensor and the Licensee are hereinafter individually referred to as a "Party" and collectively as the "Parties".)');
+
+    h.addSectionHeading('WHEREAS:');
+    h.addParagraph('A. The Licensor is the legal leaseholder of the office premises situated at ' + (data.seatNumber || '___________') + ', 213 & 214, 2nd Floor, Welldone Tech Park, Sohna Road, Gurgaon - 122001 (hereinafter referred to as the "Licensed Premises") and has full and unfettered rights to lease/let out the said Premises (or a portion thereof) on such terms and conditions as it may think fit at its sole discretion.');
+    h.addParagraph('B. The Client/ Licensee desire to take a property on lease so as to use the said property as its registered office for a period of eleven (11) months.');
+    h.addParagraph('C. That the annually rent of the above said premises has been settled in between both the parties at a sum of Rupees 10,000/per annual in advance.');
+    h.addParagraph('D. Pursuant thereto, the Licensor has agreed to permit the LICENSEE/ CLIENT to use the Licensed Premises on a Leave and License basis, and the LICENSEE/ CLIENT has agreed to take the Licensed Premises on license subject to the terms, covenants, conditions and agreements hereinafter contained.');
+
+    h.addSectionHeading('EFFECTIVE DATE: ' + formatDate(data.startDate) + '   TERM: 11 Months');
+
+    h.addSectionHeading('USE OF AND ACCESS TO THE LICENSED PREMISES');
+    h.addParagraph('The Client/ Licensee is interested in using the office space (hereinafter referred to as the "Services") from the Licensor at its premise located at 213 & 214, 2nd Floor, Welldone Tech Park, Sohna Road, Gurgaon - 122001 (hereinafter referred to as the "Premise").The whole of the Premise remains the property of the Service Provider and remains in the Licensor’s possession and control. The allowed usage for Licensee is mentioned in the clause ‘Terms of Usage’. This Agreement is personal to the Client/ Licensee and cannot be transferred to anyone else.');
+
+    h.addSectionHeading('ACKNOWLEDGMENT AND ACCEPTANCE OF TERMS OF USE.');
+    h.addParagraph('The Services are offered to Client/ Licensee conditioned on acceptance without modification of the terms and conditions, contained in this Agreement. Client/ Licensee use of the Service constitutes its agreement and consent to the terms and conditions stated in this Agreement. Each person that uses the Premise, or enters into a contract, in writing or online, on behalf of its employer or other third party, represents that such person is authorized to accept these terms on its employer\'s or on third party\'s behalf. Unless explicitly stated otherwise, the Terms of Service will govern the use of any new features that augment or enhance the current Services, including the release of new resources and services. In the case of any violation of these terms, Service Provider reserves the right to cancel Services to Client/ Licensee immediately and seek all remedies available by law and in equity for such violations.');
+
+    h.addSectionHeading('TERMS OF USAGE');
+    h.addParagraph('The Client may use the address for its business correspondence.\nClients may also use the Office Address for obtaining GST, with the understanding that the client assumes the responsibility for complying with all the required provisions of applicable acts and laws.\nThe client may use the address of the designated centre as their additional office address.\nThe Licensee/Client is not permitted to avail of any credit facility, whether relating to any loans or any other forms of credit line, at this address.');
+
+    h.addSectionHeading('LICENSE FEES');
+    h.addParagraph('License fees are payable in advance. Any dues/delays in the License fees will cause the termination of the Services/Agreement on the expiration date set forth at the time of signup or payment. For late payments of renewals, the Client/ Licensee has to pay an additional INR 500 penalty per day, in addition to renewal license fees, for the delay in payment.');
+
+    h.addSectionHeading('SERVICE RETAINER / DEPOSIT AMOUNT');
+    h.addParagraph('If interested, the Client/ Licensee will be required to pay a service retainer/deposit fee of INR 1000+GST, at any time during the agreement, in case it wishes to use the "Courier Forwarding" facility. This amount will be kept separately from Subscription fees. This is an optional service for the Client/ Licensee. The client/ Licensee has to replenish the deposit when it reaches the minimum level. When the Client/ Licensee terminates the service, the entire balance of the deposit amount will be refunded to the Client/ Licensee.');
+
+    h.addSectionHeading('ADDITIONAL SERVICES');
+    h.addParagraph('The Client/ Licensee can receive registered and certified mail at the premises.\nService Provider will receive up to 10 letters or packages per month free of charge for the Client/ Licensee. For additional letters or packages, Service Provider will charge a handling fee of Rs.10 per letter/package. The service Provider will not accept packages more than 5 Kg in weight or 1 cubic foot in size. The Client/ Licensee can pick up the mail from the location free of cost. Service Provider shall not be liable for any mail not collected within 30 days from the date of receipt date of the package at the Premise.');
+
+    h.addSectionHeading('TERMINATION OF SERVICE');
+    h.addParagraph('The Client/ Licensee may decide to terminate the service at any time. Service will be automatically terminated on the expiry date unless the subscription is renewed. Upon termination of the agreement, the Client/ Licensee must cease the use of the address of the premise for any government registrations, and any Phone Numbers issued by the service provider to the Client/ Licensee immediately, from all places including but not limited to business cards, websites, stationary, advertising material, licenses, certificates etc.\n\nNotwithstanding any other provision under this Agreement, if the Client/ Licensee has used the address of the premise for registration with the registrar of companies, Statutory compliances authority, Banks, or other governmental authorities etc., it has to change the address submitted with such authorities within 30 (Thirty) days after the date of termination or expiry of this Agreement, unless otherwise agreed with the Service Provider. The Licensor reserves the right to take legal action against the Licensee if they are found in breach of this clause.\n\nService Provider reserves the right to terminate the service and this agreement without notice for any Client/ Licensee whose activity might adversely affect Service Provider\'s reputation or Service Provider’s normal operation.\nService Provider will terminate the service anytime (without issuing any termination notice) in case Client/ Licensee violates any clause or provision of this agreement, or Client//Licensee’s activities are reported to be fraudulent.\n\nAs our contract is of automatic renewal in nature, if the licensee is still using the address at end of the agreement term, the payment of the subscription services becomes due immediately. If the Licensee fails to process the renewal payment on time, the Licensor reserves the right to deactivate accounts and cancel subscription benefits of all legal Govt. registrations taken at the address, by informing the concerned government departments.');
+
+    h.addSectionHeading('REFUND POLICY');
+    h.addParagraph('Any License fee paid fully or partially non-refundable, unless the Licensor purposely terminates the agreement.');
+
+    h.addSectionHeading('NATURE OF BUSINESS');
+    h.addParagraph('Client/ Licensee has to explain its nature of business in writing on this agreement in Annexure 1 hereto. The Client/ Licensee agrees with the Service Provider not to carry on any business, which could be construed illegal, defamatory, immoral or obscene and agrees not to use the address of the premises, whether directly or indirectly for any such purpose or purposes. If the Client/ Licensee carries any business contrary to this understanding, the service provider is at liberty to terminate the agreement and shall not be responsible for any legal issues which may arise because of such illegal business.\n\nIf the Client/ Licensee changes the nature of business, it must notify the Service Provider in writing beforehand.');
+
+    h.addSectionHeading('LIABILITY');
+    h.addParagraph('Service Provider will not be liable for any loss sustained as a result of the Service Provider’s failure to provide the services as a result of any Software Glitches, Mechanical breakdown, Strike, Loss of electric power, or termination of the Service Provider\'s interest in the building containing the office. The Service Provider does not accept liability for actions, or services of/by third parties in any way whatsoever, including delays & Non-receipt of messages or communication due to delays or failures in the email, SMS or fax systems, Phone, courier or postal service.\n\nFurther, the Service Provider shall not be responsible or liable to Client/ Licensee for any loss or damage resulting to Client/ Licensee by reason including but not limited to flood, fire, hurricane, riots, explosion, acts of God, war, terror, governmental action, or any other cause which is beyond the reasonable control of the Service Provider.\n\nThe Client/ Licensee shall indemnify and keep and hold the Service provider fully indemnified and harmless from and against all claims, proceedings, damages, losses, actions, costs and expenses arising as a consequence of or out of this agreement or arising from any breach of rules and regulations of any applicable law.\n\nIn case the Client/ Licensee is unable to fulfil the obligations mentioned herein, this Agreement shall be deemed to be terminated therefrom. Apart from that if the Client/ Licensee violates any terms of this agreement, this agreement shall be terminated forthwith.');
+
+    h.addSectionHeading('CONFIDENTIALITY');
+    h.addParagraph('Client/ Licensee recognizes that it may, in the course of obtaining or using the Services, come into possession of or learn the confidential information ("Confidential Information") about Service Provider. Client/ Licensee agrees that during the Term of this Agreement and thereafter: (a) Client/ Licensee shall provide, at a minimum, the care to avoid disclosure of unauthorized use of Confidential Information as is provided with respect to Client//Licensee\'s own similar information, but in no event less than a reasonable standard of care; (b) Client/ Licensee will use Confidential Information solely for the purposes of this Agreement; and (c) Client/ Licensee will not disclose Confidential Information to any third party without the express prior written consent of Service Provider unless required to do so under applicable law.\n\nSimilarly, the Service Provider recognizes that it may, in the course of obtaining or using the Services, come into possession of or learn confidential and proprietary business information ("Confidential Information") about the Client/ Licensee. Service Provider agrees that during the Term of this Agreement and thereafter Service Provider shall provide, at a minimum, the care to avoid disclosure of unauthorized use of Confidential Information of Client/ Licensee.\n\nIf the Service Provider transfers its business or any business segment that provides services to the Client/ Licensee, Service Provider is authorized to transfer all user information to Service Provider\'s successor.');
+
+    h.addSectionHeading('OWNERSHIP');
+    h.addParagraph('All programs, services, processes, designs, software, technologies, trademarks, trade names, inventions and materials comprising the services are wholly owned by the Service Provider and/or its Licensor and service providers except where expressly stated otherwise. This agreement only provides a licensor to the Client/ Licensee to use the Premise and will not provide any leasehold rights to the Client/ Licensee. Client/ Licensee agrees that the Client/ Licensee is not the owner of any phone number assigned to them by the Service Provider. Upon termination of the agreement for any reason, such number may be reassigned to another Client/ Licensee.');
+
+    doc.addPage();
+    h.addOrangeHeaderOnPage();
+
+    let y = 30;
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(17, 17, 16);
+    doc.text('Brief about Company Operations (up to 200 words)', h.margin, y);
+    y += 8;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(40, 40, 40);
+    const bizLines = doc.splitTextToSize(data.businessNature || '___', h.contentWidth);
+    bizLines.forEach(line => {
+      doc.text(line, h.margin, y);
+      y += 6;
+    });
+    y += 10;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(17, 17, 16);
+    doc.text('Client/Licensee’s Address will be:', h.margin, y);
+    y += 6;
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(40, 40, 40);
+    doc.text(data.clientCompanyName || '___________', h.margin, y);
+    y += 6;
+    doc.text('213 & 214, 2nd Floor, Welldone Tech Park, Sohna Road, Gurgaon 122001', h.margin, y);
+    y += 15;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(17, 17, 16);
+    doc.text('THIS IS A FORMAL AGREEMENT ON Licensee’s TERMS AND CONDITIONS.', h.margin, y);
+    y += 6;
+    doc.text('I AGREE TO THE ABOVE TERMS AND CONDITIONS.', h.margin, y);
+    y += 20;
+
+    doc.text('For Licensor:', h.margin, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(40, 40, 40);
+    y += 15;
+    doc.text('Signature: ___________________________', h.margin, y);
+    y += 6;
+    doc.text('Name: Sandeep Mohan', h.margin, y);
+    y += 6;
+    doc.text('Designation/Title: Authorised Signatory', h.margin, y);
+    y += 20;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(17, 17, 16);
+    doc.text('For Licensee:', h.margin, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(40, 40, 40);
+    y += 15;
+    doc.text('Signature: ___________________________', h.margin, y);
+    y += 6;
+    doc.text('Name: ' + (data.directorName || '___________'), h.margin, y);
+    y += 6;
+    doc.text('Designation/Title: ' + (data.representativeType || 'Authorized person'), h.margin, y);
+    y += 20;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(17, 17, 16);
+    doc.text('WITNESS 1', h.margin, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(40, 40, 40);
+    y += 8;
+    doc.text('Name:-', h.margin, y);
+    y += 6;
+    doc.text('Adhar Number:-', h.margin, y);
+    y += 6;
+    doc.text('Adhar Linked Mobile No:-', h.margin, y);
+    y += 6;
+    doc.text('Signature:-', h.margin, y);
+    y += 15;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(17, 17, 16);
+    doc.text('WITNESS 2', h.margin, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(40, 40, 40);
+    y += 8;
+    doc.text('Name:-', h.margin, y);
+    y += 6;
+    doc.text('Adhar Number:-', h.margin, y);
+    y += 6;
+    doc.text('Adhar Linked Mobile No:-', h.margin, y);
+    y += 6;
+    doc.text('Signature:-', h.margin, y);
+  };
+
+  const buildAssetSenseNOC = (doc, data, h) => {
+    let y = h.yPos();
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(40, 40, 40);
+
+    doc.text('To,', h.margin, y);
+    y += 6;
+    doc.text(data.directorName || '___________', h.margin, y);
+    y += 6;
+    doc.text(doc.splitTextToSize(data.directorAddress || '___________', h.contentWidth), h.margin, y);
+    y += (doc.splitTextToSize(data.directorAddress || '___________', h.contentWidth).length * 6);
+    doc.text('Firm/Company Name: ' + (data.clientCompanyName || '___________'), h.margin, y);
+    y += 6;
+    doc.text('PAN No: ' + (data.panNumber || '___________'), h.margin, y);
+    y += 6;
+    doc.text('Aadhaar No.: ' + (data.aadharNumber || '___________'), h.margin, y);
+    y += 10;
+    
+    doc.text('Date: ' + formatDate(data.nocDate || data.agreementDate), h.margin, y);
+    y += 14;
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(17, 17, 16);
+    doc.text('SUBJECT: NO OBJECTION CERTIFICATE (NOC)', h.margin, y);
+    y += 14;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(40, 40, 40);
+    doc.text('Dear Sir,', h.margin, y);
+    y += 10;
+
+    const nocText =
+      'We ASSET SENSE PVT LTD, having its office space at "213 & 214, 2nd Floor, Welldone Tech Park, Sohna Road, Sector 48, Gurgaon - 122001 Haryana" hereby declare and confirm that we are the legal lease owner of the above mentioned office premises and hereby allow Company "' + (data.clientCompanyName || '___________') + '" to use the above-mentioned address as the Registered Office (MCA Address Office/ GST Address office/ Virtual Office) of Company ' + (data.clientCompanyName || '___________') + '.\n\n' +
+      'Further, we have no objection if Company "' + (data.clientCompanyName || '___________') + '" carries any business-related activity in the above-mentioned address.\n\n' +
+      (data.directorName || '___________') + ', (Aadhaar No.: ' + (data.aadharNumber || '___________') + '), further agrees that this above address can only be used till the expiry of Virtual Office use at this premise including renewal period, if any. On expiry or termination of Registered Office Membership Letter-Terms of Offer, ' + (data.directorName || '___________') + ' has to immediately take all steps to remove / de-list the company address of the premises "' + (data.seatNumber || 'Seat no. __') + ', 213 & 214, 2nd Floor, Welldone Tech Park, Sohna Road, Sector 48, Gurgaon 122001 Haryana" from the records of above mentioned appropriate authority and from all registrations / filings etc. with statutory / government authorities and mandatorily shall keep ASSET SENSE PVT LTD, informed of the same in writing and also shall provide a proof of such removal to ASSET SENSE PVT LTD within 2 weeks prior to termination or expiration of the membership agreement.\n\n' +
+      (data.directorName || '___________') + ' shall be solely responsible for the complete compliance of such registration taken and it is furthermore agreed that ASSET SENSE PVT LTD will have no responsibility whatsoever.';
+
+    const lines = doc.splitTextToSize(nocText, h.contentWidth);
+    lines.forEach(line => {
+      if (y > h.pageHeight - 40) {
+        doc.addPage();
+        h.addOrangeHeaderOnPage();
+        y = 25;
+      }
+      doc.text(line, h.margin, y);
+      y += 6;
+    });
+
+    y += 20;
+    doc.text('For ASSET SENSE PVT LTD', h.margin, y);
+    y += 30;
+    doc.text('Authorized Signatory', h.margin, y);
+    y += 10;
+    doc.text('Gurgaon', h.margin, y);
+  };
+
   const getCalculatedEndDate = () => {
     if (!formData.startDate) return '';
     const date = new Date(formData.startDate);
@@ -1673,6 +1987,33 @@ export default function DraftGenerator() {
                     {renderField('Agreement End Date', 'endDate', 'text', { value: `Auto: ${getCalculatedEndDate()}`, readOnly: true, className: 'bg-[rgba(17,17,16,0.03)] border border-[rgba(17,17,16,0.1)] rounded-[8px] p-[10px_12px] text-[14px] text-[rgba(17,17,16,0.6)] w-full font-sans h-[42px] cursor-not-allowed' })}
                   </div>
                   {renderField('Nature of Business (Annexure-1)', 'businessNature', 'textarea', { rows: 3, placeholder: 'Brief description of client\'s business...' })}
+                </div>
+              )}
+
+              {selectedTemplate.id === 'asset-sense' && (
+                <div className="flex flex-col gap-1">
+                  <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
+                    {renderField('Agreement / NOC Date', 'agreementDate', 'date')}
+                    {renderField('Agreement Start Date', 'startDate', 'date')}
+                  </div>
+                  {renderField('Seat Number', 'seatNumber', 'text', { placeholder: 'e.g. Seat no. 78' })}
+                  {renderField('Client Company / Firm Name', 'clientCompanyName', 'text', { placeholder: 'e.g. MRT DIGITAL' })}
+                  {renderField('Company Type', 'companyType', 'select', { options: ['Private Limited Company', 'LLP', 'Proprietorship', 'Trust', 'Partnership Firm'] })}
+                  <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
+                    {renderField('Representative Type', 'representativeType', 'select', { options: ['Director', 'Authorized Signatory', 'Partner', 'Sole Proprietor'] })}
+                    {renderField('Authorized Person Name', 'directorName', 'text', { placeholder: 'Name of the representative' })}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
+                    {renderField('Father\'s Name (C/O)', 'directorFatherName', 'text', { placeholder: 'C/O ...' })}
+                    {renderField('PAN Number', 'panNumber', 'text', { placeholder: 'e.g. ABCDE1234F' })}
+                  </div>
+                  {renderField('Representative Address', 'directorAddress', 'textarea', { rows: 2, placeholder: 'Residential / Business address' })}
+                  <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
+                    {renderField('Mobile Number', 'mobileNumber', 'text', { placeholder: '10-digit mobile' })}
+                    {renderField('Aadhar Number', 'aadharNumber', 'text', { placeholder: '12-digit aadhar' })}
+                  </div>
+                  {renderField('Agreement End Date', 'endDate', 'text', { value: `Auto: ${getCalculatedEndDate()}`, readOnly: true, className: 'bg-[rgba(17,17,16,0.03)] border border-[rgba(17,17,16,0.1)] rounded-[8px] p-[10px_12px] text-[14px] text-[rgba(17,17,16,0.6)] w-full font-sans h-[42px] cursor-not-allowed' })}
+                  {renderField('Nature of Business', 'businessNature', 'textarea', { rows: 3, placeholder: 'Brief description of client\'s business...' })}
                 </div>
               )}
 
