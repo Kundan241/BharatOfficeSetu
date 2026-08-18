@@ -26,16 +26,10 @@ const TEMPLATES = [
     icon: FileText
   },
   {
-    id: 'gurgaon-workspace-agreement',
-    name: 'Gurgaon Workspace Agreement',
-    description: 'Workspace agreement for True Work Lounge, Gurugram',
+    id: 'true-work-lounge',
+    name: 'Ultraview Hospitality',
+    description: 'Combined Workspace Agreement and NOC for Ultraview Hospitality, Gurugram',
     icon: FileSignature
-  },
-  {
-    id: 'gurgaon-noc',
-    name: 'Gurgaon NOC',
-    description: 'NOC from True Work Lounge, Gurugram',
-    icon: FileCheck
   },
   {
     id: 'dwarka-template',
@@ -134,9 +128,10 @@ export default function DraftGenerator() {
         purpose: '',
         validUntil: ''
       });
-    } else if (templateId === 'gurgaon-workspace-agreement') {
+    } else if (templateId === 'true-work-lounge') {
       setFormData({
         agreementDate: today,
+        nocDate: today,
         clientCompanyName: '',
         directorName: '',
         directorFatherName: '',
@@ -146,15 +141,6 @@ export default function DraftGenerator() {
         aadharNumber: '',
         startDate: today,
         businessNature: ''
-      });
-    } else if (templateId === 'gurgaon-noc') {
-      setFormData({
-        nocDate: today,
-        clientCompanyName: '',
-        directorName: '',
-        directorFatherName: '',
-        directorAddress: '',
-        aadharNumber: ''
       });
     } else if (templateId === 'dwarka-template') {
       setFormData({
@@ -198,8 +184,7 @@ export default function DraftGenerator() {
       'workspace-agreement': ['clientCompanyName', 'directorName', 'directorAddress', 'panNumber', 'mobileNumber', 'startDate'],
       'noc': ['ownerName', 'ownerAddress', 'businessName', 'propertyAddress', 'purpose', 'state'],
       'authorization': ['companyName', 'authorizedByName', 'authorizedPersonName', 'purpose', 'validUntil'],
-      'gurgaon-workspace-agreement': ['clientCompanyName', 'directorName', 'directorAddress', 'panNumber', 'mobileNumber', 'aadharNumber', 'startDate'],
-      'gurgaon-noc': ['clientCompanyName', 'directorName', 'directorAddress', 'aadharNumber'],
+      'true-work-lounge': ['clientCompanyName', 'directorName', 'directorAddress', 'panNumber', 'mobileNumber', 'aadharNumber', 'startDate'],
       'dwarka-template': ['clientCompanyName', 'representativeName', 'representativeAddress', 'panNumber', 'mobileNumber', 'startDate'],
       'asset-sense': ['clientCompanyName', 'directorName', 'directorAddress', 'panNumber', 'mobileNumber', 'aadharNumber', 'startDate', 'seatNumber']
     };
@@ -298,10 +283,10 @@ export default function DraftGenerator() {
     const margin = 20;
     const contentWidth = pageWidth - (margin * 2);
 
-    const isGurgaonTemplate = template.id.startsWith('gurgaon-');
+    const isGurgaonTemplate = template.id.startsWith('gurgaon-') || template.id === 'true-work-lounge';
 
     const addOrangeHeader = () => {
-      if (isGurgaonTemplate) return;
+      if (isGurgaonTemplate || template.id === 'asset-sense') return;
       doc.setFillColor(244, 131, 31);
       doc.rect(0, 0, pageWidth, 12, 'F');
       doc.setTextColor(255, 255, 255);
@@ -379,10 +364,56 @@ export default function DraftGenerator() {
       buildNOC(doc, formData, helpers);
     } else if (template.id === 'authorization') {
       buildAuthorization(doc, formData, helpers);
-    } else if (template.id === 'gurgaon-workspace-agreement') {
+    } else if (template.id === 'true-work-lounge') {
       buildGurgaonWorkspaceAgreement(doc, formData, helpers);
-    } else if (template.id === 'gurgaon-noc') {
-      buildGurgaonNOC(doc, formData, helpers);
+      const nameKey = formData.clientCompanyName || formData.businessName || formData.companyName || 'Document';
+      doc.save(`Workspace-Agreement--${nameKey.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
+
+      const docNoc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      let yPosNoc = 30;
+      const helpersNoc = {
+        addSectionHeading: (text) => {
+          if (yPosNoc > pageHeight - 40) {
+            docNoc.addPage();
+            yPosNoc = 25;
+          }
+          docNoc.setFontSize(11);
+          docNoc.setFont('helvetica', 'bold');
+          docNoc.setTextColor(17, 17, 16);
+          docNoc.text(text, margin, yPosNoc);
+          yPosNoc += 8;
+        },
+        addParagraph: (text) => {
+          docNoc.setFontSize(10);
+          docNoc.setFont('helvetica', 'normal');
+          docNoc.setTextColor(40, 40, 40);
+          const lines = docNoc.splitTextToSize(text, contentWidth);
+          lines.forEach(line => {
+            if (yPosNoc > pageHeight - 25) {
+              docNoc.addPage();
+              yPosNoc = 25;
+            }
+            docNoc.text(line, margin, yPosNoc);
+            yPosNoc += 6;
+          });
+          yPosNoc += 4;
+        },
+        margin,
+        pageWidth,
+        contentWidth,
+        yPos: () => yPosNoc,
+        setY: (y) => { yPosNoc = y; },
+        addOrangeHeaderOnPage: () => {}
+      };
+
+      buildGurgaonNOC(docNoc, formData, helpersNoc);
+      docNoc.save(`Client-NOC--${nameKey.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
+      return;
     } else if (template.id === 'dwarka-template') {
       buildDwarkaTemplate(doc, formData, helpers);
     } else if (template.id === 'asset-sense') {
@@ -398,13 +429,7 @@ export default function DraftGenerator() {
       
       let yPosNoc = 30;
       const addOrangeHeaderNoc = () => {
-        docNoc.setFillColor(244, 131, 31);
-        docNoc.rect(0, 0, pageWidth, 12, 'F');
-        docNoc.setTextColor(255, 255, 255);
-        docNoc.setFontSize(9);
-        docNoc.setFont('helvetica', 'bold');
-        docNoc.text('ASSET SENSE', pageWidth / 2, 8, { align: 'center' });
-        docNoc.setTextColor(40, 40, 40);
+        // Removed for Asset Sense
       };
 
       addOrangeHeaderNoc();
@@ -812,7 +837,7 @@ export default function DraftGenerator() {
 
     h.addParagraph(
       'This LEAVE AND LICENSE AGREEMENT is made on ' + formatDate(data.agreementDate) +
-      ' between True Work Lounge, always be registered office address at 02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102 through its Authorised Signator, Manoj Yadav, hereinafter referred to as "Licensor/ Services Provider", who has leased the premises and ' + (data.clientCompanyName || '___________') +
+      ' between M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED (PAN NO. ABNCS9938G), having its registered office address at 02-004, 2nd Floor, Emaar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102 through its authorized signatory Mr. Manoj Yadav, hereinafter referred to as "Licensor/ Services Provider", who has leased the premises and ' + (data.clientCompanyName || '___________') +
       ' through its Authorized person, ' + (data.directorName || '___________') +
       ' C/O ' + (data.directorFatherName || '___________') +
       ', R/O ' + (data.directorAddress || '___________') +
@@ -821,12 +846,12 @@ export default function DraftGenerator() {
     );
 
     h.addSectionHeading('WHEREAS');
-    h.addParagraph('• The Licensor bearing address 02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102 has full and unfettered rights to lease/let out the said Premises (or a portion thereof) on such terms and conditions as it may think fit at its sole discretion.\n• The Client/ Licensee desire to take a property on lease so as to use the said property as its registered office for a period of eleven (11) months.\n• That the annually rent of the above said premises has been settled in between both the parties at a sum of Rupees 10,000/per annual in advance.\n• Pursuant thereto, the Licensor has agreed to permit the LICENSEE/ CLIENT to use the Licensed Premises on a Leave and License basis, and the LICENSEE/ CLIENT has agreed to take the Licensed Premises on license subject to the terms, covenants, conditions and agreements hereinafter contained.');
+    h.addParagraph('• The Licensor bearing address 02-004, 2nd Floor, Emaar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102 has full and unfettered rights to lease/let out the said Premises (or a portion thereof) on such terms and conditions as it may think fit at its sole discretion.\n• The Client/Licensee desires to use the Licensed Premises on a Leave and License basis as its registered office for a period of eleven (11) months.\n• Pursuant thereto, the Licensor has agreed to permit the LICENSEE/ CLIENT to use the Licensed Premises on a Leave and License basis, and the LICENSEE/ CLIENT has agreed to take the Licensed Premises on license subject to the terms, covenants, conditions and agreements hereinafter contained.');
 
     h.addSectionHeading('EFFECTIVE DATE: ' + formatDate(data.startDate) + '   TERM: 11 Months');
 
     h.addSectionHeading('USE OF AND ACCESS TO THE LICENSED PREMISES');
-    h.addParagraph('The Client/ Licensee is interested in using the office space (hereinafter referred to as the "Services") from the Licensor at its premise located at 02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102 (hereinafter referred to as the "Premise").The whole of the Premise remains the property of the Service Provider and remains in the Licensor’s possession and control. The allowed usage for Licensee is mentioned in the clause ‘Terms of Usage’. This Agreement is personal to the Client/ Licensee and cannot be transferred to anyone else.');
+    h.addParagraph('The Client/ Licensee is interested in using the office space (hereinafter referred to as the "Services") from the Licensor at its premise located at 02-004, 2nd Floor, Emaar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102 (hereinafter referred to as the "Premise").The whole of the Premise remains the property of the Service Provider and remains in the Licensor’s possession and control. The allowed usage for Licensee is mentioned in the clause ‘Terms of Usage’. This Agreement is personal to the Client/ Licensee and cannot be transferred to anyone else.');
 
     h.addSectionHeading('ACKNOWLEDGMENT AND ACCEPTANCE OF TERMS OF USE.');
     h.addParagraph('The Services are offered to Client/ Licensee conditioned on acceptance without modification of the terms and conditions, contained in this Agreement. Client/ Licensee use of the Service constitutes its agreement and consent to the terms and conditions stated in this Agreement. Each person that uses the Premise, or enters into a contract, in writing or online, on behalf of its employer or other third party, represents that such person is authorized to accept these terms on its employer\'s or on third party\'s behalf. Unless explicitly stated otherwise, the Terms of Service will govern the use of any new features that augment or enhance the current Services, including the release of new resources and services. In the case of any violation of these terms, Service Provider reserves the right to cancel Services to Client/ Licensee immediately and seek all remedies available by law and in equity for such violations.');
@@ -838,16 +863,16 @@ export default function DraftGenerator() {
     h.addParagraph('License fees are payable in advance. Any dues/delays in the License fees will cause the termination of the Services/Agreement on the expiration date set forth at the time of signup or payment. For late payments of renewals, the Client/ Licensee has to pay an additional INR 500 penalty per day, in addition to renewal license fees, for the delay in payment.');
 
     h.addSectionHeading('SERVICE RETAINER / DEPOSIT AMOUNT');
-    h.addParagraph('If interested, the Client/ Licensee will be required to pay a service retainer/deposit fee of INR 1000+GST, at any time during the agreement, in case it wishes to use the "Courier Forwarding" facility. This amount will be kept separately from Subscription fees. This is an optional service for the Client/ Licensee. The client/ Licensee has to replenish the deposit when it reaches the minimum level. When the Client/ Licensee terminates the service, the entire balance of the deposit amount will be refunded to the Client/ Licensee.');
+    h.addParagraph('If interested, the Client/Licensee will be required to pay a service retainer/deposit fee of INR 1000+GST, at any time during the agreement, in case it wishes to use the "Courier Forwarding" facility. This amount will be kept separately from Subscription fees. This is an optional service for the Client/Licensee. If the deposit reaches the minimum operational threshold prescribed by the Service Provider, the Client shall replenish it as required for continued Courier Forwarding services. When the Client/Licensee terminates the service, the entire balance of the deposit amount will be refunded to the Client/Licensee.');
 
     h.addSectionHeading('ADDITIONAL SERVICES');
-    h.addParagraph('The Client/ Licensee can receive registered and certified mail at the premises.\nService Provider will receive up to 10 letters or packages per month free of charge for the Client/ Licensee. For additional letters or packages, Service Provider will charge a handling fee of Rs.10 per letter/package. The service Provider will not accept packages more than 5 Kg in weight or 1 cubic foot in size. The Client/ Licensee can pick up the mail from the location free of cost. Service Provider shall not be liable for any mail not collected within 30 days from the date of receipt date of the package at the Premise.');
+    h.addParagraph('The Client/ Licensee can receive registered and certified mail at the premises.\nService Provider will receive up to 10 letters or packages per month free of charge for the Client/ Licensee. For additional letters or packages, Service Provider will charge a handling fee of Rs.10 per letter/package. The service Provider will not accept packages more than 5 Kg in weight or 1 cubic foot in size. The Client/ Licensee can pick up the mail from the location free of cost. Service Provider shall not be liable for any mail not collected within 30 days from the date of receipt of the package at the Premise.');
 
     h.addSectionHeading('TERMINATION OF SERVICE');
-    h.addParagraph('The Client/ Licensee may decide to terminate the service at any time. Service will be automatically terminated on the expiry date unless the subscription is renewed. Upon termination of the agreement, the Client/ Licensee must cease the use of the address of the premise for any government registrations, and any Phone Numbers issued by the service provider to the Client/ Licensee immediately, from all places including but not limited to business cards, websites, stationary, advertising material, licenses, certificates etc.\n\nNotwithstanding any other provision under this Agreement, if the Client/ Licensee has used the address of the premise for registration with the registrar of companies, Statutory compliances authority, Banks, or other governmental authorities etc., it has to change the address submitted with such authorities within 30 (Thirty) days after the date of termination or expiry of this Agreement, unless otherwise agreed with the Service Provider. The Licensor reserves the right to take legal action against the Licensee if they are found in breach of this clause.\n\nService Provider reserves the right to terminate the service and this agreement without notice for any Client/ Licensee whose activity might adversely affect Service Provider\'s reputation or Service Provider’s normal operation.\nService Provider will terminate the service anytime (without issuing any termination notice) in case Client/ Licensee violates any clause or provision of this agreement, or Client//Licensee’s activities are reported to be fraudulent.\n\nAs our contract is of automatic renewal in nature, if the licensee is still using the address at end of the agreement term, the payment of the subscription services becomes due immediately. If the Licensee fails to process the renewal payment on time, the Licensor reserves the right to deactivate accounts and cancel subscription benefits of all legal Govt. registrations taken at the address, by informing the concerned government departments.');
+    h.addParagraph('The initial term is 11 months. The agreement expires automatically at the end of the initial term unless renewed. If the Client wishes to continue using the address beyond the initial term, the Client must complete the renewal/payment process before expiry. Continued use after expiry should not be treated as an automatic renewal unless the renewal is formally completed. The Service Provider is not required to provide reminders for renewal.\n\nUpon termination of the agreement, the Client/ Licensee must cease the use of the address of the premise for any government registrations, and any Phone Numbers issued by the service provider to the Client/ Licensee immediately, from all places including but not limited to business cards, websites, stationery, advertising material, licenses, certificates etc.\n\nNotwithstanding any other provision under this Agreement, if the Client/ Licensee has used the address of the premise for registration with the registrar of companies, Statutory compliances authority, Banks, or other governmental authorities etc., it has to change the address submitted with such authorities within 30 (Thirty) days after the date of termination or expiry of this Agreement, unless otherwise agreed with the Service Provider. The Licensor reserves the right to take legal action against the Licensee if they are found in breach of this clause.\n\nService Provider reserves the right to terminate the service and this agreement without notice for any Client/ Licensee whose activity might adversely affect Service Provider\'s reputation or Service Provider’s normal operation.\nService Provider will terminate the service anytime (without issuing any termination notice) in case Client/ Licensee violates any clause or provision of this agreement, or Client//Licensee’s activities are reported to be fraudulent.');
 
     h.addSectionHeading('REFUND POLICY');
-    h.addParagraph('Any License fee paid fully or partially non-refundable, unless the Licensor purposely terminates the agreement.');
+    h.addParagraph('The Client/Licensee may request termination of the services at any time. Any license fee or subscription fee already paid shall be non-refundable, except where the Licensor terminates the Agreement without cause or where a refund is otherwise required by applicable law or expressly agreed in writing between the parties.');
 
     h.addSectionHeading('NATURE OF BUSINESS');
     h.addParagraph('Client/ Licensee has to explain its nature of business in writing on this agreement in Annexure 1 hereto. The Client/ Licensee agrees with the Service Provider not to carry on any business, which could be construed illegal, defamatory, immoral or obscene and agrees not to use the address of the premises, whether directly or indirectly for any such purpose or purposes. If the Client/ Licensee carries any business contrary to this understanding, the service provider is at liberty to terminate the agreement and shall not be responsible for any legal issues which may arise because of such illegal business.\n\nIf the Client/ Licensee changes the nature of business, it must notify the Service Provider in writing beforehand.');
@@ -859,7 +884,7 @@ export default function DraftGenerator() {
     h.addParagraph('Client/ Licensee recognizes that it may, in the course of obtaining or using the Services, come into possession of or learn the confidential information ("Confidential Information") about Service Provider. Client/ Licensee agrees that during the Term of this Agreement and thereafter: (a) Client/ Licensee shall provide, at a minimum, the care to avoid disclosure of unauthorized use of Confidential Information as is provided with respect to Client//Licensee\'s own similar information, but in no event less than a reasonable standard of care; (b) Client/ Licensee will use Confidential Information solely for the purposes of this Agreement; and (c) Client/ Licensee will not disclose Confidential Information to any third party without the express prior written consent of Service Provider unless required to do so under applicable law.\n\nSimilarly, the Service Provider recognizes that it may, in the course of obtaining or using the Services, come into possession of or learn confidential and proprietary business information ("Confidential Information") about the Client/ Licensee. Service Provider agrees that during the Term of this Agreement and thereafter Service Provider shall provide, at a minimum, the care to avoid disclosure of unauthorized use of Confidential Information of Client/ Licensee.\n\nIf the Service Provider transfers its business or any business segment that provides services to the Client/ Licensee, Service Provider is authorized to transfer all user information to Service Provider\'s successor.');
 
     h.addSectionHeading('OWNERSHIP');
-    h.addParagraph('All programs, services, processes, designs, software, technologies, trademarks, trade names, inventions and materials comprising the services are wholly owned by the Service Provider and/or its Licensor and service providers except where expressly stated otherwise. This agreement only provides a licensor to the Client/ Licensee to use the Premise and will not provide any leasehold rights to the Client/ Licensee. Client/ Licensee agrees that the Client/ Licensee is not the owner of any phone number assigned to them by the Service Provider. Upon termination of the agreement for any reason, such number may be reassigned to another Client/ Licensee.');
+    h.addParagraph('All programs, services, processes, designs, software, technologies, trademarks, trade names, inventions and materials comprising the services are wholly owned by the Service Provider and/or its Licensor and service providers except where expressly stated otherwise. This agreement only provides a license to the Client/ Licensee to use the Premise and will not provide any leasehold rights to the Client/ Licensee. Client/ Licensee agrees that the Client/ Licensee is not the owner of any phone number assigned to them by the Service Provider. Upon termination of the agreement for any reason, such number may be reassigned to another Client/ Licensee.');
 
     doc.addPage();
     h.addOrangeHeaderOnPage();
@@ -868,7 +893,7 @@ export default function DraftGenerator() {
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(17, 17, 16);
-    doc.text('Brief about Company Operations (up to 200 words)', h.margin, y);
+    doc.text('ANNEXURE 1 – NATURE OF BUSINESS / BRIEF ABOUT COMPANY OPERATIONS', h.margin, y);
     y += 8;
 
     doc.setFontSize(10);
@@ -889,7 +914,7 @@ export default function DraftGenerator() {
     doc.setTextColor(40, 40, 40);
     doc.text(data.clientCompanyName || '___________', h.margin, y);
     y += 6;
-    doc.text('02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102', h.margin, y);
+    doc.text('02-004, 2nd Floor, Emaar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102', h.margin, y);
     y += 15;
 
     doc.setFont('helvetica', 'bold');
@@ -985,10 +1010,10 @@ export default function DraftGenerator() {
     y += 10;
 
     const nocText =
-      'We True Work lounge LLP having its office space at "02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102" hereby declare and confirm that we are the legal lease owner of the above mentioned office premises and hereby allow Company "' + (data.clientCompanyName || '___________') + '" to use the above-mentioned address as the Registered Office (GST Address office/Office) of Company ' + (data.clientCompanyName || '___________') + '.\n\n' +
+      'We M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED having its office space at "02-004, 2nd Floor, Emaar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102" hereby declare and confirm that we are the legal lease owner of the above mentioned office premises and hereby allow Company "' + (data.clientCompanyName || '___________') + '" to use the above-mentioned address as the Registered Office (GST Address office/Office) of Company ' + (data.clientCompanyName || '___________') + '.\n\n' +
       'Further, we have no objection if Company "' + (data.clientCompanyName || '___________') + '" carries any business-related activity in the above-mentioned address.\n\n' +
-      (data.directorName || '___________') + ', (Aadhar Number : ' + (data.aadharNumber || '___________') + ' ) further agrees that this above address can only be used till the expiry of Office use at this premise including renewal period, if any. On expiry or termination of Registered Office Membership Letter-Terms of Offer ' + (data.directorName || '___________') + ' has to immediately take all steps to remove / de-list the company address ' + (data.clientCompanyName || '___________') + ' of the premises "02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102" from the records of above mentioned appropriate authority and from all registrations / filings etc. with statutory / government authorities and mandatorily shall keep True Work lounge LLP informed of the same in writing and also shall provide a proof of such removal to True Work lounge LLP within 2 weeks prior to termination or expiration of the membership agreement.\n\n' +
-      (data.directorName || '___________') + ' shall be solely responsible for the complete compliance of such registration taken and it is furthermore agreed that True Work lounge LLP will have no responsibility whatsoever.';
+      (data.directorName || '___________') + ', (Aadhar Number : ' + (data.aadharNumber || '___________') + ' ) further agrees that this above address can only be used till the expiry of Office use at this premise including renewal period, if any. On expiry or termination of Registered Office Membership Letter-Terms of Offer ' + (data.directorName || '___________') + ' has to immediately take all steps to remove / de-list the company address ' + (data.clientCompanyName || '___________') + ' of the premises "02-004, 2nd Floor, Emaar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102" from the records of above mentioned appropriate authority and from all registrations / filings etc. with statutory / government authorities and mandatorily shall keep M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED informed of the same in writing and also shall provide a proof of such removal to M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED within 2 weeks prior to termination or expiration of the membership agreement.\n\n' +
+      (data.directorName || '___________') + ' shall be solely responsible for the complete compliance of such registration taken and it is furthermore agreed that M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED will have no responsibility whatsoever.';
 
     const lines = doc.splitTextToSize(nocText, h.contentWidth);
     lines.forEach(line => {
@@ -1002,7 +1027,7 @@ export default function DraftGenerator() {
     });
 
     y += 20;
-    doc.text('For True Work lounge LLP', h.margin, y);
+    doc.text('For M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED', h.margin, y);
     y += 30;
     doc.text('Authorized Signatory', h.margin, y);
     y += 10;
@@ -1090,7 +1115,7 @@ export default function DraftGenerator() {
     h.addParagraph('It is expressly acknowledged by the Client that it does not possess or occupy any physical space on the premises under this Agreement. For any in-person meetings or use of workspace, the Client shall be required to pre-book a cabin or facility on an hourly basis, as the subscription granted herein is strictly limited to virtual office services.');
 
     h.addSectionHeading('GUEST POLICY');
-    h.addParagraph('The Service Provider, Vselek Co-working and Co-Warehousing Private Limited, permits the Client to host guests for meetings or project-related purposes, subject to prior coordination and availability. The Client shall remain solely responsible for ensuring that all guests strictly adhere to the Service Provider’s workspace rules, code of conduct, and operational policies.');
+    h.addParagraph('The Service Provider, Jupiter SPACE, permits the Client to host guests for meetings or project-related purposes, subject to prior coordination and availability. The Client shall remain solely responsible for ensuring that all guests strictly adhere to the Service Provider’s workspace rules, code of conduct, and operational policies.');
     h.addParagraph('Any breach or violation of such policies by the Client’s guests shall be deemed a breach by the Client, who shall bear full responsibility and liability for the same.');
 
     h.addSectionHeading('FINANCIAL TRANSACTIONS');
@@ -1696,15 +1721,15 @@ export default function DraftGenerator() {
             </div>
           </>
         );
-      } else if (selectedTemplate.id === 'gurgaon-workspace-agreement') {
+      } else if (selectedTemplate.id === 'true-work-lounge') {
         return (
           <>
             <p style={{ textAlign: 'center', fontWeight: 'bold' }}>LEAVE AND LICENSE AGREEMENT</p>
             <hr style={{ margin: '10px 0 20px 0', borderTop: '1px solid black' }} />
-            <p>This LEAVE AND LICENSE AGREEMENT is made on {formatDate(formData.agreementDate)} between True Work Lounge, always be registered office address at 02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102 through its Authorised Signator, Manoj Yadav, hereinafter referred to as "Licensor/ Services Provider", who has leased the premises and {formData.clientCompanyName || '___________'} through its Authorized person, {formData.directorName || '___________'} C/O {formData.directorFatherName || '___________'}, R/O {formData.directorAddress || '___________'} with PAN No. {formData.panNumber || '___________'} and hereinafter referred to as "Client/ Licensee". (KYC is attached)</p>
+            <p>This LEAVE AND LICENSE AGREEMENT is made on {formatDate(formData.agreementDate)} between M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED (PAN NO. ABNCS9938G), having its registered office address at 02-004, 2nd Floor, Emaar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102 through its authorized signatory Mr. Manoj Yadav, hereinafter referred to as "Licensor/ Services Provider", who has leased the premises and {formData.clientCompanyName || '___________'} through its Authorized person, {formData.directorName || '___________'} C/O {formData.directorFatherName || '___________'}, R/O {formData.directorAddress || '___________'} with PAN No. {formData.panNumber || '___________'} and hereinafter referred to as "Client/ Licensee". (KYC is attached)</p>
             <p><strong>EFFECTIVE DATE:</strong> {formatDate(formData.startDate)} <strong>TERM:</strong> 11 Months</p>
             <p><strong>USE OF AND ACCESS TO THE LICENSED PREMISES</strong></p>
-            <p>The Client/ Licensee is interested in using the office space (hereinafter referred to as the "Services") from the Licensor at its premise located at 02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102 (hereinafter referred to as the "Premise"). The whole of the Premise remains the property of the Service Provider and remains in the Licensor's possession and control.</p>
+            <p>The Client/ Licensee is interested in using the office space (hereinafter referred to as the "Services") from the Licensor at its premise located at 02-004, 2nd Floor, Emaar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102 (hereinafter referred to as the "Premise"). The whole of the Premise remains the property of the Service Provider and remains in the Licensor's possession and control.</p>
             <p><strong>TERMS OF USAGE</strong></p>
             <p>The Client may use the address for its business correspondence. Clients may also use the Office Address for obtaining GST, with the understanding that the client assumes the responsibility for complying with all the required provisions of applicable acts and laws.</p>
             <div style={{ marginTop: '30px' }}>
@@ -1713,18 +1738,16 @@ export default function DraftGenerator() {
             <div style={{ marginTop: '30px' }}>
               <p>For Licensee:<br />Name: {formData.directorName || '___________'}<br />Designation/Title: Authorized person</p>
             </div>
-          </>
-        );
-      } else if (selectedTemplate.id === 'gurgaon-noc') {
-        return (
-          <>
+
+            <div style={{ marginTop: '40px', marginBottom: '40px', borderBottom: '2px dashed #ccc' }} />
+
             <p style={{ textAlign: 'center', fontWeight: 'bold' }}>NO OBJECTION CERTIFICATE</p>
             <hr style={{ margin: '10px 0 20px 0', borderTop: '1px solid black' }} />
             <p>Date: {formatDate(formData.nocDate)}</p>
             <p>To<br />{formData.directorName || '___________'} C/O {formData.directorFatherName || '___________'},<br />Address: R/o {formData.directorAddress || '___________'}<br />Company Name: {formData.clientCompanyName || '___________'}<br />Aadhaar No.: {formData.aadharNumber || '___________'}</p>
-            <p>We True Work lounge LLP having its office space at "02-007, 2nd Floor, Emar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102" hereby declare and confirm that we are the legal lease owner of the above mentioned office premises and hereby allow Company "{formData.clientCompanyName || '___________'}" to use the above-mentioned address as the Registered Office (GST Address office/Office) of Company {formData.clientCompanyName || '___________'}.</p>
+            <p>We M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED having its office space at "02-004, 2nd Floor, Emaar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102" hereby declare and confirm that we are the legal lease owner of the above mentioned office premises and hereby allow Company "{formData.clientCompanyName || '___________'}" to use the above-mentioned address as the Registered Office (GST Address office/Office) of Company {formData.clientCompanyName || '___________'}.</p>
             <div style={{ marginTop: '30px' }}>
-              <p>For True Work lounge LLP</p>
+              <p>For M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED</p>
               <br /><br />
               <p>Authorized Signatory<br />Gurgaon</p>
             </div>
@@ -1933,12 +1956,13 @@ export default function DraftGenerator() {
                 </div>
               )}
 
-              {selectedTemplate.id === 'gurgaon-workspace-agreement' && (
+              {selectedTemplate.id === 'true-work-lounge' && (
                 <div className="flex flex-col gap-1">
                   <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
                     {renderField('Agreement Date', 'agreementDate', 'date')}
-                    {renderField('Agreement Start Date', 'startDate', 'date')}
+                    {renderField('NOC Date', 'nocDate', 'date')}
                   </div>
+                  {renderField('Agreement Start Date', 'startDate', 'date')}
                   {renderField('Client Company Name', 'clientCompanyName', 'text', { placeholder: 'e.g. COMPANY PRIVATE LIMITED' })}
                   {renderField('Authorized Person Name', 'directorName', 'text', { placeholder: 'e.g. JOHN DOE' })}
                   <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4">
@@ -1951,17 +1975,6 @@ export default function DraftGenerator() {
                     {renderField('Aadhar Number', 'aadharNumber', 'text', { placeholder: '12-digit aadhar' })}
                   </div>
                   {renderField('Nature of Business', 'businessNature', 'textarea', { rows: 3, placeholder: 'Brief description of client\'s business...' })}
-                </div>
-              )}
-
-              {selectedTemplate.id === 'gurgaon-noc' && (
-                <div className="flex flex-col gap-1">
-                  {renderField('NOC Date', 'nocDate', 'date')}
-                  {renderField('Company Name', 'clientCompanyName', 'text', { placeholder: 'Company / business name' })}
-                  {renderField('Director / Authorized Person', 'directorName', 'text', { placeholder: 'Name' })}
-                  {renderField('Father\'s Name (C/O)', 'directorFatherName', 'text', { placeholder: 'C/O ...' })}
-                  {renderField('Director\'s Address', 'directorAddress', 'textarea', { rows: 2, placeholder: 'Residential address' })}
-                  {renderField('Aadhar Number', 'aadharNumber', 'text', { placeholder: '12-digit aadhar' })}
                 </div>
               )}
 
