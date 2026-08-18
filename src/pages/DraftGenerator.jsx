@@ -899,13 +899,23 @@ export default function DraftGenerator() {
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(40, 40, 40);
+    const checkPageBreak = (neededSpace) => {
+      if (y + neededSpace > 270) {
+        doc.addPage();
+        h.addOrangeHeaderOnPage();
+        y = 30;
+      }
+    };
+
     const bizLines = doc.splitTextToSize(data.businessNature || '___', h.contentWidth);
     bizLines.forEach(line => {
+      checkPageBreak(10);
       doc.text(line, h.margin, y);
       y += 6;
     });
     y += 10;
 
+    checkPageBreak(30);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(17, 17, 16);
     doc.text('Client/Licensee’s Address will be:', h.margin, y);
@@ -917,6 +927,7 @@ export default function DraftGenerator() {
     doc.text('02-004, 2nd Floor, Emaar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102', h.margin, y);
     y += 15;
 
+    checkPageBreak(30);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(17, 17, 16);
     doc.text('THIS IS A FORMAL AGREEMENT ON Licensee’s TERMS AND CONDITIONS.', h.margin, y);
@@ -924,6 +935,7 @@ export default function DraftGenerator() {
     doc.text('I AGREE TO THE ABOVE TERMS AND CONDITIONS.', h.margin, y);
     y += 20;
 
+    checkPageBreak(45);
     doc.text('For Licensor:', h.margin, y);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(40, 40, 40);
@@ -935,6 +947,7 @@ export default function DraftGenerator() {
     doc.text('Designation/Title: Authorised Signatory', h.margin, y);
     y += 20;
 
+    checkPageBreak(45);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(17, 17, 16);
     doc.text('For Licensee:', h.margin, y);
@@ -948,6 +961,7 @@ export default function DraftGenerator() {
     doc.text('Designation/Title: Authorized person', h.margin, y);
     y += 20;
 
+    checkPageBreak(45);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(17, 17, 16);
     doc.text('WITNESS 1', h.margin, y);
@@ -963,6 +977,7 @@ export default function DraftGenerator() {
     doc.text('Signature:-', h.margin, y);
     y += 15;
 
+    checkPageBreak(40);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(17, 17, 16);
     doc.text('WITNESS 2', h.margin, y);
