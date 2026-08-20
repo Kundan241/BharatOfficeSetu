@@ -334,7 +334,9 @@ export default function DraftGenerator() {
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(40, 40, 40);
-      const lines = doc.splitTextToSize(text, contentWidth);
+      
+      const cleanText = (text || '').replace(/[\s\u00A0\u200B]+/g, ' ').trim();
+      const lines = doc.splitTextToSize(cleanText, contentWidth);
       lines.forEach(line => {
         if (yPos > pageHeight - 25) {
           doc.addPage();
@@ -907,7 +909,8 @@ export default function DraftGenerator() {
       }
     };
 
-    const bizLines = doc.splitTextToSize(data.businessNature || '___', h.contentWidth);
+    const cleanBizText = (data.businessNature || '___').replace(/[\s\u00A0\u200B]+/g, ' ').trim();
+    const bizLines = doc.splitTextToSize(cleanBizText, h.contentWidth);
     bizLines.forEach(line => {
       checkPageBreak(10);
       doc.text(line, h.margin, y);
