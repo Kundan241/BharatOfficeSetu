@@ -1004,16 +1004,22 @@ export default function DraftGenerator() {
     doc.text('Date: ' + formatDate(data.nocDate), h.margin, y);
     y += 14;
 
-    doc.text('To', h.margin, y);
-    y += 6;
-    doc.text((data.directorName || '___________') + ' C/O ' + (data.directorFatherName || '___________') + ',', h.margin, y);
-    y += 6;
-    doc.text('Address: R/o ' + (data.directorAddress || '___________'), h.margin, y);
-    y += 6;
-    doc.text('Company Name: ' + (data.clientCompanyName || '___________'), h.margin, y);
-    y += 6;
-    doc.text('Aadhaar No.: ' + (data.aadharNumber || '___________'), h.margin, y);
-    y += 14;
+    const toName = (data.directorName || '___________') + ' C/O ' + (data.directorFatherName || '___________') + ',';
+    const toNameLines = doc.splitTextToSize(toName, h.contentWidth);
+    toNameLines.forEach(line => { doc.text(line, h.margin, y); y += 6; });
+
+    const toAddress = 'Address: R/o ' + (data.directorAddress || '___________');
+    const toAddressLines = doc.splitTextToSize(toAddress, h.contentWidth);
+    toAddressLines.forEach(line => { doc.text(line, h.margin, y); y += 6; });
+
+    const toCompany = 'Company Name: ' + (data.clientCompanyName || '___________');
+    const toCompanyLines = doc.splitTextToSize(toCompany, h.contentWidth);
+    toCompanyLines.forEach(line => { doc.text(line, h.margin, y); y += 6; });
+
+    const aadharLine = 'Aadhaar No.: ' + String(data.aadharNumber || '___________').replace(/\s+/g, ' ').trim();
+    const aadharLines = doc.splitTextToSize(aadharLine, h.contentWidth);
+    aadharLines.forEach(line => { doc.text(line, h.margin, y); y += 6; });
+    y += 8;
 
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
@@ -1027,25 +1033,35 @@ export default function DraftGenerator() {
     doc.text('Dear Sir,', h.margin, y);
     y += 10;
 
+    const cleanDirectorName = String(data.directorName || '___________').replace(/[\\s\\uFEFF\\xA0]+/g, ' ').trim();
+    const cleanAadharNumber = String(data.aadharNumber || '___________').replace(/[\\s\\uFEFF\\xA0]+/g, ' ').trim();
+    const cleanClientCompanyName = String(data.clientCompanyName || '___________').replace(/[\\s\\uFEFF\\xA0]+/g, ' ').trim();
+
     const nocText =
-      'We M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED having its office space at "02-004, 2nd Floor, Emaar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102" hereby declare and confirm that we are the legal lease owner of the above mentioned office premises and hereby allow Company "' + (data.clientCompanyName || '___________') + '" to use the above-mentioned address as the Registered Office (GST Address office/Office) of Company ' + (data.clientCompanyName || '___________') + '.\n\n' +
-      'Further, we have no objection if Company "' + (data.clientCompanyName || '___________') + '" carries any business-related activity in the above-mentioned address.\n\n' +
-      (data.directorName || '___________') + ', (Aadhar Number : ' + (data.aadharNumber || '___________') + ' ) further agrees that this above address can only be used till the expiry of Office use at this premise including renewal period, if any. On expiry or termination of Registered Office Membership Letter-Terms of Offer ' + (data.directorName || '___________') + ' has to immediately take all steps to remove / de-list the company address ' + (data.clientCompanyName || '___________') + ' of the premises "02-004, 2nd Floor, Emaar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102" from the records of above mentioned appropriate authority and from all registrations / filings etc. with statutory / government authorities and mandatorily shall keep M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED informed of the same in writing and also shall provide a proof of such removal to M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED within 2 weeks prior to termination or expiration of the membership agreement.\n\n' +
-      (data.directorName || '___________') + ' shall be solely responsible for the complete compliance of such registration taken and it is furthermore agreed that M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED will have no responsibility whatsoever.';
+      'We M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED having its office space at "02-004, 2nd Floor, Emaar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102" hereby declare and confirm that we are the legal lease owner of the above mentioned office premises and hereby allow Company "' + cleanClientCompanyName + '" to use the above-mentioned address as the Registered Office (GST Address office/Office) of Company ' + cleanClientCompanyName + '.\n\n' +
+      'Further, we have no objection if Company "' + cleanClientCompanyName + '" carries any business-related activity in the above-mentioned address.\n\n' +
+      cleanDirectorName + ', (Aadhar Number : ' + cleanAadharNumber + ' ) further agrees that this above address can only be used till the expiry of Office use at this premise including renewal period, if any. On expiry or termination of Registered Office Membership Letter-Terms of Offer ' + cleanDirectorName + ' has to immediately take all steps to remove / de-list the company address ' + cleanClientCompanyName + ' of the premises "02-004, 2nd Floor, Emaar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102" from the records of above mentioned appropriate authority and from all registrations / filings etc. with statutory / government authorities and mandatorily shall keep M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED informed of the same in writing and also shall provide a proof of such removal to M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED within 2 weeks prior to termination or expiration of the membership agreement.\n\n' +
+      cleanDirectorName + ' shall be solely responsible for the complete compliance of such registration taken and it is furthermore agreed that M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED will have no responsibility whatsoever.';
 
     const lines = doc.splitTextToSize(nocText, h.contentWidth);
     lines.forEach(line => {
-      if (y > h.pageWidth * 1.4) {
+      if (y > doc.internal.pageSize.height - 25) {
         doc.addPage();
-        h.addOrangeHeaderOnPage();
+        if (h.addOrangeHeaderOnPage) h.addOrangeHeaderOnPage();
         y = 25;
       }
-      doc.text(line, h.margin, y);
+      doc.text(line, h.margin, y, { align: 'left' });
       y += 6;
     });
 
+    if (y > doc.internal.pageSize.height - 85) {
+      doc.addPage();
+      if (h.addOrangeHeaderOnPage) h.addOrangeHeaderOnPage();
+      y = 25;
+    }
+
     y += 20;
-    doc.text('For M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED', h.margin, y);
+    doc.text('For M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED', h.margin, y, { align: 'left' });
     y += 30;
     doc.text('Authorized Signatory', h.margin, y);
     y += 10;
