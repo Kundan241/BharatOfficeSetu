@@ -1002,7 +1002,7 @@ export default function DraftGenerator() {
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(40, 40, 40);
     doc.text('Date: ' + formatDate(data.nocDate), h.margin, y);
-    y += 14;
+    y += 10;
 
     const toName = (data.directorName || '___________') + ' C/O ' + (data.directorFatherName || '___________') + ',';
     const toNameLines = doc.splitTextToSize(toName, h.contentWidth);
@@ -1019,19 +1019,19 @@ export default function DraftGenerator() {
     const aadharLine = 'Aadhaar No.: ' + String(data.aadharNumber || '___________').replace(/\s+/g, ' ').trim();
     const aadharLines = doc.splitTextToSize(aadharLine, h.contentWidth);
     aadharLines.forEach(line => { doc.text(line, h.margin, y); y += 6; });
-    y += 8;
+    y += 4;
 
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(17, 17, 16);
     doc.text('Subject: No Objection Certificate (NOC)', h.margin, y);
-    y += 14;
+    y += 10;
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(40, 40, 40);
     doc.text('Dear Sir,', h.margin, y);
-    y += 10;
+    y += 8;
 
     const cleanDirectorName = String(data.directorName || '___________').replace(/[\\s\\uFEFF\\xA0]+/g, ' ').trim();
     const cleanAadharNumber = String(data.aadharNumber || '___________').replace(/[\\s\\uFEFF\\xA0]+/g, ' ').trim();
@@ -1054,17 +1054,17 @@ export default function DraftGenerator() {
       y += 6;
     });
 
-    if (y > doc.internal.pageSize.height - 85) {
+    if (y > doc.internal.pageSize.height - 50) {
       doc.addPage();
       if (h.addOrangeHeaderOnPage) h.addOrangeHeaderOnPage();
       y = 25;
     }
 
-    y += 20;
-    doc.text('For M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED', h.margin, y, { align: 'left' });
-    y += 30;
-    doc.text('Authorized Signatory', h.margin, y);
     y += 10;
+    doc.text('For M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED', h.margin, y, { align: 'left' });
+    y += 25;
+    doc.text('Authorized Signatory', h.margin, y);
+    y += 8;
     doc.text('Gurgaon', h.margin, y);
   };
 
