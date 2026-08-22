@@ -222,6 +222,15 @@ export default function DraftGenerator() {
 
   const handleDownload = () => {
     if (validateForm()) {
+      let finalPartnerName = partnerName || 'Admin/Self';
+      if (selectedTemplate.id === 'dwarka-template') {
+        finalPartnerName = 'JupiterSpace';
+      } else if (selectedTemplate.id === 'true-work-lounge') {
+        finalPartnerName = 'Ultraview Hospitality';
+      } else if (selectedTemplate.id === 'asset-sense') {
+        finalPartnerName = 'Asset Sense';
+      }
+
       const trackingPayload = {
         documentType: formData.documentType || "Draft",
         "Timestamp": new Date().toISOString(),
@@ -248,7 +257,7 @@ export default function DraftGenerator() {
         aadhar: formData.aadhar || formData.aadharNumber || "",
         mobile: formData.mobile || formData.mobileNumber || "",
         email: formData.email || "",
-        partnerName: partnerName || 'Admin/Self',
+        partnerName: finalPartnerName,
         paymentStatus: "In Process"
       };
 

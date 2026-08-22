@@ -30,6 +30,7 @@ import {
   updateReferralStatus, 
   getPartnerReferrals 
 } from '../services/partners';
+import { processSheetRecords } from '../utils/ledgerUtils';
 
 const ADMIN_GATE_PASSWORD = 'BOS@Admin2026';
 
@@ -311,11 +312,11 @@ export default function Admin() {
         <div className="p-4 md:p-8 flex-1">
           <Routes>
             <Route path="/" element={<AdminDashboard />} />
-            <Route path="/clients" element={<AdminClients />} />
+            <Route path="/clients" element={<AdminClients showConfirm={showConfirm} />} />
             <Route path="/clients/add" element={<AddClientForm showConfirm={showConfirm} />} />
             <Route path="/clients/:uid" element={<ClientDetailView showConfirm={showConfirm} />} />
             <Route path="/cases" element={<AdminCases />} />
-            <Route path="/partners" element={<AdminPartners />} />
+            <Route path="/partners" element={<AdminPartners showConfirm={showConfirm} />} />
             <Route path="/partners/add" element={<AddPartnerForm />} />
             <Route path="/partners/:uid" element={<PartnerDetailView showConfirm={showConfirm} />} />
             <Route path="/blog/*" element={<AdminBlog showConfirm={showConfirm} />} />
@@ -454,12 +455,31 @@ function AdminDashboard() {
 // -------------------------------------------------------------
 // TAB 2: Clients
 // -------------------------------------------------------------
-function AdminClients() {
+function AdminClients({ showConfirm }) {
   const [clients, setClients] = useState([]);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All'); // All, Active, Completed
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { addToast } = useToast();
+
+  const handleDeleteClient = (clientId, e) => {
+    e.stopPropagation();
+    showConfirm({
+      title: 'Delete Client',
+      message: 'Are you sure you want to delete this client? This cannot be undone.',
+      type: 'danger',
+      confirmText: 'Delete',
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(db, 'clients', clientId));
+          addToast('success', 'Client deleted successfully');
+        } catch (err) {
+          addToast('error', 'Failed to delete client');
+        }
+      }
+    });
+  };
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, 'clients'), async (snap) => {
@@ -558,14 +578,19 @@ function AdminClients() {
               <div key={client.id} onClick={() => navigate(`/admin/clients/${client.id}`)} className="border-b border-[rgba(17,17,16,0.05)] last:border-0 hover:bg-[rgba(27,107,47,0.02)] transition-colors cursor-pointer">
                 {/* Mobile */}
                 <div className="md:hidden p-4 flex flex-col gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[rgba(27,107,47,0.1)] text-[#1B6B2F] font-[700] text-[14px] flex items-center justify-center shrink-0">
-                      {client.name?.substring(0,2).toUpperCase()}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[rgba(27,107,47,0.1)] text-[#1B6B2F] font-[700] text-[14px] flex items-center justify-center shrink-0">
+                        {client.name?.substring(0,2).toUpperCase()}
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-[14px] font-[600] text-[#111110]">{client.name}</div>
+                        <div className="text-[12px] text-[rgba(17,17,16,0.45)]">{client.email}</div>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <div className="text-[14px] font-[600] text-[#111110]">{client.name}</div>
-                      <div className="text-[12px] text-[rgba(17,17,16,0.45)]">{client.email}</div>
-                    </div>
+                    <button onClick={(e) => handleDeleteClient(client.id, e)} className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors">
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 </div>
 
@@ -607,7 +632,10 @@ function AdminClients() {
                     {formatDate(client.createdAt)}
                   </div>
 
-                  <div className="col-span-1 flex justify-end">
+                  <div className="col-span-1 flex justify-end gap-2">
+                    <button onClick={(e) => handleDeleteClient(client.id, e)} className="h-[30px] px-2 rounded-[100px] border border-red-200 bg-transparent hover:bg-red-50 text-red-600 transition-colors">
+                      <Trash2 size={14} />
+                    </button>
                     <button onClick={(e) => { e.stopPropagation(); navigate(`/admin/clients/${client.id}`); }} className="h-[30px] px-3 rounded-[100px] border border-[rgba(27,107,47,0.2)] bg-transparent hover:bg-[rgba(27,107,47,0.05)] text-[#1B6B2F] text-[12px] font-[600] transition-colors whitespace-nowrap">
                       View →
                     </button>
@@ -1632,11 +1660,30 @@ function AddPartnerForm() {
 }
 
 // 2. PARTNERS LIST VIEW
-function AdminPartners() {
+function AdminPartners({ showConfirm }) {
   const [partners, setPartners] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { addToast } = useToast();
+
+  const handleDeletePartner = (partnerId, e) => {
+    e.stopPropagation();
+    showConfirm({
+      title: 'Delete Partner',
+      message: 'Are you sure you want to delete this partner? This cannot be undone.',
+      type: 'danger',
+      confirmText: 'Delete',
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(db, 'partners', partnerId));
+          addToast('success', 'Partner deleted successfully');
+        } catch (err) {
+          addToast('error', 'Failed to delete partner');
+        }
+      }
+    });
+  };
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, 'partners'), (snap) => {
@@ -1714,15 +1761,20 @@ function AdminPartners() {
               <div key={partner.id} onClick={() => navigate(`/admin/partners/${partner.id}`)} className="border-b border-[rgba(17,17,16,0.05)] last:border-0 hover:bg-[rgba(27,107,47,0.02)] transition-colors cursor-pointer">
                 {/* Mobile */}
                 <div className="md:hidden p-4 flex flex-col gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[rgba(27,107,47,0.1)] text-[#1B6B2F] font-[700] text-[14px] flex items-center justify-center shrink-0">
-                      {partner.name?.substring(0,2).toUpperCase()}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[rgba(27,107,47,0.1)] text-[#1B6B2F] font-[700] text-[14px] flex items-center justify-center shrink-0">
+                        {partner.name?.substring(0,2).toUpperCase()}
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-[14px] font-[600] text-[#111110]">{partner.name}</div>
+                        <div className="text-[12px] text-[rgba(17,17,16,0.45)]">{partner.email}</div>
+                        <div className="text-[12px] text-[rgba(17,17,16,0.45)]">{partner.phone}</div>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <div className="text-[14px] font-[600] text-[#111110]">{partner.name}</div>
-                      <div className="text-[12px] text-[rgba(17,17,16,0.45)]">{partner.email}</div>
-                      <div className="text-[12px] text-[rgba(17,17,16,0.45)]">{partner.phone}</div>
-                    </div>
+                    <button onClick={(e) => handleDeletePartner(partner.id, e)} className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors">
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 </div>
 
@@ -1749,7 +1801,10 @@ function AdminPartners() {
                     {formatDate(partner.createdAt)}
                   </div>
 
-                  <div className="col-span-1 flex justify-end">
+                  <div className="col-span-1 flex justify-end gap-2">
+                    <button onClick={(e) => handleDeletePartner(partner.id, e)} className="h-[30px] px-2 rounded-[100px] border border-red-200 bg-transparent hover:bg-red-50 text-red-600 transition-colors">
+                      <Trash2 size={14} />
+                    </button>
                     <button onClick={(e) => { e.stopPropagation(); navigate(`/admin/partners/${partner.id}`); }} className="h-[30px] px-3 rounded-[100px] border border-[rgba(27,107,47,0.2)] bg-transparent hover:bg-[rgba(27,107,47,0.05)] text-[#1B6B2F] text-[12px] font-[600] transition-colors whitespace-nowrap">
                       View →
                     </button>
@@ -1801,6 +1856,53 @@ function PartnerDetailView({ showConfirm }) {
     return () => unsubscribe();
   }, [uid]);
 
+  const [sheetCases, setSheetCases] = useState([]);
+  useEffect(() => {
+    if (!partner) return;
+    const fetchSheet = async () => {
+      try {
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzDvmLliVGdBQCvB68D4SbuWpYlWNoUYZIK3QdM6TOGQwmP4kydtWIS1s4NKtR9Hmq3NA/exec';
+        const res = await fetch(SCRIPT_URL + '?action=getLedger');
+        const data = await res.json();
+        let recs = data.records || data || [];
+        recs = processSheetRecords(recs);
+        const filtered = recs.filter(row => {
+          if (!row || !row['Partner Name']) return false;
+          return row['Partner Name'].toString().trim().toLowerCase() === partner.name?.toString().trim().toLowerCase();
+        });
+        setSheetCases(filtered);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchSheet();
+  }, [partner]);
+
+  const mergedReferrals = [...referrals];
+  const mergedKeys = new Set(mergedReferrals.map(r => r.pan?.toLowerCase() || r.clientName?.toLowerCase()));
+
+  sheetCases.forEach(sheetCase => {
+    const panKey = sheetCase['PAN']?.toLowerCase();
+    const nameKey = sheetCase['Client Name']?.toLowerCase();
+    if (!mergedKeys.has(panKey) && !mergedKeys.has(nameKey)) {
+      mergedReferrals.push({
+        id: sheetCase['PAN'] || sheetCase['Client Name'] || Math.random().toString(),
+        clientName: sheetCase['Client Name'] || '',
+        companyName: sheetCase['Company Name'] || '',
+        pan: sheetCase['PAN'] || '',
+        arnNumber: sheetCase['ARN Number'] || '',
+        gstStatus: 'Pending',
+        paymentStatus: sheetCase['Payment Status'] || 'In Process',
+        month: sheetCase['Timestamp'] ? new Date(sheetCase['Timestamp']).toLocaleString('default', { month: 'short', year: 'numeric' }) : 'Unknown',
+        timestamp: sheetCase['Timestamp'] || new Date().toISOString(),
+        isSheet: true
+      });
+    }
+  });
+  
+  mergedReferrals.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+
   if (loading || !partner) {
     return (
       <div className="fade-up-enter max-w-[1000px] mx-auto pb-20">
@@ -1824,6 +1926,22 @@ function PartnerDetailView({ showConfirm }) {
   const handleEditClick = (referral) => {
     setSelectedReferral(referral);
     setShowAddEditModal(true);
+  };
+
+  const handleDeleteReferralClick = (referral) => {
+    if (referral.isSheet) {
+      addToast('error', 'Cannot delete referrals synced from Google Sheets.');
+      return;
+    }
+    showConfirm('Delete Referral', 'Are you sure you want to delete this referral? This action cannot be undone.', async () => {
+      try {
+        await deleteDoc(doc(db, `partners/${uid}/referrals`, referral.id));
+        addToast('success', 'Referral deleted successfully');
+      } catch (e) {
+        console.error(e);
+        addToast('error', 'Failed to delete referral');
+      }
+    });
   };
 
   const getGSTPill = (status) => {
@@ -1887,13 +2005,13 @@ function PartnerDetailView({ showConfirm }) {
         </div>
 
         <div className="divide-y divide-[rgba(17,17,16,0.05)]">
-          {referrals.length === 0 ? (
+          {mergedReferrals.length === 0 ? (
             <div className="p-16 flex flex-col items-center justify-center text-center">
               <Users size={32} className="text-[rgba(17,17,16,0.15)] mb-3" />
               <div className="text-[15px] font-[500] text-[rgba(17,17,16,0.4)]">No referrals added yet</div>
             </div>
           ) : (
-            referrals.map((ref) => (
+            mergedReferrals.map((ref) => (
               <div key={ref.id}>
                 {/* Mobile View */}
                 <div className="md:hidden p-4 flex flex-col gap-2">
@@ -1902,12 +2020,22 @@ function PartnerDetailView({ showConfirm }) {
                       <div className="text-[14px] font-[600] text-[#111110]">{ref.clientName}</div>
                       <div className="text-[12px] text-[rgba(17,17,16,0.5)]">ARN: {ref.arnNumber || 'N/A'}</div>
                     </div>
-                    <button 
-                      onClick={() => handleEditClick(ref)} 
-                      className="p-2 text-[rgba(17,17,16,0.4)] hover:text-[#1B6B2F] transition-colors"
-                    >
-                      <Pencil size={16} />
-                    </button>
+                    <div className="flex items-center">
+                      <button 
+                        onClick={() => handleEditClick(ref)} 
+                        className="p-2 text-[rgba(17,17,16,0.4)] hover:text-[#1B6B2F] transition-colors"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      {!ref.isSheet && (
+                        <button 
+                          onClick={() => handleDeleteReferralClick(ref)} 
+                          className="p-2 text-[rgba(17,17,16,0.4)] hover:text-red-600 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="flex gap-2 mt-1.5">
                     {getGSTPill(ref.gstStatus)}
@@ -1933,13 +2061,21 @@ function PartnerDetailView({ showConfirm }) {
                   <div className="col-span-2 text-center text-[13px] text-[rgba(17,17,16,0.7)] font-[500]">
                     {ref.month}
                   </div>
-                  <div className="col-span-1 flex justify-end">
+                  <div className="col-span-1 flex justify-end gap-1">
                     <button 
                       onClick={() => handleEditClick(ref)} 
                       className="w-8 h-8 flex items-center justify-center rounded-full text-[rgba(17,17,16,0.4)] hover:text-[#1B6B2F] hover:bg-[rgba(27,107,47,0.05)] transition-colors"
                     >
                       <Pencil size={16} />
                     </button>
+                    {!ref.isSheet && (
+                      <button 
+                        onClick={() => handleDeleteReferralClick(ref)} 
+                        className="w-8 h-8 flex items-center justify-center rounded-full text-[rgba(17,17,16,0.4)] hover:text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1966,6 +2102,7 @@ function AddEditReferralModal({ partnerUid, referral, onClose }) {
   const [clientName, setClientName] = useState(referral ? referral.clientName : '');
   const [companyName, setCompanyName] = useState(referral ? referral.companyName : '');
   const [pan, setPan] = useState(referral ? referral.pan : '');
+  const [arnNumber, setArnNumber] = useState(referral ? (referral.arnNumber || '') : '');
   const [paymentStatus, setPaymentStatus] = useState(referral ? referral.paymentStatus : 'Pending');
   const [manualDate, setManualDate] = useState(referral?.timestamp ? referral.timestamp.split('T')[0] : today);
   const [loading, setLoading] = useState(false);
@@ -1985,16 +2122,17 @@ function AddEditReferralModal({ partnerUid, referral, onClose }) {
         clientName,
         companyName,
         pan,
+        arnNumber,
         paymentStatus,
         timestamp: manualDate
       };
 
-      if (isEdit) {
+      if (isEdit && !referral.isSheet) {
         await updateReferralStatus(partnerUid, referral.id, data);
         addToast('success', 'Referral updated successfully');
       } else {
         await addReferral(partnerUid, data);
-        addToast('success', 'Referral added successfully');
+        addToast('success', referral?.isSheet ? 'Referral saved and ARN updated!' : 'Referral added successfully');
       }
       onClose();
     } catch (e) {
@@ -2115,7 +2253,8 @@ function AdminCases() {
       try {
         const res = await fetch(SCRIPT_URL + '?action=getLedger');
         const data = await res.json();
-        const recs = data.records || data || [];
+        let recs = data.records || data || [];
+        recs = processSheetRecords(recs);
         setRecords(recs);
       } catch (err) {
         console.error(err);

@@ -4,6 +4,7 @@ import { LogOut } from 'lucide-react';
 import { useAuth } from '../components/AuthContext';
 import { db, auth } from '../firebase';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { processSheetRecords } from '../utils/ledgerUtils';
 
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzDvmLliVGdBQCvB68D4SbuWpYlWNoUYZIK3QdM6TOGQwmP4kydtWIS1s4NKtR9Hmq3NA/exec';
 
@@ -49,8 +50,12 @@ export default function PartnerDashboard() {
         try {
           const res = await fetch(SCRIPT_URL + '?action=getLedger');
           const data = await res.json();
-          const records = data.records || data || [];
-          sheetCases = (records || []).filter(row => row && row['Partner Name'] === partnerName);
+          let records = data.records || data || [];
+          records = processSheetRecords(records);
+          sheetCases = records.filter(row => {
+            if (!row || !row['Partner Name']) return false;
+            return row['Partner Name'].toString().trim().toLowerCase() === partnerName?.toString().trim().toLowerCase();
+          });
         } catch (e) {
           console.error("Failed to fetch Google Sheets cases", e);
         }
@@ -59,12 +64,12 @@ export default function PartnerDashboard() {
         // Use PAN or Client Name to deduplicate (giving priority to Firestore)
         const combined = [...firestoreCases];
         const combinedKeys = new Set(
-          combined.map(r => r['PAN']?.toLowerCase() || r['Client Name']?.toLowerCase())
+          combined.map(r => String(r['PAN'] || '').toLowerCase() || String(r['Client Name'] || '').toLowerCase())
         );
 
         for (const sCase of sheetCases) {
-          const key1 = sCase['PAN']?.toLowerCase();
-          const key2 = sCase['Client Name']?.toLowerCase();
+          const key1 = String(sCase['PAN'] || '').toLowerCase();
+          const key2 = String(sCase['Client Name'] || '').toLowerCase();
           if ((key1 && combinedKeys.has(key1)) || (key2 && combinedKeys.has(key2))) {
             // Already exists in Firestore data, skip
             continue;
