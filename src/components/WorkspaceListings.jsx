@@ -1,54 +1,42 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './WorkspaceListings.css';
 
-const listingsData = [
+const verifiedSpaces = [
   {
-    id: 'mh-001',
-    name: 'Premium Coworking at Goregaon',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    type: 'Coworking',
-    price: '15,000',
-    priceUnit: 'yr',
-    features: ['WiFi', 'GST Address', 'Meeting Room'],
-    image: '/images/listings/goregaon.jpg',
-    available: true
+    id: 1,
+    category: "Coworking",
+    title: "Premium Coworking at Goregaon",
+    location: "Mumbai, Maharashtra",
+    price: "₹15,000/yr",
+    amenities: ["WIFI", "GST Address", "Meeting Room"],
+    imageUrl: "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?w=800&q=80" // Dummy photo
   },
   {
-    id: 'mh-002',
-    name: 'Aesthetic Workspace at Bandra',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    type: 'Coworking',
-    price: '16,000',
-    priceUnit: 'yr',
-    features: ['WiFi', 'GST Address', 'Cafeteria'],
-    image: '/images/listings/bandra.jpg',
-    available: true
+    id: 2,
+    category: "Coworking",
+    title: "Aesthetic Workspace at Bandra",
+    location: "Mumbai, Maharashtra",
+    price: "₹16,000/yr",
+    amenities: ["WIFI", "GST Address", "Cafeteria"],
+    imageUrl: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80" // Dummy photo
   },
   {
-    id: 'gj-001',
-    name: 'Dependable Workspace Navrangpura',
-    city: 'Ahmedabad',
-    state: 'Gujarat',
-    type: 'Managed Office',
-    price: '14,000',
-    priceUnit: 'yr',
-    features: ['WiFi', 'Parking', 'GST Address'],
-    image: '/images/listings/navrangpura.jpg',
-    available: true
+    id: 3,
+    category: "Managed Office",
+    title: "Dependable Workspace Navrangpura",
+    location: "Ahmedabad, Gujarat",
+    price: "₹14,000/yr",
+    amenities: ["WIFI", "Parking", "GST Address"],
+    imageUrl: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80" // Dummy photo
   },
   {
-    id: 'pc-001',
-    name: 'Executive Private Cabin',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    type: 'Private Cabin',
-    price: '25,000',
-    priceUnit: 'mo',
-    features: ['High-Speed WiFi', '24/7 Access', 'AC'],
-    image: '/images/listings/private-cabin.jpg',
-    available: true
+    id: 4,
+    category: "Private Cabin",
+    title: "Executive Private Cabin",
+    location: "Mumbai, Maharashtra",
+    price: "₹25,000/mo",
+    amenities: ["High-Speed WIFI", "24/7 Access", "AC"],
+    imageUrl: "https://images.unsplash.com/photo-1604328698692-f76ea9498e76?w=800&q=80" // Dummy photo
   }
 ];
 
@@ -109,7 +97,7 @@ const SkeletonImage = () => (
 
 const WorkspaceListings = () => {
   const [activeFilter, setActiveFilter] = useState('All');
-  const [filteredListings, setFilteredListings] = useState(listingsData);
+  const [filteredListings, setFilteredListings] = useState(verifiedSpaces);
   const scrollRef = useRef(null);
   const observerRef = useRef(null);
 
@@ -132,9 +120,9 @@ const WorkspaceListings = () => {
   useEffect(() => {
     // Filter logic
     if (activeFilter === 'All') {
-      setFilteredListings(listingsData);
+      setFilteredListings(verifiedSpaces);
     } else {
-      setFilteredListings(listingsData.filter(l => l.type === activeFilter));
+      setFilteredListings(verifiedSpaces.filter(l => l.category === activeFilter));
     }
     
     // Scroll back to left
@@ -191,17 +179,17 @@ const WorkspaceListings = () => {
     
     if (isWaitlist) {
       message = `Hi Bharat Office Setu! I'd like to join the waitlist for:\n\n` +
-        `📍 *${listing.name}*\n` +
-        `🏙️ ${listing.city}, ${listing.state}\n` +
-        `🏢 Type: ${listing.type}\n` +
-        `💰 Price: ₹${listing.price}/${listing.priceUnit}\n\n` +
+        `📍 *${listing.title}*\n` +
+        `🏙️ ${listing.location}\n` +
+        `🏢 Type: ${listing.category}\n` +
+        `💰 Price: ${listing.price}\n\n` +
         `Please let me know when a space opens up.`;
     } else {
       message = `Hi Bharat Office Setu! I'm interested in this workspace:\n\n` +
-        `📍 *${listing.name}*\n` +
-        `🏙️ ${listing.city}, ${listing.state}\n` +
-        `🏢 Type: ${listing.type}\n` +
-        `💰 Price: ₹${listing.price}/${listing.priceUnit}\n\n` +
+        `📍 *${listing.title}*\n` +
+        `🏙️ ${listing.location}\n` +
+        `🏢 Type: ${listing.category}\n` +
+        `💰 Price: ${listing.price}\n\n` +
         `Please share availability and next steps.`;
     }
     
@@ -222,11 +210,11 @@ const WorkspaceListings = () => {
       <div className="workspace-header-container">
         <div className="our-spaces-pill">OUR SPACES</div>
         <h2 className="workspace-headline">
-          <span className="text-dark">Bridging Your Business to</span><br />
-          <span className="text-accent">India's Finest Workspaces.</span>
+          <span className="text-dark">Verified Business Premises for</span><br />
+          <span className="text-accent">Physical &amp; Virtual Offices</span>
         </h2>
         <p className="workspace-subtext">
-          Premium coworking, private cabins, virtual offices and managed spaces — ready when you are
+          We facilitate documented use of verified shared business premises.
         </p>
         
         <div className="filter-row">
@@ -275,8 +263,8 @@ const WorkspaceListings = () => {
                       </div>
                     )}
                     <img 
-                      src={listing.image} 
-                      alt={listing.name} 
+                      src={listing.imageUrl} 
+                      alt={listing.title} 
                       onLoad={() => setLoaded(true)}
                       onError={() => { setLoaded(true); setError(true); }}
                       className={`listing-img ${loaded && !error ? 'opacity-100' : 'opacity-0'}`}
@@ -287,22 +275,28 @@ const WorkspaceListings = () => {
 
               return (
                 <div key={listing.id} className="listing-card" tabIndex="0">
-                  <div className="card-image-section">
+                  <div className="card-image-section relative">
                     <ImageComponent />
-                    <div className="type-badge">{listing.type.toUpperCase()}</div>
-                    <div className={`availability-badge ${listing.available ? 'available' : 'unavailable'}`}>
-                      {listing.available ? 'Available' : 'Full'}
+                    <div className="type-badge">{listing.category.toUpperCase()}</div>
+                    <div className={`availability-badge ${listing.available !== false ? 'available' : 'unavailable'}`}>
+                      {listing.available !== false ? 'Available' : 'Full'}
+                    </div>
+                    {/* Verified Badge */}
+                    <div className="absolute bottom-3 right-3 bg-white rounded-full p-[2px] shadow-sm flex items-center justify-center z-10">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#22c55e" className="w-6 h-6">
+                        <path d="M11.99 2C7.52 2 4 5.52 4 9.99c0 1.94.69 3.71 1.83 5.09l-.79 3.73 3.82-1.07A7.95 7.95 0 0011.99 18c4.47 0 8-3.52 8-7.99S16.46 2 11.99 2zm-1 11.41L7.5 10l1.41-1.41 2.09 2.09 4.09-4.09L16.5 8l-5.51 5.41z"/>
+                      </svg>
                     </div>
                   </div>
                   
                   <div className="card-body">
                     <div className="location-line">
                       <PinIcon />
-                      <span>{listing.city}, {listing.state}</span>
+                      <span>{listing.location}</span>
                     </div>
-                    <h3 className="listing-name">{listing.name}</h3>
+                    <h3 className="listing-name">{listing.title}</h3>
                     <div className="feature-pills">
-                      {listing.features.map(feat => (
+                      {listing.amenities.map(feat => (
                         <span key={feat} className="feature-pill">{feat}</span>
                       ))}
                     </div>
@@ -310,18 +304,17 @@ const WorkspaceListings = () => {
                   
                   <div className="card-footer">
                     <div className="price-container">
-                      <div className="price">₹{listing.price}</div>
-                      <div className="price-unit">/{listing.priceUnit}</div>
+                      <div className="price">{listing.price}</div>
                     </div>
                     <button 
-                      className={`book-now-btn ${!listing.available ? 'waitlist-btn' : ''}`}
+                      className={`book-now-btn ${listing.available === false ? 'waitlist-btn' : ''}`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        openWhatsApp(listing, !listing.available);
+                        openWhatsApp(listing, listing.available === false);
                       }}
-                      aria-label={`${listing.available ? 'Book' : 'Waitlist for'} ${listing.name} on WhatsApp`}
+                      aria-label={`${listing.available !== false ? 'Book' : 'Waitlist for'} ${listing.title} on WhatsApp`}
                     >
-                      {listing.available ? 'Book Now \u2192' : 'Join Waitlist'}
+                      {listing.available !== false ? 'Book Now \u2192' : 'Join Waitlist'}
                     </button>
                   </div>
                 </div>
