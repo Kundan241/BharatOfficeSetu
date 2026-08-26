@@ -343,7 +343,7 @@ export default function DraftGenerator() {
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(40, 40, 40);
-      
+
       const cleanText = (text || '').replace(/[\s\u00A0\u200B]+/g, ' ').trim();
       const lines = doc.splitTextToSize(cleanText, contentWidth);
       lines.forEach(line => {
@@ -385,7 +385,7 @@ export default function DraftGenerator() {
         unit: 'mm',
         format: 'a4'
       });
-      
+
       let yPosNoc = 30;
       const helpersNoc = {
         addSectionHeading: (text) => {
@@ -419,7 +419,7 @@ export default function DraftGenerator() {
         contentWidth,
         yPos: () => yPosNoc,
         setY: (y) => { yPosNoc = y; },
-        addOrangeHeaderOnPage: () => {}
+        addOrangeHeaderOnPage: () => { }
       };
 
       buildGurgaonNOC(docNoc, formData, helpersNoc);
@@ -437,7 +437,7 @@ export default function DraftGenerator() {
         unit: 'mm',
         format: 'a4'
       });
-      
+
       let yPosNoc = 30;
       const addOrangeHeaderNoc = () => {
         // Removed for Asset Sense
@@ -1305,9 +1305,9 @@ export default function DraftGenerator() {
 
     const companyTypeString = data.companyType === 'LLP' ? 'a Limited Liability Partnership' :
       data.companyType === 'Proprietorship' ? 'a sole proprietorship firm' :
-      data.companyType === 'Trust' ? 'a registered Trust' :
-      data.companyType === 'Partnership Firm' ? 'a partnership firm' :
-      'a company incorporated under the provisions of the Companies Act, 2013';
+        data.companyType === 'Trust' ? 'a registered Trust' :
+          data.companyType === 'Partnership Firm' ? 'a partnership firm' :
+            'a company incorporated under the provisions of the Companies Act, 2013';
 
     h.addParagraph(
       (data.clientCompanyName || '___________') + ', ' + companyTypeString + ' having its principal place of business at ' + (data.directorAddress || '___________') + ', represented herein by its ' + (data.representativeType || 'Director') + ', ' + (data.directorName || '___________') + ' (Aadhaar No.: ' + (data.aadharNumber || '___________') + ', PAN: ' + (data.panNumber || '___________') + ', Contact: ' + (data.mobileNumber || '___________') + ') (hereinafter referred to as the "LICENSEE", which expression shall, unless repugnant to the context or meaning thereof, be deemed to mean and include his/its legal heirs, successors, and permitted assigns) of the SECOND PART.'
@@ -1469,7 +1469,7 @@ export default function DraftGenerator() {
     y += 6;
     doc.text('Aadhaar No.: ' + (data.aadharNumber || '___________'), h.margin, y);
     y += 10;
-    
+
     doc.text('Date: ' + formatDate(data.nocDate || data.agreementDate), h.margin, y);
     y += 14;
 

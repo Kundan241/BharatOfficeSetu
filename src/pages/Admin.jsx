@@ -1895,6 +1895,7 @@ function PartnerDetailView({ showConfirm }) {
         paymentStatus: sheetCase['Payment Status'] || 'In Process',
         month: sheetCase['Timestamp'] ? new Date(sheetCase['Timestamp']).toLocaleString('default', { month: 'short', year: 'numeric' }) : 'Unknown',
         timestamp: sheetCase['Timestamp'] || new Date().toISOString(),
+        remarks: sheetCase['Remarks'] || '',
         isSheet: true
       });
     }
@@ -1933,21 +1934,30 @@ function PartnerDetailView({ showConfirm }) {
       addToast('error', 'Cannot delete referrals synced from Google Sheets.');
       return;
     }
-    showConfirm('Delete Referral', 'Are you sure you want to delete this referral? This action cannot be undone.', async () => {
-      try {
-        await deleteDoc(doc(db, `partners/${uid}/referrals`, referral.id));
-        addToast('success', 'Referral deleted successfully');
-      } catch (e) {
-        console.error(e);
-        addToast('error', 'Failed to delete referral');
+    showConfirm({
+      title: 'Delete Referral',
+      message: 'Are you sure you want to delete this referral? This action cannot be undone.',
+      type: 'danger',
+      confirmText: 'Delete',
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(db, `partners/${uid}/referrals`, referral.id));
+          addToast('success', 'Referral deleted successfully');
+        } catch (e) {
+          console.error(e);
+          addToast('error', 'Failed to delete referral');
+        }
       }
     });
   };
 
-  const getGSTPill = (status) => {
-    if (status === 'Approved') {
+  const getGSTPill = (ref) => {
+    if (ref.pan && ref.pan !== 'N/A' && ref.pan.trim() !== '') {
+      return <span className="bg-[rgba(27,107,47,0.1)] text-[#1B6B2F] px-2.5 py-0.5 rounded-[100px] text-[12px] font-[600] truncate max-w-[120px] inline-block align-bottom" title={ref.pan}>{ref.pan}</span>;
+    }
+    if (ref.gstStatus === 'Approved') {
       return <span className="bg-[rgba(27,107,47,0.1)] text-[#1B6B2F] px-2.5 py-0.5 rounded-[100px] text-[12px] font-[600]">Approved</span>;
-    } else if (status === 'Rejected') {
+    } else if (ref.gstStatus === 'Rejected') {
       return <span className="bg-red-50 text-[#DC2626] px-2.5 py-0.5 rounded-[100px] text-[12px] font-[600]">Rejected</span>;
     }
     return <span className="bg-[rgba(244,131,31,0.1)] text-[#F4831F] px-2.5 py-0.5 rounded-[100px] text-[12px] font-[600]">Pending</span>;
@@ -1995,13 +2005,13 @@ function PartnerDetailView({ showConfirm }) {
       </div>
 
       <div className="bg-white rounded-[14px] border border-[rgba(17,17,16,0.08)] overflow-hidden shadow-sm">
-        <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-3 bg-[#F9F8F5] border-b border-[rgba(17,17,16,0.06)] text-[11px] font-[600] tracking-[0.08em] text-[rgba(17,17,16,0.4)]">
-          <div className="col-span-3">CLIENT NAME</div>
-          <div className="col-span-2">ARN NUMBER</div>
-          <div className="col-span-2 text-center">GST STATUS</div>
-          <div className="col-span-2 text-center">PAYMENT STATUS</div>
-          <div className="col-span-2 text-center">MONTH</div>
-          <div className="col-span-1 text-right">ACTIONS</div>
+        <div className="hidden md:grid grid-cols-[1.8fr_1.2fr_1fr_1fr_2.5fr_auto] gap-4 px-5 py-3 bg-[#F9F8F5] border-b border-[rgba(17,17,16,0.06)] text-[11px] font-[600] tracking-[0.08em] text-[rgba(17,17,16,0.4)]">
+          <div>CLIENT NAME</div>
+          <div>ARN NUMBER</div>
+          <div className="text-center">GST STATUS</div>
+          <div className="text-center">PAYMENT STATUS</div>
+          <div className="text-left">REMARKS</div>
+          <div className="text-right w-16">ACTIONS</div>
         </div>
 
         <div className="divide-y divide-[rgba(17,17,16,0.05)]">
@@ -2018,7 +2028,8 @@ function PartnerDetailView({ showConfirm }) {
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="text-[14px] font-[600] text-[#111110]">{ref.clientName}</div>
-                      <div className="text-[12px] text-[rgba(17,17,16,0.5)]">ARN: {ref.arnNumber || 'N/A'}</div>
+                      {ref.companyName && <div className="text-[12px] font-[500] text-[rgba(17,17,16,0.6)]">{ref.companyName}</div>}
+                      <div className="text-[12px] text-[rgba(17,17,16,0.5)] mt-0.5">ARN: {ref.arnNumber || 'N/A'}</div>
                     </div>
                     <div className="flex items-center">
                       <button 
@@ -2037,31 +2048,36 @@ function PartnerDetailView({ showConfirm }) {
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-2 mt-1.5">
-                    {getGSTPill(ref.gstStatus)}
+                  <div className="flex gap-2 mt-1.5 mb-1">
+                    {getGSTPill(ref)}
                     {getPaymentPill(ref.paymentStatus)}
-                    <span className="bg-[#F4F3EE] text-[rgba(17,17,16,0.6)] px-2.5 py-0.5 rounded-[100px] text-[12px] font-[500]">{ref.month}</span>
                   </div>
+                  {ref.remarks && (
+                    <div className="text-[12px] text-[rgba(17,17,16,0.7)] p-2 bg-[#F9F8F5] rounded-[8px] border border-[rgba(17,17,16,0.05)]">
+                      <span className="font-[600] text-[rgba(17,17,16,0.4)] mr-1">Remarks:</span> {ref.remarks}
+                    </div>
+                  )}
                 </div>
 
                 {/* Desktop View */}
-                <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-4 items-center">
-                  <div className="col-span-3 text-[14px] font-[600] text-[#111110] truncate">
-                    {ref.clientName}
+                <div className="hidden md:grid grid-cols-[1.8fr_1.2fr_1fr_1fr_2.5fr_auto] gap-4 px-5 py-4 items-center">
+                  <div className="truncate flex flex-col justify-center">
+                    <span className="text-[14px] font-[600] text-[#111110] truncate">{ref.clientName}</span>
+                    {ref.companyName && <span className="text-[12px] font-[500] text-[rgba(17,17,16,0.5)] truncate mt-0.5">{ref.companyName}</span>}
                   </div>
-                  <div className="col-span-2 text-[13px] text-[rgba(17,17,16,0.6)] font-mono truncate">
+                  <div className="text-[13px] text-[rgba(17,17,16,0.6)] font-mono truncate">
                     {ref.arnNumber || 'N/A'}
                   </div>
-                  <div className="col-span-2 text-center">
-                    {getGSTPill(ref.gstStatus)}
+                  <div className="text-center">
+                    {getGSTPill(ref)}
                   </div>
-                  <div className="col-span-2 text-center">
+                  <div className="text-center">
                     {getPaymentPill(ref.paymentStatus)}
                   </div>
-                  <div className="col-span-2 text-center text-[13px] text-[rgba(17,17,16,0.7)] font-[500]">
-                    {ref.month}
+                  <div className="text-[12px] text-[rgba(17,17,16,0.6)] line-clamp-2 leading-relaxed">
+                    {ref.remarks || '-'}
                   </div>
-                  <div className="col-span-1 flex justify-end gap-1">
+                  <div className="flex justify-end gap-1 w-16">
                     <button 
                       onClick={() => handleEditClick(ref)} 
                       className="w-8 h-8 flex items-center justify-center rounded-full text-[rgba(17,17,16,0.4)] hover:text-[#1B6B2F] hover:bg-[rgba(27,107,47,0.05)] transition-colors"
@@ -2105,6 +2121,7 @@ function AddEditReferralModal({ partnerUid, referral, onClose }) {
   const [arnNumber, setArnNumber] = useState(referral ? (referral.arnNumber || '') : '');
   const [paymentStatus, setPaymentStatus] = useState(referral ? referral.paymentStatus : 'Pending');
   const [manualDate, setManualDate] = useState(referral?.timestamp ? referral.timestamp.split('T')[0] : today);
+  const [remarks, setRemarks] = useState(referral ? (referral.remarks || '') : '');
   const [loading, setLoading] = useState(false);
 
   const isEdit = !!referral;
@@ -2124,7 +2141,8 @@ function AddEditReferralModal({ partnerUid, referral, onClose }) {
         pan,
         arnNumber,
         paymentStatus,
-        timestamp: manualDate
+        timestamp: manualDate,
+        remarks
       };
 
       if (isEdit && !referral.isSheet) {
@@ -2193,6 +2211,17 @@ function AddEditReferralModal({ partnerUid, referral, onClose }) {
           </div>
 
           <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-[600] text-[#111110]">ARN Number</label>
+            <input 
+              type="text" 
+              placeholder="e.g. ARN-123456"
+              value={arnNumber} 
+              onChange={e => setArnNumber(e.target.value)} 
+              className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] transition-all"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
             <label className="text-[12px] font-[600] text-[#111110]">Date *</label>
             <input 
               required
@@ -2216,6 +2245,16 @@ function AddEditReferralModal({ partnerUid, referral, onClose }) {
                 <option value="Paid">Paid</option>
               </select>
             </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-[600] text-[#111110]">Remarks</label>
+            <textarea 
+              placeholder="Any additional notes..."
+              value={remarks} 
+              onChange={e => setRemarks(e.target.value)} 
+              className="h-[80px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] p-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] transition-all resize-none"
+            />
           </div>
 
           <div className="flex gap-3 justify-end mt-6 pt-4 border-t border-[rgba(17,17,16,0.06)]">

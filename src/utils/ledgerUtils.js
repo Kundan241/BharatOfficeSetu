@@ -28,7 +28,7 @@ export function processSheetRecords(records) {
     
     // Remap if missing or defaulted to Admin/Self
     if (!partnerName || partnerName === 'Admin/Self') {
-       if (docType.toLowerCase().includes('dwarka') || docType === 'Workspace Service Agreement') {
+       if (docType.toLowerCase().includes('dwarka')) {
          partnerName = 'JupiterSpace';
        } else if (docType.toLowerCase().includes('gurgaon') || docType === 'Ultraview Hospitality' || docType === 'true-work-lounge') {
          partnerName = 'Ultraview Hospitality';
@@ -103,7 +103,13 @@ export function processSheetRecords(records) {
     }
   }
 
-  return Object.values(uniqueRecords).sort((a, b) => {
+  const recordsToHide = ['AWVPK5125B', 'ABTFA6324M'];
+  const finalRecords = Object.values(uniqueRecords).filter(row => {
+    const pan = String(row['PAN'] || '').trim().toUpperCase();
+    return !recordsToHide.includes(pan);
+  });
+
+  return finalRecords.sort((a, b) => {
     return new Date(b['Timestamp'] || 0) - new Date(a['Timestamp'] || 0);
   });
 }

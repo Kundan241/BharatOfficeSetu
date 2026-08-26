@@ -39,7 +39,9 @@ export default function PartnerDashboard() {
             'Company Name': d.data().companyName || d.data()['Company Name'] || 'N/A',
             'PAN': d.data().pan || d.data()['PAN'] || 'N/A',
             'Payment Status': d.data().paymentStatus || d.data()['Payment Status'] || 'In Process',
-            'ARN Number': d.data().arnNumber || d.data()['ARN Number']
+            'ARN Number': d.data().arnNumber || d.data()['ARN Number'],
+            'Remarks': d.data().remarks || d.data()['Remarks'],
+            'GST Status': d.data().gstStatus || d.data()['GST Status'] || 'Pending'
           }));
         } catch (e) {
           console.error("Failed to fetch Firestore cases", e);
@@ -208,39 +210,54 @@ export default function PartnerDashboard() {
             ) : (
               <div className="flex flex-col">
                 {/* Table Header (Desktop) */}
-                <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 border-b border-[rgba(17,17,16,0.06)] bg-[#F9F8F5] text-[11px] font-[600] tracking-[0.08em] text-[rgba(17,17,16,0.4)]">
-                  <div className="col-span-4">CLIENT NAME</div>
-                  <div className="col-span-4">COMPANY NAME</div>
-                  <div className="col-span-2">PAN</div>
-                  <div className="col-span-2">PAYMENT STATUS</div>
+                <div className="hidden md:grid grid-cols-[1.8fr_1.2fr_1fr_1fr_2.5fr] gap-4 px-6 py-3 border-b border-[rgba(17,17,16,0.06)] bg-[#F9F8F5] text-[11px] font-[600] tracking-[0.08em] text-[rgba(17,17,16,0.4)]">
+                  <div>CLIENT NAME</div>
+                  <div>ARN NUMBER</div>
+                  <div className="text-center">GST STATUS</div>
+                  <div className="text-center">PAYMENT STATUS</div>
+                  <div className="text-left">REMARKS</div>
                 </div>
 
                 {/* Referrals List */}
                 {(displayedReferrals || []).map((ref, index) => (
                   <div key={ref?.id || index} className="border-b border-[rgba(17,17,16,0.05)] last:border-0 hover:bg-[rgba(27,107,47,0.02)] transition-colors">
                     {/* Mobile View */}
-                    <div className="md:hidden p-4 flex flex-col gap-3">
-                      <div className="font-[600] text-[14px] text-[#111110]">{ref?.['Client Name'] || 'N/A'}</div>
-                      <div className="text-[13px] font-mono text-[rgba(17,17,16,0.45)]">{ref?.['Company Name'] || 'N/A'}</div>
-                      <div className="text-[13px] font-mono text-[rgba(17,17,16,0.45)]">{ref?.['PAN'] || 'N/A'}</div>
-                      <div className="flex gap-2">
+                    <div className="md:hidden p-4 flex flex-col gap-2">
+                      <div className="text-[14px] font-[600] text-[#111110]">{ref?.['Client Name'] || 'N/A'}</div>
+                      {ref?.['Company Name'] && ref?.['Company Name'] !== 'N/A' && (
+                        <div className="text-[12px] font-[500] text-[rgba(17,17,16,0.6)]">{ref?.['Company Name']}</div>
+                      )}
+                      <div className="text-[12px] text-[rgba(17,17,16,0.5)] mt-0.5">ARN: {ref?.['ARN Number'] || 'N/A'}</div>
+                      <div className="flex gap-2 mt-1.5 mb-1">
+                        <GSTPill status={ref?.['GST Status']} pan={ref?.['PAN']} />
                         <StatusPill status={ref?.['Payment Status']} />
                       </div>
+                      {ref?.['Remarks'] && (
+                        <div className="text-[12px] text-[rgba(17,17,16,0.7)] p-2 bg-[#F9F8F5] rounded-[8px] border border-[rgba(17,17,16,0.05)]">
+                          <span className="font-[600] text-[rgba(17,17,16,0.4)] mr-1">Remarks:</span> {ref?.['Remarks']}
+                        </div>
+                      )}
                     </div>
 
                     {/* Desktop View */}
-                    <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 items-center">
-                      <div className="col-span-4 font-[600] text-[14px] text-[#111110] truncate">
-                        {ref?.['Client Name'] || 'N/A'}
+                    <div className="hidden md:grid grid-cols-[1.8fr_1.2fr_1fr_1fr_2.5fr] gap-4 px-6 py-4 items-center">
+                      <div className="truncate flex flex-col justify-center">
+                        <span className="text-[14px] font-[600] text-[#111110] truncate">{ref?.['Client Name'] || 'N/A'}</span>
+                        {ref?.['Company Name'] && ref?.['Company Name'] !== 'N/A' && (
+                          <span className="text-[12px] font-[500] text-[rgba(17,17,16,0.5)] truncate mt-0.5">{ref?.['Company Name']}</span>
+                        )}
                       </div>
-                      <div className="col-span-4 text-[13px] text-[rgba(17,17,16,0.6)] truncate">
-                        {ref?.['Company Name'] || 'N/A'}
+                      <div className="text-[13px] text-[rgba(17,17,16,0.6)] font-mono truncate">
+                        {ref?.['ARN Number'] || 'N/A'}
                       </div>
-                      <div className="col-span-2 text-[13px] font-mono text-[rgba(17,17,16,0.45)] truncate">
-                        {ref?.['PAN'] || 'N/A'}
+                      <div className="text-center">
+                        <GSTPill status={ref?.['GST Status']} pan={ref?.['PAN']} />
                       </div>
-                      <div className="col-span-2">
+                      <div className="text-center">
                         <StatusPill status={ref?.['Payment Status']} />
+                      </div>
+                      <div className="text-[12px] text-[rgba(17,17,16,0.6)] line-clamp-2 leading-relaxed">
+                        {ref?.['Remarks'] || '-'}
                       </div>
                     </div>
                   </div>
@@ -277,4 +294,16 @@ function StatusPill({ status }) {
       {currentStatus}
     </span>
   );
+}
+
+function GSTPill({ status, pan }) {
+  if (pan && pan !== 'N/A' && pan.trim() !== '') {
+    return <span className="bg-[rgba(27,107,47,0.1)] text-[#1B6B2F] px-2.5 py-0.5 rounded-[100px] text-[12px] font-[600] truncate max-w-[120px] inline-block align-bottom" title={pan}>{pan}</span>;
+  }
+  if (status === 'Approved') {
+    return <span className="bg-[rgba(27,107,47,0.1)] text-[#1B6B2F] px-2.5 py-0.5 rounded-[100px] text-[12px] font-[600]">Approved</span>;
+  } else if (status === 'Rejected') {
+    return <span className="bg-red-50 text-[#DC2626] px-2.5 py-0.5 rounded-[100px] text-[12px] font-[600]">Rejected</span>;
+  }
+  return <span className="bg-[rgba(244,131,31,0.1)] text-[#F4831F] px-2.5 py-0.5 rounded-[100px] text-[12px] font-[600]">Pending</span>;
 }
