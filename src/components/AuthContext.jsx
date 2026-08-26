@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
       if (currentUser) {
         try {
           const adminSnap = await getDoc(doc(db, 'admins', currentUser.uid));
-          const isHardcodedAdmin = ['admin@bos.com', 'mu8ndan@gmail.com'].includes(currentUser.email);
+          const isHardcodedAdmin = ['admin@bos.com', 'mu8ndan@gmail.com', 'partners@bharatofficesetu.com'].includes(currentUser.email);
           
           if (adminSnap.exists() || isHardcodedAdmin) {
             setIsAdmin(true);

@@ -5,7 +5,7 @@ import { useToast } from '../components/ToastContext';
 import { login, sendSetPasswordEmail } from '../services/auth';
 import { useAuth } from '../components/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -77,7 +77,7 @@ export default function Login() {
 
       // 1. Check Admin
       try {
-        const adminEmails = ['admin@bos.com', 'mu8ndan@gmail.com'];
+        const adminEmails = ['admin@bos.com', 'mu8ndan@gmail.com', 'partners@bharatofficesetu.com'];
         const adminSnap = await getDoc(doc(db, 'admins', uid));
         if (adminSnap.exists() || adminEmails.includes(result.user.email)) { 
           userRole = 'admin'; 
