@@ -3,6 +3,24 @@ import './WorkspaceListings.css';
 
 const verifiedSpaces = [
   {
+    id: 5,
+    category: "Managed Office",
+    title: "BOS Verified Space",
+    location: "Sector 48, Sohna Road, Gurugram. Exact address shared upon enquiry.",
+    price: "Starting ₹6,500/mo",
+    amenities: ["120 Workstations", "4 Cabins", "Conference", "Cafeteria"],
+    imageUrl: "/images/listings/AssetSense.jpeg"
+  },
+  {
+    id: 6,
+    category: "Coworking",
+    title: "Premium Workspace at Saket",
+    location: "Saket",
+    price: "₹15,000/yr",
+    amenities: ["WIFI", "GST Address", "Meeting Room"],
+    imageUrl: "/images/listings/Saket.jpeg"
+  },
+  {
     id: 1,
     category: "Coworking",
     title: "Premium Coworking at Goregaon",
@@ -281,12 +299,7 @@ const WorkspaceListings = () => {
                     <div className={`availability-badge ${listing.available !== false ? 'available' : 'unavailable'}`}>
                       {listing.available !== false ? 'Available' : 'Full'}
                     </div>
-                    {/* Verified Badge */}
-                    <div className="absolute bottom-3 right-3 bg-white rounded-full p-[2px] shadow-sm flex items-center justify-center z-10">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#22c55e" className="w-6 h-6">
-                        <path d="M11.99 2C7.52 2 4 5.52 4 9.99c0 1.94.69 3.71 1.83 5.09l-.79 3.73 3.82-1.07A7.95 7.95 0 0011.99 18c4.47 0 8-3.52 8-7.99S16.46 2 11.99 2zm-1 11.41L7.5 10l1.41-1.41 2.09 2.09 4.09-4.09L16.5 8l-5.51 5.41z"/>
-                      </svg>
-                    </div>
+                    {/* Verified Badge removed from here to be placed next to title */}
                   </div>
                   
                   <div className="card-body">
@@ -294,7 +307,12 @@ const WorkspaceListings = () => {
                       <PinIcon />
                       <span>{listing.location}</span>
                     </div>
-                    <h3 className="listing-name">{listing.title}</h3>
+                    <h3 className="listing-name" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      {listing.title}
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z" fill="#0095F6"/>
+                      </svg>
+                    </h3>
                     <div className="feature-pills">
                       {listing.amenities.map(feat => (
                         <span key={feat} className="feature-pill">{feat}</span>
