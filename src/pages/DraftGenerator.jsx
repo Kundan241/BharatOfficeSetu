@@ -1068,9 +1068,9 @@ export default function DraftGenerator() {
     doc.text('Dear Sir,', h.margin, y);
     y += 8;
 
-    const cleanDirectorName = String(data.directorName || '___________').replace(/[\\s\\uFEFF\\xA0]+/g, ' ').trim();
-    const cleanAadharNumber = String(data.aadharNumber || '___________').replace(/[\\s\\uFEFF\\xA0]+/g, ' ').trim();
-    const cleanClientCompanyName = String(data.clientCompanyName || '___________').replace(/[\\s\\uFEFF\\xA0]+/g, ' ').trim();
+    const cleanDirectorName = String(data.directorName || '___________').replace(/[\s\uFEFF\xA0]+/g, ' ').trim();
+    const cleanAadharNumber = String(data.aadharNumber || '___________').replace(/[\s\uFEFF\xA0]+/g, ' ').trim();
+    const cleanClientCompanyName = String(data.clientCompanyName || '___________').replace(/[\s\uFEFF\xA0]+/g, ' ').trim();
 
     const nocText =
       'We M/s ULTRAVIEW HOSPITALITY PRIVATE LIMITED having its office space at "02-004, 2nd Floor, Emaar The Palm Square, Sector 66, Golf Course Road, Extension, Gurugram, Haryana, 122102" hereby declare and confirm that we are the legal lease owner of the above mentioned office premises and hereby allow Company "' + cleanClientCompanyName + '" to use the above-mentioned address as the Registered Office (GST Address office/Office) of Company ' + cleanClientCompanyName + '.\n\n' +
