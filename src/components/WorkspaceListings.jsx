@@ -3,58 +3,156 @@ import './WorkspaceListings.css';
 
 const verifiedSpaces = [
   {
-    id: 5,
+    id: 1,
+    isVerified: true,
     category: "Managed Office",
-    title: "BOS Verified Space",
-    location: "Sector 48, Sohna Road, Gurugram. Exact address shared upon enquiry.",
+    title: "Gurgaon (Haryana) Location",
+    location: "Gurgaon, Haryana",
     price: "Starting ₹6,500/mo",
     amenities: ["120 Workstations", "4 Cabins", "Conference", "Cafeteria"],
-    imageUrl: "/images/listings/AssetSense.jpeg"
+    images: [
+      "/images/listings/Gurgaon(Haryana)_Location/AssetSense.jpeg",
+      "/images/listings/Gurgaon(Haryana)_Location/WhatsApp%20Image%202026-08-07%20at%2018.35.52%20(1).jpeg",
+      "/images/listings/Gurgaon(Haryana)_Location/WhatsApp%20Image%202026-08-07%20at%2018.35.52.jpeg",
+      "/images/listings/Gurgaon(Haryana)_Location/WhatsApp%20Image%202026-08-07%20at%2018.35.53%20(1).jpeg",
+      "/images/listings/Gurgaon(Haryana)_Location/WhatsApp%20Image%202026-08-07%20at%2018.35.53.jpeg",
+      "/images/listings/Gurgaon(Haryana)_Location/WhatsApp%20Image%202026-08-07%20at%2018.35.54.jpeg",
+      "/images/listings/Gurgaon(Haryana)_Location/WhatsApp%20Image%202026-08-07%20at%2018.35.56%20(1).jpeg",
+      "/images/listings/Gurgaon(Haryana)_Location/WhatsApp%20Image%202026-08-07%20at%2018.35.57%20(1).jpeg",
+      "/images/listings/Gurgaon(Haryana)_Location/WhatsApp%20Image%202026-08-07%20at%2018.35.57%20(2).jpeg",
+      "/images/listings/Gurgaon(Haryana)_Location/WhatsApp%20Image%202026-08-07%20at%2018.35.57%20(3).jpeg",
+      "/images/listings/Gurgaon(Haryana)_Location/WhatsApp%20Image%202026-08-07%20at%2018.35.58%20(2).jpeg"
+    ]
+  },
+  {
+    id: 2,
+    isVerified: true,
+    category: "Coworking",
+    title: "Kondapur, Hyderabad",
+    location: "Kondapur, Hyderabad",
+    price: "₹15,000/yr",
+    amenities: ["WIFI", "GST Address", "Meeting Room"],
+    images: [
+      "/images/listings/Kondapur,Hyderabad/WhatsApp%20Image%202026-09-01%20at%2017.01.34%20(1).jpeg",
+      "/images/listings/Kondapur,Hyderabad/WhatsApp%20Image%202026-09-01%20at%2017.01.34%20(2).jpeg",
+      "/images/listings/Kondapur,Hyderabad/WhatsApp%20Image%202026-09-01%20at%2017.01.34.jpeg",
+      "/images/listings/Kondapur,Hyderabad/WhatsApp%20Image%202026-09-01%20at%2017.01.35%20(1).jpeg",
+      "/images/listings/Kondapur,Hyderabad/WhatsApp%20Image%202026-09-01%20at%2017.01.35.jpeg",
+      "/images/listings/Kondapur,Hyderabad/WhatsApp%20Image%202026-09-01%20at%2017.01.36%20(1).jpeg",
+      "/images/listings/Kondapur,Hyderabad/WhatsApp%20Image%202026-09-01%20at%2017.01.36%20(2).jpeg",
+      "/images/listings/Kondapur,Hyderabad/WhatsApp%20Image%202026-09-01%20at%2017.01.36.jpeg",
+      "/images/listings/Kondapur,Hyderabad/WhatsApp%20Image%202026-09-01%20at%2017.01.37.jpeg"
+    ]
+  },
+  {
+    id: 3,
+    isVerified: true,
+    category: "Coworking",
+    title: "Laxmi Nagar, East Delhi",
+    location: "Laxmi Nagar, East Delhi",
+    price: "₹15,000/yr",
+    amenities: ["WIFI", "GST Address", "Meeting Room"],
+    images: [
+      "/images/listings/Laxmi%20Nagar,East%20Delhi/WhatsApp%20Image%202026-09-01%20at%2017.00.59%20(1).jpeg",
+      "/images/listings/Laxmi%20Nagar,East%20Delhi/WhatsApp%20Image%202026-09-01%20at%2017.00.59.jpeg",
+      "/images/listings/Laxmi%20Nagar,East%20Delhi/WhatsApp%20Image%202026-09-01%20at%2017.01.00.jpeg",
+      "/images/listings/Laxmi%20Nagar,East%20Delhi/WhatsApp%20Image%202026-09-01%20at%2017.01.01%20(1).jpeg",
+      "/images/listings/Laxmi%20Nagar,East%20Delhi/WhatsApp%20Image%202026-09-01%20at%2017.01.01%20(2).jpeg",
+      "/images/listings/Laxmi%20Nagar,East%20Delhi/WhatsApp%20Image%202026-09-01%20at%2017.01.01.jpeg"
+    ]
+  },
+  {
+    id: 4,
+    isVerified: true,
+    category: "Coworking",
+    title: "Saket, New Delhi",
+    location: "Saket, New Delhi",
+    price: "₹16,000/yr",
+    amenities: ["WIFI", "GST Address", "Cafeteria"],
+    images: [
+      "/images/listings/Saket,New%20Delhi/WhatsApp%20Image%202026-09-04%20at%2012.53.24.jpeg",
+      "/images/listings/Saket,New%20Delhi/WhatsApp%20Image%202026-09-04%20at%2012.53.25%20(1).jpeg",
+      "/images/listings/Saket,New%20Delhi/WhatsApp%20Image%202026-09-04%20at%2012.53.25.jpeg",
+      "/images/listings/Saket,New%20Delhi/WhatsApp%20Image%202026-09-04%20at%2012.53.26%20(1).jpeg",
+      "/images/listings/Saket,New%20Delhi/WhatsApp%20Image%202026-09-04%20at%2012.53.26%20(2).jpeg",
+      "/images/listings/Saket,New%20Delhi/WhatsApp%20Image%202026-09-04%20at%2012.53.26.jpeg",
+      "/images/listings/Saket,New%20Delhi/WhatsApp%20Image%202026-09-04%20at%2012.53.27%20(1).jpeg",
+      "/images/listings/Saket,New%20Delhi/WhatsApp%20Image%202026-09-04%20at%2012.53.27.jpeg",
+      "/images/listings/Saket,New%20Delhi/WhatsApp%20Image%202026-09-04%20at%2013.26.04%20(1).jpeg",
+      "/images/listings/Saket,New%20Delhi/WhatsApp%20Image%202026-09-04%20at%2013.26.04.jpeg",
+      "/images/listings/Saket,New%20Delhi/WhatsApp%20Image%202026-09-04%20at%2013.26.05%20(1).jpeg",
+      "/images/listings/Saket,New%20Delhi/WhatsApp%20Image%202026-09-04%20at%2013.26.05.jpeg"
+    ]
+  },
+  {
+    id: 5,
+    isVerified: true,
+    category: "Managed Office",
+    title: "Telangana, Hyderabad",
+    location: "Telangana, Hyderabad",
+    price: "₹14,000/yr",
+    amenities: ["WIFI", "Parking", "GST Address"],
+    images: [
+      "/images/listings/Telangana,Hyderabad/WhatsApp%20Image%202026-09-01%20at%2017.01.31%20(1).jpeg",
+      "/images/listings/Telangana,Hyderabad/WhatsApp%20Image%202026-09-01%20at%2017.01.31.jpeg",
+      "/images/listings/Telangana,Hyderabad/WhatsApp%20Image%202026-09-01%20at%2017.01.32%20(1).jpeg",
+      "/images/listings/Telangana,Hyderabad/WhatsApp%20Image%202026-09-01%20at%2017.01.32%20(2).jpeg",
+      "/images/listings/Telangana,Hyderabad/WhatsApp%20Image%202026-09-01%20at%2017.01.32.jpeg",
+      "/images/listings/Telangana,Hyderabad/WhatsApp%20Image%202026-09-01%20at%2017.01.33%20(1).jpeg",
+      "/images/listings/Telangana,Hyderabad/WhatsApp%20Image%202026-09-01%20at%2017.01.33.jpeg"
+    ]
   },
   {
     id: 6,
-    category: "Coworking",
-    title: "Premium Workspace at Saket",
-    location: "Saket",
-    price: "₹15,000/yr",
-    amenities: ["WIFI", "GST Address", "Meeting Room"],
-    imageUrl: "/images/listings/Saket.jpeg"
-  },
-  {
-    id: 1,
     category: "Coworking",
     title: "Premium Coworking at Goregaon",
     location: "Mumbai, Maharashtra",
     price: "₹15,000/yr",
     amenities: ["WIFI", "GST Address", "Meeting Room"],
-    imageUrl: "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?w=800&q=80" // Dummy photo
+    images: [
+      "/images/listings/goregaon.jpg",
+      "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
+      "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80"
+    ]
   },
   {
-    id: 2,
+    id: 7,
     category: "Coworking",
     title: "Aesthetic Workspace at Bandra",
     location: "Mumbai, Maharashtra",
     price: "₹16,000/yr",
     amenities: ["WIFI", "GST Address", "Cafeteria"],
-    imageUrl: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80" // Dummy photo
+    images: [
+      "/images/listings/bandra.jpg",
+      "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80",
+      "https://images.unsplash.com/photo-1604328698692-f76ea9498e76?w=800&q=80"
+    ]
   },
   {
-    id: 3,
+    id: 8,
     category: "Managed Office",
     title: "Dependable Workspace Navrangpura",
     location: "Ahmedabad, Gujarat",
     price: "₹14,000/yr",
     amenities: ["WIFI", "Parking", "GST Address"],
-    imageUrl: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80" // Dummy photo
+    images: [
+      "/images/listings/navrangpura.jpg",
+      "https://images.unsplash.com/photo-1604328698692-f76ea9498e76?w=800&q=80",
+      "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?w=800&q=80"
+    ]
   },
   {
-    id: 4,
+    id: 9,
     category: "Private Cabin",
     title: "Executive Private Cabin",
     location: "Mumbai, Maharashtra",
     price: "₹25,000/mo",
     amenities: ["High-Speed WIFI", "24/7 Access", "AC"],
-    imageUrl: "https://images.unsplash.com/photo-1604328698692-f76ea9498e76?w=800&q=80" // Dummy photo
+    images: [
+      "https://images.unsplash.com/photo-1604328698692-f76ea9498e76?w=800&q=80",
+      "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?w=800&q=80",
+      "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80"
+    ]
   }
 ];
 
@@ -118,6 +216,41 @@ const WorkspaceListings = () => {
   const [filteredListings, setFilteredListings] = useState(verifiedSpaces);
   const scrollRef = useRef(null);
   const observerRef = useRef(null);
+
+  // Lightbox state
+  const [lightbox, setLightbox] = useState({
+    isOpen: false,
+    images: [],
+    currentIndex: 0
+  });
+
+  const openLightbox = (images) => {
+    setLightbox({
+      isOpen: true,
+      images,
+      currentIndex: 0
+    });
+  };
+
+  const closeLightbox = () => {
+    setLightbox({ ...lightbox, isOpen: false });
+  };
+
+  const nextImage = (e) => {
+    e.stopPropagation();
+    setLightbox(prev => ({
+      ...prev,
+      currentIndex: (prev.currentIndex + 1) % prev.images.length
+    }));
+  };
+
+  const prevImage = (e) => {
+    e.stopPropagation();
+    setLightbox(prev => ({
+      ...prev,
+      currentIndex: (prev.currentIndex - 1 + prev.images.length) % prev.images.length
+    }));
+  };
 
   useEffect(() => {
     // Initial scroll hint
@@ -270,24 +403,38 @@ const WorkspaceListings = () => {
                 const [error, setError] = useState(false);
                 
                 return (
-                  <>
-                    {!loaded && !error && <SkeletonImage />}
-                    {error && (
-                      <div className="w-full h-full absolute inset-0 z-0 bg-[#F4F3EE] flex items-center justify-center">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C5D9B0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
-                          <path d="M9 22v-4h6v4"></path>
-                        </svg>
+                  <div 
+                    className="relative w-full h-48 sm:h-56 cursor-pointer"
+                    onClick={() => openLightbox(listing.images)}
+                  >
+                    <div className="w-full h-full relative overflow-hidden rounded-t-lg">
+                      {!loaded && !error && <SkeletonImage />}
+                      {error && (
+                        <div className="w-full h-full absolute inset-0 z-0 bg-[#F4F3EE] flex items-center justify-center">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C5D9B0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                            <path d="M9 22v-4h6v4"></path>
+                          </svg>
+                        </div>
+                      )}
+                      <img 
+                        src={listing.images[0]} 
+                        alt={listing.title} 
+                        onLoad={() => setLoaded(true)}
+                        onError={() => { setLoaded(true); setError(true); }}
+                        className={`listing-img w-full h-full object-cover ${loaded && !error ? 'opacity-100' : 'opacity-0'}`}
+                      />
+                    </div>
+                    {listing.isVerified && (
+                      <div className="absolute -bottom-8 right-2 w-16 h-16 drop-shadow-md z-20">
+                        <img 
+                          src="/BosVerifiedBadge.png" 
+                          alt="BOS Verified" 
+                          className="w-full h-full object-contain"
+                        />
                       </div>
                     )}
-                    <img 
-                      src={listing.imageUrl} 
-                      alt={listing.title} 
-                      onLoad={() => setLoaded(true)}
-                      onError={() => { setLoaded(true); setError(true); }}
-                      className={`listing-img ${loaded && !error ? 'opacity-100' : 'opacity-0'}`}
-                    />
-                  </>
+                  </div>
                 );
               };
 
@@ -352,6 +499,56 @@ const WorkspaceListings = () => {
           See All Locations &rarr;
         </button>
       </div>
+
+      {/* Lightbox Modal */}
+      {lightbox.isOpen && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm"
+          onClick={closeLightbox}
+        >
+          <button 
+            className="absolute top-6 right-6 text-white hover:text-gray-300 transition-colors z-50 p-2"
+            onClick={closeLightbox}
+            aria-label="Close Lightbox"
+          >
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+
+          <button 
+            className="absolute left-4 md:left-12 text-white hover:text-gray-300 transition-colors z-50 p-2 bg-black/20 rounded-full hover:bg-black/40"
+            onClick={prevImage}
+            aria-label="Previous Image"
+          >
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6"></path>
+            </svg>
+          </button>
+
+          <img 
+            src={lightbox.images[lightbox.currentIndex]} 
+            alt="Workspace preview" 
+            className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()} 
+          />
+
+          <button 
+            className="absolute right-4 md:right-12 text-white hover:text-gray-300 transition-colors z-50 p-2 bg-black/20 rounded-full hover:bg-black/40"
+            onClick={nextImage}
+            aria-label="Next Image"
+          >
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 18l6-6-6-6"></path>
+            </svg>
+          </button>
+          
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white bg-black/50 px-4 py-2 rounded-full text-sm font-medium">
+            {lightbox.currentIndex + 1} / {lightbox.images.length}
+          </div>
+        </div>
+      )}
     </section>
   );
 };

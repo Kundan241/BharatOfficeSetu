@@ -36,7 +36,7 @@ export default function Navbar() {
         {/* Logo */}
         <a href="/" className="flex items-center hover-lift" aria-label="Bharat Office Setu — Home">
           <img
-            src="/logo.png"
+            src="/BOS%20LOGO/ChatGPT%20Image%20Sep%204,%202026,%2001_47_55%20PM.png"
             alt="Bharat Office Setu Logo"
             className="h-8 md:h-12 lg:h-16 w-auto object-contain"
           />
@@ -102,7 +102,7 @@ export default function Navbar() {
             style={{ backgroundColor: "var(--color-bg-warm)" }}
           >
             <div className="flex items-center justify-between mb-12">
-              <img src="/logo.png" alt="Bharat Office Setu" className="h-8" />
+              <img src="/BOS%20LOGO/ChatGPT%20Image%20Sep%204,%202026,%2001_47_55%20PM.png" alt="Bharat Office Setu" className="h-8" />
               <button
                 className="p-2 text-[var(--color-text-dark)]"
                 onClick={() => setMobileMenuOpen(false)}

@@ -62,9 +62,14 @@ export default function Hero() {
           style={{ animationDelay: '0.2s' }}
         >
           <div className="absolute top-1/2 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--color-primary)] to-transparent opacity-20"></div>
-          <span className="text-[10px] md:text-[12px] font-bold tracking-[0.3em] uppercase text-[var(--color-text-muted)] bg-[var(--color-bg-warm)] px-4 z-10">
-            Digital Infrastructure for the New India
-          </span>
+          <div className="bg-[var(--color-bg-warm)] px-4 z-10 flex flex-col items-center text-center">
+            <span className="text-[10px] md:text-[12px] font-bold tracking-[0.15em] md:tracking-[0.2em] uppercase text-[var(--color-text-muted)]">
+              BUSINESS INFRASTRUCTURE &amp; WORKSPACE SOLUTIONS FOR NEW INDIA
+            </span>
+            <span className="text-[10px] md:text-[12px] font-medium tracking-[0.1em] text-[var(--color-text-muted)] mt-1 uppercase">
+              Enabling Businesses Across India
+            </span>
+          </div>
         </div>
       </div>
 

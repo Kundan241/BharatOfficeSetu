@@ -231,12 +231,6 @@
   transform: scale(0.97);
 }
 
-.card-image-section {
-  height: 190px;
-  position: relative;
-  overflow: hidden;
-  aspect-ratio: 16/9;
-}
 
 .listing-img {
   width: 100%;
