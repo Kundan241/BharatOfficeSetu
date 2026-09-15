@@ -6,7 +6,7 @@ import {
   LogOut, Search, FileText, ChevronRight, 
   ArrowLeft, Plus, Check, Trash2, LayoutDashboard, 
   Users, UserPlus, Menu, X as XIcon, UploadCloud, Eye, EyeOff, MoreVertical,
-  AlertTriangle, Pencil
+  AlertTriangle, Pencil, IndianRupee
 } from 'lucide-react';
 import { SERVICE_STEPS } from '../services/services';
 import { auth, db } from '../firebase';
@@ -21,6 +21,7 @@ import { updateServiceStatus, addService } from '../services/services';
 import { uploadDocument, deleteDocument } from '../services/documents';
 import { uploadFile } from '../services/cloudinary';
 import AdminBlog from './AdminBlog';
+import AdminSalesLedger from '../components/AdminSalesLedger';
 import emailjs from '@emailjs/browser';
 import { 
   createPartner, 
@@ -212,6 +213,7 @@ export default function Admin() {
     if (location.pathname.startsWith('/admin/clients')) return 'clients';
     if (location.pathname.startsWith('/admin/partners/add')) return 'add-partner';
     if (location.pathname.startsWith('/admin/partners')) return 'partners';
+    if (location.pathname.startsWith('/admin/sales-ledger')) return 'sales-ledger';
     return 'dashboard';
   };
   const activeTab = getActiveTab();
@@ -279,6 +281,14 @@ export default function Admin() {
           </Link>
 
           <div className="text-[10px] font-[600] tracking-[0.1em] text-[rgba(255,255,255,0.25)] px-5 pt-4 pb-1">
+            FINANCE
+          </div>
+          <Link to="/admin/sales-ledger" onClick={() => setMobileMenuOpen(false)} className={`mx-2 my-[2px] px-3 py-2.5 rounded-[8px] text-[13px] font-[500] flex items-center gap-2.5 transition-all
+            ${activeTab === 'sales-ledger' ? 'bg-[rgba(255,255,255,0.08)] text-white' : 'text-[rgba(255,255,255,0.5)] hover:bg-[rgba(255,255,255,0.05)] hover:text-[rgba(255,255,255,0.75)]'}`}>
+            <IndianRupee size={16} /> India Filings Sales
+          </Link>
+
+          <div className="text-[10px] font-[600] tracking-[0.1em] text-[rgba(255,255,255,0.25)] px-5 pt-4 pb-1">
             CONTENT
           </div>
           <Link to="/admin/blog" onClick={() => setMobileMenuOpen(false)} className={`mx-2 my-[2px] px-3 py-2.5 rounded-[8px] text-[13px] font-[500] flex items-center gap-2.5 transition-all
@@ -319,6 +329,7 @@ export default function Admin() {
             <Route path="/partners" element={<AdminPartners showConfirm={showConfirm} />} />
             <Route path="/partners/add" element={<AddPartnerForm />} />
             <Route path="/partners/:uid" element={<PartnerDetailView showConfirm={showConfirm} />} />
+            <Route path="/sales-ledger" element={<AdminSalesLedger isAdmin={isAdmin} />} />
             <Route path="/blog/*" element={<AdminBlog showConfirm={showConfirm} />} />
           </Routes>
         </div>
