@@ -322,7 +322,7 @@ export default function DraftGenerator() {
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
-      const headerText = template.id === 'dwarka-template' ? 'WORKSPACE SERVICE AGREEMENT' : template.id === 'rajasthan-template' ? '' : template.name.toUpperCase();
+      const headerText = template.id === 'dwarka-template' ? 'WORKSPACE SERVICE AGREEMENT' : (template.id === 'rajasthan-template' || template.id === 'workspace-agreement') ? '' : template.name.toUpperCase();
       doc.text(headerText, pageWidth / 2, 8, { align: 'center' });
       doc.setTextColor(40, 40, 40);
     };
@@ -332,7 +332,7 @@ export default function DraftGenerator() {
     let yPos = 30;
 
     if (!isGurgaonTemplate) {
-      if (template.id !== 'dwarka-template' && template.id !== 'rajasthan-template') {
+      if (template.id !== 'dwarka-template' && template.id !== 'rajasthan-template' && template.id !== 'workspace-agreement') {
         doc.setTextColor(17, 17, 16);
         doc.setFontSize(16);
         doc.setFont('helvetica', 'bold');
@@ -546,9 +546,12 @@ export default function DraftGenerator() {
       data.businessNature ← form field: businessNature
     `);
 
+    h.setY(30);
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
-    doc.text('WORK SPACE SERVICE CONTRACT', h.pageWidth / 2, h.yPos(), { align: 'center' });
+    doc.setTextColor(17, 17, 16);
+    doc.text('WORKSPACE SERVICE AGREEMENT', h.pageWidth / 2, h.yPos(), { align: 'center' });
+    doc.setDrawColor(17, 17, 16);
     doc.setLineWidth(0.5);
     doc.line(h.margin, h.yPos() + 2, h.pageWidth - h.margin, h.yPos() + 2);
     h.setY(h.yPos() + 15);

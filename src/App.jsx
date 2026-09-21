@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
+import ServicesShowcase from './components/ServicesShowcase'
 import WhyBosSection from './components/WhyBosSection'
 import WorkspaceListings from './components/WorkspaceListings'
 import FreeConsultation from './components/FreeConsultation'
@@ -35,8 +36,15 @@ function LandingPage() {
     <div className="bg-[var(--color-bg-warm)] text-[var(--color-text-dark)]">
       <Navbar />
       <main>
+        {/* 1. The Interactive India Map Section */}
         <Hero />
+
+        {/* 2. ADD THIS HERE: The New Services Carousel */}
+        <ServicesShowcase />
+
+        {/* 3. The Dark Green "Stop doing the boring stuff" Section */}
         <WhyBosSection />
+
         <WorkspaceListings />
         <FreeConsultation />
         <Services />
