@@ -48,21 +48,6 @@ export default function ChangePassword() {
       const credential = EmailAuthProvider.credential(auth.currentUser.email, currentPassword);
       await reauthenticateWithCredential(auth.currentUser, credential);
       await updatePassword(auth.currentUser, newPassword);
-
-      // Update Firestore document
-      const collectionName = role === 'partner' ? 'partners' : 'clients';
-      await updateDoc(doc(db, collectionName, auth.currentUser.uid), {
-        tempPasswordUsed: false
-      });
-
-      addToast('success', 'Password updated successfully!');
-      
-      // Navigate to respective dashboard
-      if (role === 'partner') {
-        navigate('/partner-dashboard');
-      } else {
-        navigate('/dashboard');
-      }
     } catch (error) {
       console.error("Change Password Error:", error);
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
@@ -70,8 +55,28 @@ export default function ChangePassword() {
       } else {
         setError('Failed to update password. Please try again.');
       }
-    } finally {
       setLoading(false);
+      return;
+    }
+
+    // Isolate Database Logic with graceful degradation
+    try {
+      const collectionName = role === 'partner' ? 'partners' : 'clients';
+      await updateDoc(doc(db, collectionName, auth.currentUser.uid), {
+        tempPasswordUsed: false
+      });
+    } catch (error) {
+      console.warn("Firestore update failed:", error);
+    }
+
+    addToast('success', 'Password updated successfully!');
+    setLoading(false);
+    
+    // Navigate to respective dashboard
+    if (role === 'partner') {
+      navigate('/partner-dashboard');
+    } else {
+      navigate('/dashboard');
     }
   };
 
