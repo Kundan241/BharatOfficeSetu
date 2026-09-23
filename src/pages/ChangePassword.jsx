@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { updatePassword } from 'firebase/auth';
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import { useToast } from '../components/ToastContext';
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function ChangePassword() {
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -22,6 +24,10 @@ export default function ChangePassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!currentPassword) {
+      setError('Please enter your current password');
+      return;
+    }
     if (newPassword !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -35,16 +41,18 @@ export default function ChangePassword() {
     setError('');
 
     try {
-      const user = auth.currentUser;
-      if (!user) {
+      if (!auth.currentUser) {
         throw new Error('No user is currently signed in. Please log in again.');
       }
 
-      await updatePassword(user, newPassword);
+      console.log("Attempting re-auth with password:", currentPassword);
+      const credential = EmailAuthProvider.credential(auth.currentUser.email, currentPassword);
+      await reauthenticateWithCredential(auth.currentUser, credential);
+      await updatePassword(auth.currentUser, newPassword);
 
       // Update Firestore document
       const collectionName = role === 'partner' ? 'partners' : 'clients';
-      await updateDoc(doc(db, collectionName, user.uid), {
+      await updateDoc(doc(db, collectionName, auth.currentUser.uid), {
         tempPasswordUsed: false
       });
 
@@ -58,7 +66,13 @@ export default function ChangePassword() {
       }
     } catch (err) {
       console.error('Change Password Error:', err);
-      setError(err.message || 'Failed to update password');
+      if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+        setError('Incorrect current password. Please check and try again.');
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('Too many failed attempts. Please try again later.');
+      } else {
+        setError(err.message || 'Failed to update password');
+      }
     } finally {
       setLoading(false);
     }
@@ -71,6 +85,28 @@ export default function ChangePassword() {
         <p className="text-[14px] text-[rgba(17,17,16,0.45)] mb-6">Please set a new password to secure your account.</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <div className="flex flex-col gap-1.5 relative">
+            <label className="text-[13px] font-semibold text-[#111110]">Current Password</label>
+            <div className="relative">
+              <input
+                type={showCurrentPassword ? "text" : "password"}
+                name="currentPassword"
+                autoComplete="current-password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full h-12 bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] pl-4 pr-10 text-[14px] outline-none focus:border-[#1B6B2F] focus:shadow-[0_0_0_2px_rgba(27,107,47,0.1)] transition-colors duration-200"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[rgba(17,17,16,0.4)] hover:text-[#111110] transition-colors"
+              >
+                {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+
           <div className="flex flex-col gap-1.5 relative">
             <label className="text-[13px] font-semibold text-[#111110]">New Password</label>
             <div className="relative">
