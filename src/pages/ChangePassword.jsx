@@ -50,11 +50,11 @@ export default function ChangePassword() {
       await reauthenticateWithCredential(auth.currentUser, credential);
       await updatePassword(auth.currentUser, newPassword);
 
-      // Update Firestore document
-      const collectionName = role === 'partner' ? 'partners' : 'clients';
-      await updateDoc(doc(db, collectionName, auth.currentUser.uid), {
-        tempPasswordUsed: false
-      });
+      // Update Firestore document (temporarily commented out to isolate Auth update)
+      // const collectionName = role === 'partner' ? 'partners' : 'clients';
+      // await updateDoc(doc(db, collectionName, auth.currentUser.uid), {
+      //   tempPasswordUsed: false
+      // });
 
       addToast('success', 'Password updated successfully!');
       
@@ -64,15 +64,9 @@ export default function ChangePassword() {
       } else {
         navigate('/dashboard');
       }
-    } catch (err) {
-      console.error('Change Password Error:', err);
-      if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        setError('Incorrect current password. Please check and try again.');
-      } else if (err.code === 'auth/too-many-requests') {
-        setError('Too many failed attempts. Please try again later.');
-      } else {
-        setError(err.message || 'Failed to update password');
-      }
+    } catch (error) {
+      console.error("Full update error:", error);
+      setError(error.code ? `Firebase Error: ${error.code}` : error.message);
     } finally {
       setLoading(false);
     }
