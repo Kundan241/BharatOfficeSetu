@@ -447,10 +447,10 @@ function AdminDashboard() {
       <div className="bg-white rounded-[14px] border border-[rgba(17,17,16,0.08)] overflow-hidden">
         {loading ? (
           <div className="p-10 text-center text-[13px] text-[rgba(17,17,16,0.4)]">Loading activity...</div>
-        ) : activities.length === 0 ? (
+        ) : (!activities || (activities?.length || 0) === 0) ? (
           <div className="p-10 text-center text-[13px] text-[rgba(17,17,16,0.4)]">No recent activity.</div>
         ) : (
-          activities.map((act) => (
+          (activities || []).map((act) => (
             <div key={act.id} className="px-5 py-3.5 border-b border-[rgba(17,17,16,0.05)] last:border-0 flex items-center gap-3">
               <div className={`w-2 h-2 rounded-full ${getDotColor(act.type)} shrink-0`}></div>
               <div className="text-[14px] text-[#111110] flex-1">{act.description}</div>
@@ -506,7 +506,7 @@ function AdminClients({ showConfirm }) {
           if (s.data().status !== 'completed' && !s.data().completedDate) isActive = true;
         });
         clientData.serviceList = srvs;
-        clientData.status = srvs.length === 0 ? 'No Services' : (isActive ? 'Active' : 'Completed');
+        clientData.status = (srvs?.length || 0) === 0 ? 'No Services' : (isActive ? 'Active' : 'Completed');
         arr.push(clientData);
       }
       setClients(arr);
@@ -579,13 +579,13 @@ function AdminClients({ showConfirm }) {
                  <div key={i} className="h-[70px] w-full border-b border-[rgba(17,17,16,0.05)] skeleton-shimmer"></div>
                ))}
              </div>
-          ) : filtered.length === 0 ? (
+          ) : (!filtered || (filtered?.length || 0) === 0) ? (
             <div className="p-16 flex flex-col items-center justify-center text-center">
               <Users size={32} className="text-[rgba(17,17,16,0.15)] mb-3" />
               <div className="text-[15px] font-[500] text-[rgba(17,17,16,0.4)]">No clients found</div>
             </div>
           ) : (
-            filtered.map((client) => (
+            (filtered || []).map((client) => (
               <div key={client.id} onClick={() => navigate(`/admin/clients/${client.id}`)} className="border-b border-[rgba(17,17,16,0.05)] last:border-0 hover:bg-[rgba(27,107,47,0.02)] transition-colors cursor-pointer">
                 {/* Mobile */}
                 <div className="md:hidden p-4 flex flex-col gap-3">
@@ -621,10 +621,10 @@ function AdminClients({ showConfirm }) {
                   </div>
                   
                   <div className="col-span-3 flex flex-wrap gap-1.5">
-                    {client.serviceList.slice(0, 2).map((s, idx) => (
+                    {(client.serviceList || []).slice(0, 2).map((s, idx) => (
                       <span key={idx} className="bg-[#F4F3EE] text-[rgba(17,17,16,0.6)] px-2 py-0.5 rounded-[100px] text-[11px] font-[500] whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]">{s}</span>
                     ))}
-                    {client.serviceList.length > 2 && (
+                    {(client.serviceList?.length || 0) > 2 && (
                       <span className="bg-[#F4F3EE] text-[rgba(17,17,16,0.6)] px-2 py-0.5 rounded-[100px] text-[11px] font-[500]">+{client.serviceList.length - 2} more</span>
                     )}
                   </div>
@@ -963,8 +963,8 @@ function ClientDetailView({ showConfirm }) {
         
         <div className="flex flex-col md:flex-row items-start md:items-center gap-4 w-full md:w-auto">
           <div className="flex gap-2">
-            <span className="bg-[#F4F3EE] rounded-[100px] px-3 py-1 text-[12px] text-[rgba(17,17,16,0.55)]">Services: {services.length}</span>
-            <span className="bg-[#F4F3EE] rounded-[100px] px-3 py-1 text-[12px] text-[rgba(17,17,16,0.55)]">Documents: {documents.length}</span>
+            <span className="bg-[#F4F3EE] rounded-[100px] px-3 py-1 text-[12px] text-[rgba(17,17,16,0.55)]">Services: {services?.length || 0}</span>
+            <span className="bg-[#F4F3EE] rounded-[100px] px-3 py-1 text-[12px] text-[rgba(17,17,16,0.55)]">Documents: {documents?.length || 0}</span>
             <span className="bg-[#F4F3EE] rounded-[100px] px-3 py-1 text-[12px] text-[rgba(17,17,16,0.55)]">Days: {daysActive}</span>
           </div>
           <div className="flex gap-2 w-full md:w-auto">
@@ -989,10 +989,10 @@ function ClientDetailView({ showConfirm }) {
         {/* LEFT COL */}
         <div className="lg:col-span-3 flex flex-col gap-5">
           <div className="text-[11px] font-[600] tracking-[0.08em] text-[rgba(17,17,16,0.4)]">SERVICES</div>
-          {services.length === 0 ? (
+          {(!services || (services?.length || 0) === 0) ? (
             <div className="bg-white rounded-[14px] border border-[rgba(17,17,16,0.08)] p-8 text-center text-[13px] text-[rgba(17,17,16,0.4)]">No services added yet</div>
           ) : (
-            services.map(s => <ServiceCard key={s.id} client={client} service={s} showConfirm={showConfirm} />)
+            (services || []).map(s => <ServiceCard key={s.id} client={client} service={s} showConfirm={showConfirm} />)
           )}
         </div>
 
@@ -1015,9 +1015,9 @@ function ClientDetailView({ showConfirm }) {
 // Service Card Component
 function ServiceCard({ client, service, showConfirm }) {
   const { addToast } = useToast();
-  const steps = SERVICE_STEPS[service.type] || ['Order Received', 'Completed'];
-  const currentIndex = service.statusIndex || 0;
-  const isCompleted = service.status === 'completed' || currentIndex === steps.length - 1;
+  const steps = (service?.type && SERVICE_STEPS[service.type]) || ['Order Received', 'Completed'];
+  const currentIndex = service?.statusIndex || 0;
+  const isCompleted = service?.status === 'completed' || currentIndex === (steps?.length || 0) - 1;
 
   const [notes, setNotes] = useState(service.notes || '');
   const [notesChanged, setNotesChanged] = useState(false);
@@ -1032,7 +1032,7 @@ function ServiceCard({ client, service, showConfirm }) {
         status: nextStatus,
         statusIndex: nextIndex
       };
-      if (nextIndex === steps.length - 1) {
+      if (nextIndex === (steps?.length || 0) - 1) {
         payload.status = 'completed';
         payload.completedDate = serverTimestamp();
       }
@@ -1046,7 +1046,7 @@ function ServiceCard({ client, service, showConfirm }) {
         timestamp: serverTimestamp()
       });
 
-      if (nextIndex === steps.length - 1) {
+      if (nextIndex === (steps?.length || 0) - 1) {
         addToast('success', '🎉 Service marked as Complete!');
       } else {
         addToast('success', `Status updated to ${nextStatus}`);
@@ -1214,10 +1214,10 @@ function DocumentsCard({ client, documents, showConfirm }) {
   return (
     <div className="bg-white rounded-[14px] border border-[rgba(17,17,16,0.08)] overflow-hidden">
       <div className="max-h-[300px] overflow-y-auto">
-        {documents.length === 0 ? (
+        {(!documents || (documents?.length || 0) === 0) ? (
           <div className="p-7 text-center text-[14px] text-[rgba(17,17,16,0.4)]">No documents uploaded yet</div>
         ) : (
-          documents.map(d => (
+          (documents || []).map(d => (
             <div key={d.id} className="h-[56px] px-4 flex items-center justify-between border-b border-[rgba(17,17,16,0.05)] last:border-0">
               <div className="flex items-center gap-3 overflow-hidden">
                 <FileText size={20} className="text-[#F4831F] shrink-0" />
@@ -1762,13 +1762,13 @@ function AdminPartners({ showConfirm }) {
                  <div key={i} className="h-[70px] w-full border-b border-[rgba(17,17,16,0.05)] skeleton-shimmer"></div>
                ))}
              </div>
-          ) : filtered.length === 0 ? (
+          ) : (!filtered || (filtered?.length || 0) === 0) ? (
             <div className="p-16 flex flex-col items-center justify-center text-center">
               <Users size={32} className="text-[rgba(17,17,16,0.15)] mb-3" />
               <div className="text-[15px] font-[500] text-[rgba(17,17,16,0.4)]">No partners found</div>
             </div>
           ) : (
-            filtered.map((partner) => (
+            (filtered || []).map((partner) => (
               <div key={partner.id} onClick={() => navigate(`/admin/partners/${partner.id}`)} className="border-b border-[rgba(17,17,16,0.05)] last:border-0 hover:bg-[rgba(27,107,47,0.02)] transition-colors cursor-pointer">
                 {/* Mobile */}
                 <div className="md:hidden p-4 flex flex-col gap-3">
@@ -2026,13 +2026,13 @@ function PartnerDetailView({ showConfirm }) {
         </div>
 
         <div className="divide-y divide-[rgba(17,17,16,0.05)]">
-          {mergedReferrals.length === 0 ? (
+          {(!mergedReferrals || (mergedReferrals?.length || 0) === 0) ? (
             <div className="p-16 flex flex-col items-center justify-center text-center">
               <Users size={32} className="text-[rgba(17,17,16,0.15)] mb-3" />
               <div className="text-[15px] font-[500] text-[rgba(17,17,16,0.4)]">No referrals added yet</div>
             </div>
           ) : (
-            mergedReferrals.map((ref) => (
+            (mergedReferrals || []).map((ref) => (
               <div key={ref.id}>
                 {/* Mobile View */}
                 <div className="md:hidden p-4 flex flex-col gap-2">
@@ -2379,7 +2379,7 @@ function AdminCases() {
             >
               <span className="truncate">{p}</span>
               <span className="bg-[#F4F3EE] px-2 py-0.5 rounded-full text-[11px]">
-                {p === 'All' ? records.length : (partnerCounts[p] || 0)}
+                {p === 'All' ? (records?.length || 0) : (partnerCounts?.[p] || 0)}
               </span>
             </button>
           ))}
@@ -2396,7 +2396,7 @@ function AdminCases() {
         <div className="flex-1 overflow-x-auto">
           {loading ? (
              <div className="p-8 text-center text-[13px] text-[rgba(17,17,16,0.4)]">Loading cases...</div>
-          ) : (!displayedRecords || displayedRecords.length === 0) ? (
+          ) : (!displayedRecords || (displayedRecords?.length || 0) === 0) ? (
             <div className="p-8 text-center text-[13px] text-[rgba(17,17,16,0.4)]">No cases found.</div>
           ) : (
             <table className="w-full text-left border-collapse min-w-[600px]">

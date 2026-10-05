@@ -111,14 +111,14 @@ export default function PartnerDashboard() {
   };
 
   const allMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const uniqueMonths = ['All', ...new Set((referrals || []).map(r => getMonthString(r.timestamp || r.Date || r.Timestamp || r.createdAt)).filter(Boolean))];
+  const uniqueMonths = ['All', ...new Set(((referrals || [])).map(r => getMonthString(r?.timestamp || r?.Date || r?.Timestamp || r?.createdAt)).filter(Boolean))];
   
   // If uniqueMonths only has 'All', maybe just show standard months or whatever exists.
   // We will just use uniqueMonths.
 
   const displayedReferrals = selectedMonth === 'All' 
     ? (referrals || []) 
-    : (referrals || []).filter(r => getMonthString(r.timestamp || r.Date || r.Timestamp || r.createdAt) === selectedMonth);
+    : (referrals || []).filter(r => getMonthString(r?.timestamp || r?.Date || r?.Timestamp || r?.createdAt) === selectedMonth);
 
   return (
     <div className="min-h-screen bg-[#F4F3EE] font-sans">
@@ -149,7 +149,7 @@ export default function PartnerDashboard() {
         <aside className="w-full md:w-[200px] shrink-0">
           <h2 className="text-[14px] font-[700] text-[#111110] mb-4">Filter by Month</h2>
           <div className="flex flex-row md:flex-col gap-1 overflow-x-auto pb-2 md:pb-0">
-            {uniqueMonths.map(m => (
+            {(uniqueMonths || []).map(m => (
               <button 
                 key={m}
                 onClick={() => setSelectedMonth(m)}
@@ -201,7 +201,7 @@ export default function PartnerDashboard() {
                   </div>
                 ))}
               </div>
-            ) : (!displayedReferrals || displayedReferrals.length === 0) ? (
+            ) : (!displayedReferrals || (displayedReferrals?.length || 0) === 0) ? (
               <div className="p-16 flex flex-col items-center justify-center text-center">
                 <div className="text-[15px] font-[500] text-[rgba(17,17,16,0.4)]">
                   No cases found for {selectedMonth}.

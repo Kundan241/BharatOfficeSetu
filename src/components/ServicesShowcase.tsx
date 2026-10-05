@@ -6,8 +6,8 @@ const bosServicesData: GalleryItem[] = [
 		common: 'Premium Workspaces',
 		binomial: 'Coworking & Managed Offices',
 		photo: {
-			url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800',
-			text: 'Modern coworking space',
+			url: '/serviceslistimage/Premium Coworking Workspace Interior.png',
+			text: 'Premium coworking workspace interior',
 			pos: 'center',
 			by: 'BOS Facilities'
 		}
@@ -16,8 +16,8 @@ const bosServicesData: GalleryItem[] = [
 		common: 'Company Incorporation',
 		binomial: 'Private Limited & LLP',
 		photo: {
-			url: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=800',
-			text: 'Legal documents and scales',
+			url: '/serviceslistimage/Company Incorporation Desk Essentials.png',
+			text: 'Company incorporation desk essentials',
 			pos: 'center',
 			by: 'BOS Legal'
 		}
@@ -26,8 +26,8 @@ const bosServicesData: GalleryItem[] = [
 		common: 'Tax & Accounting',
 		binomial: 'GST & Corporate Tax',
 		photo: {
-			url: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=800',
-			text: 'Accounting calculator and charts',
+			url: '/serviceslistimage/Tax & Accounting Workspace.png',
+			text: 'Tax and accounting workspace',
 			pos: 'center',
 			by: 'BOS Finance'
 		}
@@ -36,8 +36,8 @@ const bosServicesData: GalleryItem[] = [
 		common: 'Virtual Offices',
 		binomial: 'Premium Business Addresses',
 		photo: {
-			url: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&q=80&w=800',
-			text: 'Modern office exterior',
+			url: '/serviceslistimage/Modern Virtual Office Lounge.png',
+			text: 'Modern virtual office lounge',
 			pos: 'center',
 			by: 'BOS Network'
 		}
@@ -46,8 +46,8 @@ const bosServicesData: GalleryItem[] = [
 		common: 'IT Infrastructure',
 		binomial: 'Network & Hardware Setup',
 		photo: {
-			url: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=800',
-			text: 'Server room and IT desk',
+			url: '/serviceslistimage/Modern IT Infrastructure Workspace Poster.png',
+			text: 'Modern IT infrastructure workspace',
 			pos: 'center',
 			by: 'BOS Tech'
 		}
@@ -56,8 +56,8 @@ const bosServicesData: GalleryItem[] = [
 		common: 'Payroll & HR',
 		binomial: 'End-to-end HR Management',
 		photo: {
-			url: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80&w=800',
-			text: 'Business meeting',
+			url: '/serviceslistimage/Payroll & HR Team High-Five.png',
+			text: 'Payroll and HR team',
 			pos: 'center',
 			by: 'BOS Operations'
 		}
@@ -66,22 +66,12 @@ const bosServicesData: GalleryItem[] = [
 		common: 'Legal Advisory',
 		binomial: 'Contracts & IP Protection',
 		photo: {
-			url: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=80&w=800',
-			text: 'Legal paperwork',
+			url: '/serviceslistimage/Legal Advisory Desk with Lady Justice.png',
+			text: 'Legal advisory desk with Lady Justice',
 			pos: 'center',
 			by: 'BOS Legal'
 		}
 	},
-	{
-		common: 'Business Consulting',
-		binomial: 'Market Entry & Strategy',
-		photo: {
-			url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800',
-			text: 'Strategy planning session',
-			pos: 'center',
-			by: 'BOS Growth'
-		}
-	}
 ];
 
 export default function ServicesShowcase() {

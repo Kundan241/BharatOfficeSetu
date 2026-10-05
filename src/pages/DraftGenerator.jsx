@@ -241,6 +241,9 @@ export default function DraftGenerator() {
     }
   };
 
+  // GAS Web App endpoint — handles Drive upload + Sheets logging
+  const GAS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzDvmLliVGdBQCvB68D4SbuWpYlWNoUYZIK3QdM6TOGQwmP4kydtWIS1s4NKtR9Hmq3NA/exec';
+
   const handleDownload = () => {
     if (validateForm()) {
       let finalPartnerName = partnerName || 'Admin/Self';
@@ -251,6 +254,21 @@ export default function DraftGenerator() {
       } else if (selectedTemplate.id === 'asset-sense') {
         finalPartnerName = 'Asset Sense';
       }
+
+      // Unified filename: Draft_[ClientName]_[Date].pdf
+      const clientNameRaw =
+        formData.clientName ||
+        formData.directorName ||
+        formData.representativeName ||
+        formData.authorizedByName ||
+        formData.ownerName ||
+        formData.clientCompanyName ||
+        formData.businessName ||
+        formData.companyName ||
+        'Document';
+      const dateStr = new Date().toISOString().split('T')[0];
+      const safeClientName = clientNameRaw.replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_').trim();
+      const unifiedFileName = `Draft_${safeClientName}_${dateStr}.pdf`;
 
       const trackingPayload = {
         documentType: formData.documentType || "Draft",
@@ -282,20 +300,77 @@ export default function DraftGenerator() {
         paymentStatus: "In Process"
       };
 
-      fetch('https://script.google.com/macros/s/AKfycbzDvmLliVGdBQCvB68D4SbuWpYlWNoUYZIK3QdM6TOGQwmP4kydtWIS1s4NKtR9Hmq3NA/exec', {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(trackingPayload)
-      }).then(() => {
-        addToast('success', 'Data saved successfully');
-      }).catch(err => console.error('Silent sync error', err));
-
-      generatePDF(selectedTemplate, formData);
+      generatePDF(selectedTemplate, formData, trackingPayload, unifiedFileName);
     }
   };
 
-  const generatePDF = (template, formData) => {
+  // ─────────────────────────────────────────────────────────────────────────
+  // uploadToDriveAndLog
+  //
+  // Why two requests?
+  // GAS blocks any fetch that triggers a CORS preflight (OPTIONS). A JSON body
+  // with mode:'cors' causes a preflight — GAS cannot respond to it, so doPost
+  // never fires. The fix is to send as FormData (a "simple" request — no
+  // preflight), which GAS accepts. We read the response JSON to get driveUrl.
+  // ─────────────────────────────────────────────────────────────────────────
+  const uploadToDriveAndLog = async (base64DataUri, fileName, trackingPayload) => {
+    // ── Safety check: confirm Base64 was actually captured ──────────────────
+    if (!base64DataUri || base64DataUri.length < 100) {
+      console.error('[BOS] uploadToDriveAndLog: base64DataUri is empty or too short — PDF was not captured correctly.');
+      addToast('error', 'PDF capture failed — Drive upload skipped.');
+      return;
+    }
+
+    // Strip the data URI prefix: GAS only wants the raw Base64 string
+    const base64 = base64DataUri.replace(/^data:application\/pdf;base64,/, '');
+
+    console.log('[BOS] PDF Base64 length (chars):', base64.length);  // should be >> 1000
+    console.log('[BOS] File name:', fileName);
+    console.log('[BOS] Sending to GAS:', GAS_WEBHOOK_URL);
+
+    // ── Build the full payload as a plain JSON string ────────────────────────
+    // We attach it as a single FormData field so the browser sends it as a
+    // multipart/form-data simple request — no CORS preflight triggered.
+    const fullPayload = JSON.stringify({
+      ...trackingPayload,
+      fileName,
+      pdfBase64: base64
+    });
+
+    const formData = new FormData();
+    formData.append('payload', fullPayload);
+
+    try {
+      // FormData POST = simple request = no CORS preflight = GAS doPost fires
+      const response = await fetch(GAS_WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'cors',     // GAS Web Apps deployed as "Anyone" return CORS headers
+        body: formData    // No Content-Type header needed — browser sets it automatically
+      });
+
+      const text = await response.text();
+      console.log('[BOS] GAS raw response:', text);
+
+      let result;
+      try {
+        result = JSON.parse(text);
+      } catch (_) {
+        throw new Error('GAS returned non-JSON: ' + text.substring(0, 200));
+      }
+
+      if (result.status === 'success' && result.driveUrl) {
+        addToast('success', '✅ Draft saved to Drive!');
+        window.open(result.driveUrl, '_blank', 'noopener,noreferrer');
+      } else {
+        throw new Error(result.message || 'Unexpected GAS response');
+      }
+    } catch (err) {
+      console.error('[BOS] Drive upload / Sheets log error:', err);
+      addToast('error', 'PDF downloaded locally but Drive upload failed — check console.');
+    }
+  };
+
+  const generatePDF = async (template, formData, trackingPayload, unifiedFileName) => {
     console.log('Form data being used:', formData);
     if (!window.jspdf || !window.jspdf.jsPDF) {
       addToast('error', 'PDF library not loaded yet. Please wait a moment and try again.');
@@ -397,52 +472,34 @@ export default function DraftGenerator() {
     } else if (template.id === 'authorization') {
       buildAuthorization(doc, formData, helpers);
     } else if (template.id === 'true-work-lounge') {
+      // Dual-PDF: upload Agreement to Drive; save NOC locally
       buildGurgaonWorkspaceAgreement(doc, formData, helpers);
       const nameKey = formData.clientCompanyName || formData.businessName || formData.companyName || 'Document';
-      doc.save(`Workspace-Agreement--${nameKey.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
+      const agreementBase64 = doc.output('datauristring');
+      doc.save(unifiedFileName); // local download
+      await uploadToDriveAndLog(agreementBase64, unifiedFileName, trackingPayload);
 
-      const docNoc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-
+      const docNoc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       let yPosNoc = 30;
       const helpersNoc = {
         addSectionHeading: (text) => {
-          if (yPosNoc > pageHeight - 40) {
-            docNoc.addPage();
-            yPosNoc = 25;
-          }
-          docNoc.setFontSize(11);
-          docNoc.setFont('helvetica', 'bold');
-          docNoc.setTextColor(17, 17, 16);
-          docNoc.text(text, margin, yPosNoc);
-          yPosNoc += 8;
+          if (yPosNoc > pageHeight - 40) { docNoc.addPage(); yPosNoc = 25; }
+          docNoc.setFontSize(11); docNoc.setFont('helvetica', 'bold'); docNoc.setTextColor(17, 17, 16);
+          docNoc.text(text, margin, yPosNoc); yPosNoc += 8;
         },
         addParagraph: (text) => {
-          docNoc.setFontSize(10);
-          docNoc.setFont('helvetica', 'normal');
-          docNoc.setTextColor(40, 40, 40);
+          docNoc.setFontSize(10); docNoc.setFont('helvetica', 'normal'); docNoc.setTextColor(40, 40, 40);
           const lines = docNoc.splitTextToSize(text, contentWidth);
           lines.forEach(line => {
-            if (yPosNoc > pageHeight - 25) {
-              docNoc.addPage();
-              yPosNoc = 25;
-            }
-            docNoc.text(line, margin, yPosNoc);
-            yPosNoc += 6;
+            if (yPosNoc > pageHeight - 25) { docNoc.addPage(); yPosNoc = 25; }
+            docNoc.text(line, margin, yPosNoc); yPosNoc += 6;
           });
           yPosNoc += 4;
         },
-        margin,
-        pageWidth,
-        contentWidth,
-        yPos: () => yPosNoc,
-        setY: (y) => { yPosNoc = y; },
+        margin, pageWidth, contentWidth,
+        yPos: () => yPosNoc, setY: (y) => { yPosNoc = y; },
         addOrangeHeaderOnPage: () => { }
       };
-
       buildGurgaonNOC(docNoc, formData, helpersNoc);
       docNoc.save(`Client-NOC--${nameKey.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
       return;
@@ -450,73 +507,50 @@ export default function DraftGenerator() {
       buildDwarkaTemplate(doc, formData, helpers);
     } else if (template.id === 'rajasthan-template') {
       buildRajasthanTemplate(doc, formData, helpers);
-      const nameKey = formData.clientCompanyName || formData.businessName || formData.companyName || 'Document';
-      doc.save(`Rajasthan-${nameKey.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
+      const rajBase64 = doc.output('datauristring');
+      doc.save(unifiedFileName);
+      await uploadToDriveAndLog(rajBase64, unifiedFileName, trackingPayload);
       return;
     } else if (template.id === 'asset-sense') {
+      // Dual-PDF: upload Agreement to Drive; save NOC locally
       buildAssetSenseAgreement(doc, formData, helpers);
       const nameKey = formData.clientCompanyName || formData.businessName || formData.companyName || 'Document';
-      doc.save(`GurgaonAS--${nameKey.replace(/\\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
+      const asBase64 = doc.output('datauristring');
+      doc.save(unifiedFileName);
+      await uploadToDriveAndLog(asBase64, unifiedFileName, trackingPayload);
 
-      const docNoc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-
+      const docNoc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       let yPosNoc = 30;
-      const addOrangeHeaderNoc = () => {
-        // Removed for Asset Sense
-      };
-
+      const addOrangeHeaderNoc = () => { /* Removed for Asset Sense */ };
       addOrangeHeaderNoc();
-
       const helpersNoc = {
         addSectionHeading: (text) => {
-          if (yPosNoc > pageHeight - 40) {
-            docNoc.addPage();
-            addOrangeHeaderNoc();
-            yPosNoc = 25;
-          }
-          docNoc.setFontSize(11);
-          docNoc.setFont('helvetica', 'bold');
-          docNoc.setTextColor(17, 17, 16);
-          docNoc.text(text, margin, yPosNoc);
-          yPosNoc += 8;
+          if (yPosNoc > pageHeight - 40) { docNoc.addPage(); addOrangeHeaderNoc(); yPosNoc = 25; }
+          docNoc.setFontSize(11); docNoc.setFont('helvetica', 'bold'); docNoc.setTextColor(17, 17, 16);
+          docNoc.text(text, margin, yPosNoc); yPosNoc += 8;
         },
         addParagraph: (text) => {
-          docNoc.setFontSize(10);
-          docNoc.setFont('helvetica', 'normal');
-          docNoc.setTextColor(40, 40, 40);
+          docNoc.setFontSize(10); docNoc.setFont('helvetica', 'normal'); docNoc.setTextColor(40, 40, 40);
           const lines = docNoc.splitTextToSize(text, contentWidth);
           lines.forEach(line => {
-            if (yPosNoc > pageHeight - 25) {
-              docNoc.addPage();
-              addOrangeHeaderNoc();
-              yPosNoc = 25;
-            }
-            docNoc.text(line, margin, yPosNoc);
-            yPosNoc += 6;
+            if (yPosNoc > pageHeight - 25) { docNoc.addPage(); addOrangeHeaderNoc(); yPosNoc = 25; }
+            docNoc.text(line, margin, yPosNoc); yPosNoc += 6;
           });
           yPosNoc += 4;
         },
-        margin,
-        pageWidth,
-        contentWidth,
-        yPos: () => yPosNoc,
-        setY: (y) => { yPosNoc = y; },
+        margin, pageWidth, contentWidth,
+        yPos: () => yPosNoc, setY: (y) => { yPosNoc = y; },
         addOrangeHeaderOnPage: () => addOrangeHeaderNoc()
       };
-
       buildAssetSenseNOC(docNoc, formData, helpersNoc);
-      docNoc.save(`GurgaonAS-NOC--${nameKey.replace(/\\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
+      docNoc.save(`GurgaonAS-NOC--${nameKey.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
       return;
     }
 
-    const nameKey = formData.clientCompanyName || formData.businessName || formData.companyName || 'Document';
-    const fileName = `${template.id}-${nameKey.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`;
-
-    doc.save(fileName);
+    // ── All single-PDF templates reach here ──
+    const base64DataUri = doc.output('datauristring');
+    doc.save(unifiedFileName);  // local download first — instant for the user
+    await uploadToDriveAndLog(base64DataUri, unifiedFileName, trackingPayload);
   };
 
   const formatDate = (dateString) => {

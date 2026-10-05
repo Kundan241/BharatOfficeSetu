@@ -61,22 +61,23 @@ export default function Dashboard() {
     const unsubServices = onSnapshot(
       servicesRef,
       (snapshot) => {
-        const services = snapshot.docs.map(doc => ({
+        const services = snapshot?.docs?.map(doc => ({
           id: doc.id,
           ...doc.data(),
           // Mapping 'type' to 'name' and 'status' to 'currentStep' to match UI
-          name: doc.data().type,
-          currentStep: doc.data().status,
-          status: doc.data().completedDate ? 'completed' : 'active',
-          startDate: doc.data().startDate?.toDate?.().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) || 'Just now',
-          completedDate: doc.data().completedDate?.toDate?.() || null,
-          lastUpdated: doc.data().startDate ? Math.floor((new Date() - doc.data().startDate.toDate()) / (1000 * 60 * 60 * 24)) : 0
-        }));
+          name: doc.data()?.type,
+          currentStep: doc.data()?.status,
+          status: doc.data()?.completedDate ? 'completed' : 'active',
+          startDate: doc.data()?.startDate?.toDate?.().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) || 'Just now',
+          completedDate: doc.data()?.completedDate?.toDate?.() || null,
+          lastUpdated: doc.data()?.startDate ? Math.floor((new Date() - doc.data().startDate.toDate()) / (1000 * 60 * 60 * 24)) : 0
+        })) || [];
         setServices(services);
         setFetching(false);
       },
       (error) => {
         console.error('Services error:', error);
+        setServices([]);
         setFetching(false);
       }
     );
@@ -86,15 +87,16 @@ export default function Dashboard() {
     const unsubDocs = onSnapshot(
       docsRef,
       (snapshot) => {
-        const documents = snapshot.docs.map(doc => ({
+        const documents = snapshot?.docs?.map(doc => ({
           id: doc.id,
           ...doc.data(),
-          uploadedAt: doc.data().uploadedAt?.toDate?.() || null
-        }));
+          uploadedAt: doc.data()?.uploadedAt?.toDate?.() || null
+        })) || [];
         setDocuments(documents);
       },
       (error) => {
         console.error('Documents error:', error);
+        setDocuments([]);
       }
     );
 
@@ -283,30 +285,30 @@ export default function Dashboard() {
             </button>
           </div>
           
-          {services.length === 0 ? (
+          {(!services || (services?.length || 0) === 0) ? (
             <div className="bg-white rounded-[16px] border border-[rgba(17,17,16,0.08)] p-10 flex flex-col items-center justify-center text-center">
               <FileText className="text-[rgba(17,17,16,0.2)] mb-3" size={32} />
               <div className="text-[14px] font-medium text-[rgba(17,17,16,0.5)]">Your services will appear here</div>
               <div className="text-[13px] text-[rgba(17,17,16,0.4)] mt-1">Our team is setting up your account</div>
             </div>
           ) : (
-            services.map((service) => {
-              const steps = SERVICE_STEPS[service.name] || ['Order Received', 'In Progress', 'Completed'];
-              const currentIndex = steps.indexOf(service.currentStep);
+            (services || []).map((service) => {
+              const steps = (service?.name && SERVICE_STEPS[service.name]) || ['Order Received', 'In Progress', 'Completed'];
+              const currentIndex = (steps || []).indexOf(service?.currentStep);
               
               return (
-                <div key={service.id} className="bg-white rounded-[16px] border border-[rgba(17,17,16,0.08)] p-6 mb-4 relative overflow-hidden card-lift">
+                <div key={service?.id || service?.name} className="bg-white rounded-[16px] border border-[rgba(17,17,16,0.08)] p-6 mb-4 relative overflow-hidden card-lift">
                   <div className={`absolute left-0 top-0 bottom-0 w-[3px] 
-                    ${service.status === 'active' ? 'bg-[#F4831F]' : 'bg-[#1B6B2F]'}`}
+                    ${service?.status === 'active' ? 'bg-[#F4831F]' : 'bg-[#1B6B2F]'}`}
                   ></div>
                   
                   <div className="flex justify-between items-start mb-6">
                     <div>
-                      <div className="text-[16px] font-bold text-[#111110] mb-0.5">{service.name}</div>
-                      <div className="text-[12px] text-[rgba(17,17,16,0.45)]">Started {service.startDate}</div>
+                      <div className="text-[16px] font-bold text-[#111110] mb-0.5">{service?.name}</div>
+                      <div className="text-[12px] text-[rgba(17,17,16,0.45)]">Started {service?.startDate}</div>
                     </div>
                     
-                    {service.status === 'active' ? (
+                    {service?.status === 'active' ? (
                       <div className="bg-[rgba(244,131,31,0.1)] text-[#F4831F] text-[11px] font-bold px-3 py-1 rounded-full whitespace-nowrap">
                         In Progress
                       </div>
@@ -321,7 +323,7 @@ export default function Dashboard() {
                     <div className="min-w-[500px] flex items-center justify-between relative px-4">
                       {/* Lines */}
                       <div className="absolute left-8 right-8 top-[13px] h-[2px] -z-10 flex">
-                        {steps.slice(0, -1).map((_, i) => (
+                        {(steps?.slice(0, -1) || []).map((_, i) => (
                           <div key={i} className="flex-1 h-full">
                             <div className={`h-full w-full 
                               ${i < currentIndex ? 'bg-[#1B6B2F]' : 'border-t-2 border-dashed border-[rgba(17,17,16,0.1)]'}
@@ -331,10 +333,10 @@ export default function Dashboard() {
                       </div>
                       
                       {/* Circles */}
-                      {steps.map((step, i) => {
-                        const isCompleted = i < currentIndex || service.status === 'completed';
-                        const isCurrent = i === currentIndex && service.status === 'active';
-                        const isPending = i > currentIndex && service.status === 'active';
+                      {(steps || []).map((step, i) => {
+                        const isCompleted = i < currentIndex || service?.status === 'completed';
+                        const isCurrent = i === currentIndex && service?.status === 'active';
+                        const isPending = i > currentIndex && service?.status === 'active';
                         
                         return (
                           <div key={i} className="flex flex-col items-center relative w-16">
@@ -364,7 +366,7 @@ export default function Dashboard() {
                   </div>
 
                   <div className="mt-8 text-[12px] text-[rgba(17,17,16,0.35)]">
-                    Last updated {service.lastUpdated} days ago
+                    Last updated {service?.lastUpdated || 0} days ago
                   </div>
                 </div>
               );
@@ -377,20 +379,20 @@ export default function Dashboard() {
           <div className="text-[11px] font-semibold tracking-[0.08em] text-[rgba(17,17,16,0.4)] mb-4">MY DOCUMENTS</div>
           
           <div className="bg-white rounded-[16px] border border-[rgba(17,17,16,0.08)] px-6 py-5">
-            {documents.length === 0 ? (
+            {(!documents || (documents?.length || 0) === 0) ? (
               <div className="text-[14px] text-[rgba(17,17,16,0.4)] text-center py-6">
                 No documents yet. They will appear here as your service progresses.
               </div>
             ) : (
               <div className="flex flex-col">
-                {documents.map((doc, i) => (
-                  <div key={doc.id} className={`flex items-center justify-between h-[52px] ${i !== documents.length - 1 ? 'border-b border-[rgba(17,17,16,0.06)]' : ''}`}>
+                {(documents || []).map((doc, i) => (
+                  <div key={doc?.id || i} className={`flex items-center justify-between h-[52px] ${i !== (documents?.length || 0) - 1 ? 'border-b border-[rgba(17,17,16,0.06)]' : ''}`}>
                     <div className="flex items-center gap-3">
                       <FileText className="text-[#F4831F]" size={20} />
-                      <span className="text-[14px] font-medium text-[#111110]">{doc.name}</span>
+                      <span className="text-[14px] font-medium text-[#111110]">{doc?.name}</span>
                     </div>
                     <button 
-                      onClick={() => window.open(typeof doc.url === 'string' ? doc.url : doc.url?.url, '_blank')}
+                      onClick={() => window.open(typeof doc?.url === 'string' ? doc.url : doc?.url?.url, '_blank')}
                       className="border border-[rgba(27,107,47,0.2)] text-[#1B6B2F] rounded-[100px] px-3.5 py-1.5 text-[12px] font-bold hover:bg-[#F0F5EA] hover:border-[#1B6B2F] transition-colors flex items-center gap-1.5"
                     >
                       <Download size={14} />
@@ -446,7 +448,7 @@ export default function Dashboard() {
                     Which service do you need?
                   </label>
                   <div className="flex flex-wrap gap-2">
-                    {AVAILABLE_SERVICES.map(srv => {
+                    {(AVAILABLE_SERVICES || []).map(srv => {
                       const isSelected = selectedService === srv;
                       return (
                         <button

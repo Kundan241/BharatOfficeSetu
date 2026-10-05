@@ -112,11 +112,15 @@ const CircularGallery = React.forwardRef<HTMLDivElement, CircularGalleryProps>(
                 style={{
                   transform: `rotateY(${itemAngle}deg) translateZ(${radius}px)`,
                   opacity: opacity,
-                  transition: 'opacity 0.3s linear'
+                  transition: 'opacity 0.3s linear',
+                  transformStyle: 'preserve-3d'
                 }}
               >
-                <div className="relative w-full h-full rounded-lg shadow-2xl overflow-hidden group border border-border bg-card/70 dark:bg-card/30 backdrop-blur-lg">
-                  {/* The Image */}
+                {/* Front Face (faces outward) */}
+                <div 
+                  className="absolute inset-0 rounded-lg shadow-2xl overflow-hidden border border-border bg-card/70 dark:bg-card/30 backdrop-blur-lg"
+                  style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
+                >
                   <img
                     src={item.photo.url}
                     alt={item.photo.text}
@@ -124,21 +128,24 @@ const CircularGallery = React.forwardRef<HTMLDivElement, CircularGalleryProps>(
                     style={{ objectPosition: item.photo.pos || 'center' }}
                   />
 
-                  {/* The Dark Gradient Backdrop */}
-                  <div className="absolute bottom-0 left-0 w-full h-3/4 bg-gradient-to-t from-black/95 via-black/70 to-transparent pointer-events-none" />
+                </div>
 
-                  {/* The Text Overlay - Explicitly forcing text-white on all elements */}
-                  <div className="absolute bottom-0 left-0 w-full p-6 z-10 drop-shadow-xl">
-                    <h2 className="text-2xl font-bold leading-tight mb-1 text-white !text-white">
-                      {item.common}
-                    </h2>
-                    <em className="text-sm font-medium block mb-3 text-gray-200 !text-gray-200">
-                      {item.binomial}
-                    </em>
-                    <p className="text-xs font-medium tracking-wide uppercase text-gray-300 !text-gray-300">
-                      Photo by: {item.photo.by}
-                    </p>
-                  </div>
+                {/* Back Face (faces inward, so it reads correctly when on the far side of the carousel) */}
+                <div 
+                  className="absolute inset-0 rounded-lg shadow-2xl overflow-hidden border border-border bg-card/70 dark:bg-card/30 backdrop-blur-lg"
+                  style={{ 
+                    backfaceVisibility: 'hidden', 
+                    WebkitBackfaceVisibility: 'hidden',
+                    transform: 'rotateY(180deg)' 
+                  }}
+                >
+                  <img
+                    src={item.photo.url}
+                    alt={item.photo.text}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    style={{ objectPosition: item.photo.pos || 'center' }}
+                  />
+
                 </div>
               </div>
             );
