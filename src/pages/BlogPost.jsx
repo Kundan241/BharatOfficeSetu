@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import FooterBanner from '../components/FooterBanner';
 import WhatsAppWidget from '../components/WhatsAppWidget';
-import { getPostBySlug } from '../services/blog';
+import { supabase } from '../services/supabaseClient';
 
 export default function BlogPost() {
   const { slug } = useParams();
@@ -16,21 +16,26 @@ export default function BlogPost() {
     const fetchPost = async () => {
       setLoading(true);
       try {
-        const data = await getPostBySlug(slug);
-        if (data.error) throw new Error(data.error);
-        if (!data.post) throw new Error("Post not found");
+        const { data, error: fetchError } = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('slug', slug)
+          .single();
+
+        if (fetchError) throw fetchError;
+        if (!data) throw new Error("Post not found");
         
-        setPost(data.post);
+        setPost(data);
         
         // SEO Head injection
-        document.title = `${data.post.seo?.title || data.post.title} | Bharat Office Setu`;
+        document.title = `${data.title} | Bharat Office Setu`;
         let metaDescription = document.querySelector('meta[name="description"]');
         if (!metaDescription) {
           metaDescription = document.createElement('meta');
           metaDescription.name = "description";
           document.head.appendChild(metaDescription);
         }
-        metaDescription.content = data.post.seo?.description || data.post.brief || "";
+        metaDescription.content = data.excerpt || "";
         
       } catch (err) {
         setError(err.message);
@@ -62,6 +67,13 @@ export default function BlogPost() {
     if (shareUrl) window.open(shareUrl, '_blank', 'noopener,noreferrer');
   };
 
+  const calculateReadTime = (contentHTML) => {
+    if (!contentHTML) return 3;
+    const text = contentHTML.replace(/<[^>]*>/g, '');
+    const wordCount = text.trim().split(/\s+/).length;
+    return Math.max(1, Math.ceil(wordCount / 200));
+  };
+
   return (
     <div className="bg-[#F4F3EE] min-h-screen text-[#111110]">
       <Navbar />
@@ -72,18 +84,18 @@ export default function BlogPost() {
             "@context": "https://schema.org",
             "@type": "BlogPosting",
             "headline": post.title,
-            "datePublished": post.publishedAt,
-            "dateModified": post.updatedAt || post.publishedAt,
+            "datePublished": post.created_at,
+            "dateModified": post.created_at,
             "author": {
               "@type": "Person",
-              "name": post.author?.name
+              "name": "Bharat Office Setu"
             },
             "publisher": {
               "@type": "Organization",
               "name": "Bharat Office Setu"
             },
-            "image": post.coverImage?.url,
-            "description": post.brief
+            "image": post.image_url,
+            "description": post.excerpt
           })}
         </script>
       )}
@@ -98,15 +110,8 @@ export default function BlogPost() {
           </button>
 
           {loading ? (
-            <div className="animate-pulse">
-              <div className="w-24 h-6 bg-black/5 rounded-full mb-4" />
-              <div className="w-full h-10 bg-black/5 rounded-lg mb-3" />
-              <div className="w-3/4 h-10 bg-black/5 rounded-lg mb-6" />
-              <div className="flex items-center gap-4 mb-10">
-                <div className="w-8 h-8 rounded-full bg-black/5" />
-                <div className="w-32 h-4 bg-black/5 rounded" />
-              </div>
-              <div className="w-full h-[400px] bg-black/5 rounded-xl mb-10" />
+            <div className="flex justify-center items-center py-32">
+              <div className="w-10 h-10 border-4 border-[#1B6B2F]/20 border-t-[#1B6B2F] rounded-full animate-spin"></div>
             </div>
           ) : error ? (
             <div className="text-center py-20 text-red-500 font-medium">
@@ -116,9 +121,9 @@ export default function BlogPost() {
             <article>
               {/* Header */}
               <header className="mb-10">
-                {post.tags?.[0] && (
+                {post.category && (
                   <span className="inline-block px-3 py-1 rounded-full bg-[#1B6B2F]/10 text-[#1B6B2F] font-semibold text-[11px] mb-3">
-                    {post.tags[0].name}
+                    {post.category}
                   </span>
                 )}
                 
@@ -128,19 +133,15 @@ export default function BlogPost() {
                 
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
                   <div className="flex items-center gap-2">
-                    {post.author?.profilePicture ? (
-                      <img src={post.author.profilePicture} alt={post.author.name} className="w-8 h-8 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-[#1B6B2F]/10 text-[#1B6B2F] flex items-center justify-center font-bold text-xs">
-                        {getInitials(post.author?.name)}
-                      </div>
-                    )}
-                    <span className="text-[14px] font-semibold text-[#111110]">{post.author?.name}</span>
+                    <div className="w-8 h-8 rounded-full bg-[#1B6B2F]/10 text-[#1B6B2F] flex items-center justify-center font-bold text-xs">
+                      {getInitials("Bharat Office Setu")}
+                    </div>
+                    <span className="text-[14px] font-semibold text-[#111110]">Bharat Office Setu</span>
                   </div>
                   
                   <span className="w-1 h-1 rounded-full bg-black/20" />
                   
-                  <span className="text-[14px] text-black/45">{formatDate(post.publishedAt)}</span>
+                  <span className="text-[14px] text-black/45">{formatDate(post.created_at)}</span>
                   
                   <span className="w-1 h-1 rounded-full bg-black/20" />
                   
@@ -148,15 +149,15 @@ export default function BlogPost() {
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    {post.readTimeInMinutes || 3} min read
+                    {calculateReadTime(post.content)} min read
                   </span>
                 </div>
               </header>
 
               {/* Cover Image */}
-              {post.coverImage?.url && (
+              {post.image_url && (
                 <img 
-                  src={post.coverImage.url} 
+                  src={post.image_url} 
                   alt={post.title} 
                   className="w-full max-h-[420px] object-cover rounded-xl mb-10 shadow-sm"
                 />
@@ -164,9 +165,23 @@ export default function BlogPost() {
 
               {/* Content Rendered */}
               <div 
-                className="article-content"
-                dangerouslySetInnerHTML={{ __html: post.content.html }} 
+                className="article-content max-w-none prose prose-lg prose-headings:text-[#111110] prose-a:text-[#1B6B2F] prose-a:font-semibold"
+                dangerouslySetInnerHTML={{ __html: post.content }} 
               />
+              
+              <style>{`
+                .article-content h1, .article-content h2, .article-content h3 { font-weight: bold; margin-top: 1.5em; margin-bottom: 0.5em; color: #111110; }
+                .article-content h1 { font-size: 2em; }
+                .article-content h2 { font-size: 1.5em; }
+                .article-content h3 { font-size: 1.17em; }
+                .article-content p { margin-bottom: 1em; line-height: 1.8; color: #333; }
+                .article-content ul, .article-content ol { margin-left: 1.5em; margin-bottom: 1em; }
+                .article-content ul { list-style-type: disc; }
+                .article-content ol { list-style-type: decimal; }
+                .article-content blockquote { border-left: 4px solid #1B6B2F; padding-left: 1em; margin-left: 0; color: #555; font-style: italic; }
+                .article-content a { color: #1B6B2F; text-decoration: underline; }
+                .article-content img { max-width: 100%; border-radius: 8px; margin: 1em 0; }
+              `}</style>
 
               {/* Share Row */}
               <div className="mt-10 flex items-center gap-3">
@@ -184,28 +199,19 @@ export default function BlogPost() {
               </div>
 
               {/* Author Box */}
-              {post.author && (
-                <div className="mt-10 p-6 bg-white border border-black/5 rounded-2xl flex flex-col sm:flex-row gap-5 items-start shadow-sm">
-                  {post.author.profilePicture ? (
-                    <img src={post.author.profilePicture} alt={post.author.name} className="w-14 h-14 rounded-full object-cover shrink-0" />
-                  ) : (
-                    <div className="w-14 h-14 rounded-full bg-[#1B6B2F]/10 text-[#1B6B2F] flex items-center justify-center font-bold text-xl shrink-0">
-                      {getInitials(post.author.name)}
-                    </div>
-                  )}
-                  
-                  <div>
-                    <div className="text-[11px] text-black/45 tracking-wider uppercase mb-1 font-semibold">Written by</div>
-                    <div className="text-[16px] font-bold text-[#111110] mb-2">{post.author.name}</div>
-                    {post.author.bio?.html && (
-                      <div 
-                        className="text-[14px] text-black/60 leading-relaxed max-w-lg"
-                        dangerouslySetInnerHTML={{ __html: post.author.bio.html }}
-                      />
-                    )}
+              <div className="mt-10 p-6 bg-white border border-black/5 rounded-2xl flex flex-col sm:flex-row gap-5 items-start shadow-sm">
+                <div className="w-14 h-14 rounded-full bg-[#1B6B2F]/10 text-[#1B6B2F] flex items-center justify-center font-bold text-xl shrink-0">
+                  {getInitials("Bharat Office Setu")}
+                </div>
+                
+                <div>
+                  <div className="text-[11px] text-black/45 tracking-wider uppercase mb-1 font-semibold">Written by</div>
+                  <div className="text-[16px] font-bold text-[#111110] mb-2">Bharat Office Setu</div>
+                  <div className="text-[14px] text-black/60 leading-relaxed max-w-lg">
+                    Expert guides on business compliance, company registration, and scaling operations across India.
                   </div>
                 </div>
-              )}
+              </div>
 
               {/* Call to action */}
               <div 
@@ -216,7 +222,7 @@ export default function BlogPost() {
                 }}
               >
                 <h3 className="text-[22px] font-extrabold text-[#111110] mb-2">
-                  Need help with {post.tags?.[0]?.name || 'business compliance'}?
+                  Need help with {post.category || 'business compliance'}?
                 </h3>
                 <p className="text-[15px] text-black/55 mb-6">
                   Our team handles everything — fast, compliant, and hassle-free.
