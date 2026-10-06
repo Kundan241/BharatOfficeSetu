@@ -6,7 +6,7 @@ const bosServicesData: GalleryItem[] = [
 		common: 'Premium Workspaces',
 		binomial: 'Coworking & Managed Offices',
 		photo: {
-			url: '/serviceslistimage/Premium Coworking Workspace Interior.png',
+			url: '/serviceslistimage/Premium Coworking Workspace Interior.jpg',
 			text: 'Premium coworking workspace interior',
 			pos: 'center',
 			by: 'BOS Facilities'
@@ -16,7 +16,7 @@ const bosServicesData: GalleryItem[] = [
 		common: 'Company Incorporation',
 		binomial: 'Private Limited & LLP',
 		photo: {
-			url: '/serviceslistimage/Company Incorporation Desk Essentials.png',
+			url: '/serviceslistimage/Company Incorporation Desk Essentials.jpg',
 			text: 'Company incorporation desk essentials',
 			pos: 'center',
 			by: 'BOS Legal'
@@ -26,7 +26,7 @@ const bosServicesData: GalleryItem[] = [
 		common: 'Tax & Accounting',
 		binomial: 'GST & Corporate Tax',
 		photo: {
-			url: '/serviceslistimage/Tax & Accounting Workspace.png',
+			url: '/serviceslistimage/Tax & Accounting Workspace.jpg',
 			text: 'Tax and accounting workspace',
 			pos: 'center',
 			by: 'BOS Finance'
@@ -36,7 +36,7 @@ const bosServicesData: GalleryItem[] = [
 		common: 'Virtual Offices',
 		binomial: 'Premium Business Addresses',
 		photo: {
-			url: '/serviceslistimage/Modern Virtual Office Lounge.png',
+			url: '/serviceslistimage/Modern Virtual Office Lounge.jpg',
 			text: 'Modern virtual office lounge',
 			pos: 'center',
 			by: 'BOS Network'
@@ -46,7 +46,7 @@ const bosServicesData: GalleryItem[] = [
 		common: 'IT Infrastructure',
 		binomial: 'Network & Hardware Setup',
 		photo: {
-			url: '/serviceslistimage/Modern IT Infrastructure Workspace Poster.png',
+			url: '/serviceslistimage/Modern IT Infrastructure Workspace Poster.jpg',
 			text: 'Modern IT infrastructure workspace',
 			pos: 'center',
 			by: 'BOS Tech'
@@ -56,7 +56,7 @@ const bosServicesData: GalleryItem[] = [
 		common: 'Payroll & HR',
 		binomial: 'End-to-end HR Management',
 		photo: {
-			url: '/serviceslistimage/Payroll & HR Team High-Five.png',
+			url: '/serviceslistimage/Payroll & HR Team High-Five.jpg',
 			text: 'Payroll and HR team',
 			pos: 'center',
 			by: 'BOS Operations'
@@ -66,7 +66,7 @@ const bosServicesData: GalleryItem[] = [
 		common: 'Legal Advisory',
 		binomial: 'Contracts & IP Protection',
 		photo: {
-			url: '/serviceslistimage/Legal Advisory Desk with Lady Justice.png',
+			url: '/serviceslistimage/Legal Advisory Desk with Lady Justice.jpg',
 			text: 'Legal advisory desk with Lady Justice',
 			pos: 'center',
 			by: 'BOS Legal'
