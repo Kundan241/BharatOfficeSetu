@@ -20,7 +20,7 @@ import { createClientAccount } from '../services/auth';
 import { updateServiceStatus, addService } from '../services/services';
 import { uploadDocument, deleteDocument } from '../services/documents';
 import { uploadFile } from '../services/cloudinary';
-import AdminBlog from './AdminBlog';
+import AdminBlogEditor from '../components/AdminBlogEditor';
 import AdminSalesLedger from '../components/AdminSalesLedger';
 import emailjs from '@emailjs/browser';
 import { 
@@ -330,7 +330,7 @@ export default function Admin() {
             <Route path="/partners/add" element={<AddPartnerForm />} />
             <Route path="/partners/:uid" element={<PartnerDetailView showConfirm={showConfirm} />} />
             <Route path="/sales-ledger" element={<AdminSalesLedger isAdmin={isAdmin} />} />
-            <Route path="/blog/*" element={<AdminBlog showConfirm={showConfirm} />} />
+            <Route path="/blog/*" element={<AdminBlogEditor />} />
           </Routes>
         </div>
       </div>

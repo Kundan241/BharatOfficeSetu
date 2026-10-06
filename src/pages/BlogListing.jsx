@@ -3,28 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import FooterBanner from '../components/FooterBanner';
 import WhatsAppWidget from '../components/WhatsAppWidget';
-import { getAllPosts, getPostsByTag } from '../services/blog';
+import { supabase } from '../services/supabaseClient';
 
 const TAGS = ['All', 'GST', 'Virtual Office', 'Company Setup', 'Compliance', 'Expansion'];
-
-function SkeletonCard() {
-  return (
-    <div className="bg-white border border-black/10 rounded-2xl overflow-hidden shadow-sm animate-pulse">
-      <div className="w-full h-[200px] bg-black/5" />
-      <div className="p-5">
-        <div className="w-20 h-5 bg-black/5 rounded-full mb-3" />
-        <div className="w-full h-6 bg-black/5 rounded mb-2" />
-        <div className="w-3/4 h-6 bg-black/5 rounded mb-4" />
-        <div className="w-full h-4 bg-black/5 rounded mb-1" />
-        <div className="w-5/6 h-4 bg-black/5 rounded mb-5" />
-        <div className="flex justify-between border-t border-black/5 pt-3">
-          <div className="w-20 h-4 bg-black/5 rounded" />
-          <div className="w-20 h-4 bg-black/5 rounded" />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function BlogListing() {
   const navigate = useNavigate();
@@ -51,21 +32,31 @@ export default function BlogListing() {
     
     setError(null);
     try {
-      let data;
-      if (tag === 'All') {
-        data = await getAllPosts(pageNum);
-        setHasNextPage(data.pageInfo?.hasNextPage || false);
-      } else {
-        const hashnodeTag = tag.toLowerCase().replace(/ /g, '-');
-        data = await getPostsByTag(hashnodeTag);
-        setHasNextPage(false); // getPostsByTag is hardcoded to page 1 currently
+      let query = supabase
+        .from('blog_posts')
+        .select('*', { count: 'exact' })
+        .eq('published', true)
+        .order('created_at', { ascending: false });
+
+      if (tag !== 'All') {
+        query = query.eq('category', tag);
       }
+
+      // Pagination setup (9 posts per page)
+      const limit = 9;
+      const from = (pageNum - 1) * limit;
+      const to = from + limit - 1;
+      query = query.range(from, to);
+
+      const { data, error: supabaseError, count } = await query;
       
-      if (data.error) throw new Error(data.error);
+      if (supabaseError) throw new Error(supabaseError.message);
       
-      setPosts(prev => append ? [...prev, ...data.posts] : data.posts);
+      setHasNextPage(to < count - 1);
+      setPosts(prev => append ? [...prev, ...data] : data);
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError("Failed to fetch blog posts. Please try again later.");
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -84,8 +75,9 @@ export default function BlogListing() {
   };
 
   const renderCover = (post) => {
-    if (post.coverImage?.url) {
-      return <img src={post.coverImage.url} alt={post.title} className="w-full h-full object-cover" />;
+    const imageUrl = post.cover_image || post.image_url;
+    if (imageUrl) {
+      return <img src={imageUrl} alt={post.title} className="w-full h-full object-cover" />;
     }
     return (
       <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, rgba(27,107,47,0.08), rgba(244,131,31,0.06))' }}>
@@ -163,13 +155,17 @@ export default function BlogListing() {
 
         {/* Posts Grid */}
         <div className="max-w-[1200px] mx-auto px-6 py-8 md:py-10">
-          {error && <p className="text-center text-red-500">{error}</p>}
+          {error && !loading && (
+            <div className="bg-red-50 text-red-500 p-4 rounded-lg text-center mb-6">
+              {error}
+            </div>
+          )}
           
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
+            <div className="flex justify-center items-center py-32">
+              <div className="w-10 h-10 border-4 border-[#1B6B2F]/20 border-t-[#1B6B2F] rounded-full animate-spin"></div>
             </div>
-          ) : posts.length === 0 ? (
+          ) : posts.length === 0 && !error ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <svg className="w-8 h-8 text-black/30 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -194,16 +190,16 @@ export default function BlogListing() {
                     
                     <div className={`flex flex-col justify-between ${isFeatured ? 'lg:w-[45%] lg:p-10 p-6' : 'p-5'} flex-1`}>
                       <div>
-                        {post.tags?.[0] && (
+                        {post.category && (
                           <span className="inline-block px-2.5 py-1 rounded-full bg-[#1B6B2F]/10 text-[#1B6B2F] font-semibold text-[11px] mb-2.5">
-                            {post.tags[0].name}
+                            {post.category}
                           </span>
                         )}
                         <h2 className={`font-bold text-[#111110] leading-snug mb-2 line-clamp-2 ${isFeatured ? 'text-[24px] lg:text-[28px]' : 'text-[17px]'}`}>
                           {post.title}
                         </h2>
                         <p className={`text-black/50 leading-relaxed line-clamp-3 mb-4 ${isFeatured ? 'text-[15px]' : 'text-[14px]'}`}>
-                          {post.brief}
+                          {post.excerpt || post.brief}
                         </p>
                       </div>
                       
@@ -215,12 +211,12 @@ export default function BlogListing() {
                         )}
                         
                         <div className="flex items-center justify-between pt-3 border-t border-black/5 mt-auto">
-                          <span className="text-[12px] text-black/35">{formatDate(post.publishedAt)}</span>
+                          <span className="text-[12px] text-black/35">{formatDate(post.created_at || post.publishedAt)}</span>
                           <div className="flex items-center text-[12px] text-black/35 gap-1.5">
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            {post.readTimeInMinutes || 3} min read
+                            {post.read_time || post.readTimeInMinutes || 3} min read
                           </div>
                         </div>
                       </div>
