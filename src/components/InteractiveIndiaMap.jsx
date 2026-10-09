@@ -23,7 +23,7 @@ export const STATE_DATA = {
   "Gujarat": { count: 2, img: "/Gujarat.jpeg" },
   "Tamil Nadu": { count: 5, img: "/Tamil Nadu.jpeg" },
   "Karnataka": { count: 6, img: "/Karnataka.jpeg" },
-  "Delhi": { count: 4, img: "/delhi.png" },
+  "Delhi": { count: 4, img: "/delhi.jpg" },
   "Telangana": { count: 3, img: "/Telangana.jpeg" },
   "Uttar Pradesh": { count: 3, img: "/Uttar Pradesh.jpeg" },
   "Rajasthan": { count: 2, img: "/Rajasthan.jpeg" },
@@ -40,7 +40,7 @@ export const STATE_DATA = {
   "Jammu And Kashmir": { count: 1, img: "/Himachal Pradesh.jpeg" },
 };
 
-export const DEFAULT_DATA = { count: 1, img: "/general.png" };
+export const DEFAULT_DATA = { count: 1, img: "/general.jpg" };
 
 export default function InteractiveIndiaMap({ activeState, setActiveState, showCard = true }) {
   const isMobile = useIsMobile();
