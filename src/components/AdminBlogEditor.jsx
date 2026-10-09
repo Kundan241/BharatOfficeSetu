@@ -21,19 +21,63 @@ export default function AdminBlogEditor() {
   const { addToast } = useToast();
   const fileInputRef = useRef(null);
 
+  const compressImage = (file, maxWidth, maxHeight, quality) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height *= maxWidth / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width *= maxHeight / height;
+              height = maxHeight;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          canvas.toBlob((blob) => {
+            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
+              type: 'image/jpeg',
+              lastModified: Date.now()
+            });
+            resolve(compressedFile);
+          }, 'image/jpeg', quality);
+        };
+        img.onerror = (error) => reject(error);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     setIsUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const compressedFile = await compressImage(file, 1200, 1200, 0.75);
+      
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
       const filePath = `images/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('blog-images')
-        .upload(filePath, file);
+        .upload(filePath, compressedFile);
 
       if (uploadError) throw uploadError;
 
@@ -42,7 +86,7 @@ export default function AdminBlogEditor() {
         .getPublicUrl(filePath);
 
       setImageUrl(publicUrl);
-      addToast('success', 'Image uploaded successfully!');
+      addToast('success', 'Image uploaded & compressed successfully!');
     } catch (error) {
       console.error('Error uploading image:', error);
       addToast('error', 'Failed to upload image');
