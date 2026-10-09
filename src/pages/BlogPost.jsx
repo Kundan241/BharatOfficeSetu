@@ -75,7 +75,7 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="bg-[#F4F3EE] min-h-screen text-[#111110]">
+    <div className="bg-[#F4F3EE] min-h-screen text-[#111110] overflow-x-hidden">
       <Navbar />
       
       {post && (
@@ -170,7 +170,9 @@ export default function BlogPost() {
               />
               
               <style>{`
-                .article-content h1, .article-content h2, .article-content h3 { font-weight: bold; margin-top: 1.5em; margin-bottom: 0.5em; color: #111110; }
+                .article-content { word-break: break-word; overflow-wrap: break-word; }
+                .article-content * { max-width: 100%; box-sizing: border-box; }
+                .article-content h1, .article-content h2, .article-content h3 { font-weight: bold; margin-top: 1.5em; margin-bottom: 0.5em; color: #111110; line-height: 1.3; }
                 .article-content h1 { font-size: 2em; }
                 .article-content h2 { font-size: 1.5em; }
                 .article-content h3 { font-size: 1.17em; }
