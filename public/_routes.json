@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "include": [
+    { "source": "/robots.txt" },
+    { "source": "/sitemap.xml" },
+    { "source": "/ai-catalog.json" }
+  ],
+  "exclude": [
+    { "source": "/*" }
+  ]
+}

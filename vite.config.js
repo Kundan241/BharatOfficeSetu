@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
-
+import viteImagemin from 'vite-plugin-imagemin';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -32,6 +32,28 @@ export default defineConfig({
           }
         ]
       }
+    }) ,
+    viteImagemin({
+      // Optimize PNG, JPEG and JPG images
+      include: [
+        'src/assets/**/*.png',
+        'src/assets/**/*.jpg',
+        'src/assets/**/*.jpeg',
+        'public/**/*.png',
+        'public/**/*.jpg',
+        'public/**/*.jpeg'
+      ],
+      png: {
+        quality: [0.8, 0.9]
+      },
+      jpeg: {
+        quality: 80
+      },
+      jpg: {
+        quality: 80
+      },
+      // Optionally handle other formats
+      // svgo: { plugins: [{ removeViewBox: false }] }
     })
   ],
 })
