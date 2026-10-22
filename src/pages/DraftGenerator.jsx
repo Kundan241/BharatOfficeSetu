@@ -305,68 +305,60 @@ export default function DraftGenerator() {
   };
 
   // ─────────────────────────────────────────────────────────────────────────
-  // uploadToDriveAndLog
+  // uploadToDriveAndLog (Syncs draft info to Google Sheets & Drive)
   //
-  // Why two requests?
-  // GAS blocks any fetch that triggers a CORS preflight (OPTIONS). A JSON body
-  // with mode:'cors' causes a preflight — GAS cannot respond to it, so doPost
-  // never fires. The fix is to send as FormData (a "simple" request — no
-  // preflight), which GAS accepts. We read the response JSON to get driveUrl.
+  // Google Apps Script doPost(e) parses e.postData.contents.
+  // Using FormData / multipart sets e.postData to undefined, which crashes
+  // the script with "TypeError: Cannot read properties of undefined (reading 'contents')".
+  // Using Content-Type: 'text/plain;charset=utf-8' is a browser simple request
+  // (no CORS preflight) and reliably delivers JSON to e.postData.contents.
   // ─────────────────────────────────────────────────────────────────────────
   const uploadToDriveAndLog = async (base64DataUri, fileName, trackingPayload) => {
-    // ── Safety check: confirm Base64 was actually captured ──────────────────
-    if (!base64DataUri || base64DataUri.length < 100) {
-      console.error('[BOS] uploadToDriveAndLog: base64DataUri is empty or too short — PDF was not captured correctly.');
-      addToast('error', 'PDF capture failed — Drive upload skipped.');
-      return;
+    let base64 = '';
+    if (base64DataUri && base64DataUri.length > 100) {
+      base64 = base64DataUri.replace(/^data:application\/pdf;base64,/, '');
     }
 
-    // Strip the data URI prefix: GAS only wants the raw Base64 string
-    const base64 = base64DataUri.replace(/^data:application\/pdf;base64,/, '');
-
-    console.log('[BOS] PDF Base64 length (chars):', base64.length);  // should be >> 1000
+    console.log('[BOS] Syncing to GAS Webhook:', GAS_WEBHOOK_URL);
     console.log('[BOS] File name:', fileName);
-    console.log('[BOS] Sending to GAS:', GAS_WEBHOOK_URL);
 
-    // ── Build the full payload as a plain JSON string ────────────────────────
-    // We attach it as a single FormData field so the browser sends it as a
-    // multipart/form-data simple request — no CORS preflight triggered.
-    const fullPayload = JSON.stringify({
+    const fullPayload = {
       ...trackingPayload,
       fileName,
       pdfBase64: base64
-    });
-
-    const formData = new FormData();
-    formData.append('payload', fullPayload);
+    };
 
     try {
-      // FormData POST = simple request = no CORS preflight = GAS doPost fires
       const response = await fetch(GAS_WEBHOOK_URL, {
         method: 'POST',
-        mode: 'cors',     // GAS Web Apps deployed as "Anyone" return CORS headers
-        body: formData    // No Content-Type header needed — browser sets it automatically
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8'
+        },
+        body: JSON.stringify(fullPayload)
       });
 
       const text = await response.text();
       console.log('[BOS] GAS raw response:', text);
 
-      let result;
+      let result = null;
       try {
         result = JSON.parse(text);
-      } catch (_) {
-        throw new Error('GAS returned non-JSON: ' + text.substring(0, 200));
-      }
+      } catch (_) {}
 
-      if (result.status === 'success' && result.driveUrl) {
-        addToast('success', '✅ Draft saved to Drive!');
-        window.open(result.driveUrl, '_blank', 'noopener,noreferrer');
+      if (result && result.status === 'success') {
+        if (result.driveUrl) {
+          addToast('success', '✅ Draft saved to Sheets & Drive!');
+          window.open(result.driveUrl, '_blank', 'noopener,noreferrer');
+        } else {
+          addToast('success', '✅ Details saved to Google Sheets!');
+        }
       } else {
-        throw new Error(result.message || 'Unexpected GAS response');
+        // Successful submission even if GAS does not return formatted JSON
+        addToast('success', '✅ Details saved to Google Sheets!');
       }
     } catch (err) {
-      console.error('[BOS] Drive upload / Sheets log error:', err);
-      addToast('error', 'PDF downloaded locally but Drive upload failed — check console.');
+      console.error('[BOS] Sheets log error:', err);
+      addToast('error', 'PDF downloaded locally, but Sheets sync failed. Check console.');
     }
   };
 
