@@ -255,16 +255,15 @@ export default function DraftGenerator() {
         finalPartnerName = 'Asset Sense';
       }
 
-      // Unified filename: Draft_[ClientName]_[Date].pdf
+      // Unified filename: Draft_[CompanyName]_[Date].pdf
       const clientNameRaw =
+        formData.clientCompanyName ||
+        formData.companyName ||
+        formData.businessName ||
         formData.clientName ||
         formData.directorName ||
         formData.representativeName ||
         formData.authorizedByName ||
-        formData.ownerName ||
-        formData.clientCompanyName ||
-        formData.businessName ||
-        formData.companyName ||
         'Document';
       const dateStr = new Date().toISOString().split('T')[0];
       const safeClientName = clientNameRaw.replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_').trim();
