@@ -284,6 +284,8 @@ export default function DraftGenerator() {
         "Aadhar": formData.aadhar || formData.aadharNumber || "",
         "Mobile": formData.mobile || formData.mobileNumber || "",
         "Email": formData.email || "",
+        "Partner Name": finalPartnerName,
+        "Payment Status": "In Process",
 
         // camelCase mappings as explicitly requested for variable names
         documentType: selectedTemplate.name || "",
@@ -307,15 +309,13 @@ export default function DraftGenerator() {
   // uploadToDriveAndLog (Syncs draft info to Google Sheets & Drive)
   //
   // Google Apps Script doPost(e) parses e.postData.contents.
-  // Using FormData / multipart sets e.postData to undefined, which crashes
-  // the script with "TypeError: Cannot read properties of undefined (reading 'contents')".
   // Using Content-Type: 'text/plain;charset=utf-8' is a browser simple request
   // (no CORS preflight) and reliably delivers JSON to e.postData.contents.
   // ─────────────────────────────────────────────────────────────────────────
   const uploadToDriveAndLog = async (base64DataUri, fileName, trackingPayload) => {
     let base64 = '';
     if (base64DataUri && base64DataUri.length > 100) {
-      base64 = base64DataUri.replace(/^data:application\/pdf;base64,/, '');
+      base64 = base64DataUri.includes(',') ? base64DataUri.split(',')[1] : base64DataUri;
     }
 
     console.log('[BOS] Syncing to GAS Webhook:', GAS_WEBHOOK_URL);
@@ -357,6 +357,23 @@ export default function DraftGenerator() {
       }
     } catch (err) {
       console.error('[BOS] Sheets log error:', err);
+      // Fallback: If full request fails (e.g. payload size issue with base64 PDF), retry with ledger fields only so sheet data is never lost
+      if (base64) {
+        try {
+          console.log('[BOS] Retrying sync with ledger data only...');
+          await fetch(GAS_WEBHOOK_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'text/plain;charset=utf-8'
+            },
+            body: JSON.stringify({ ...trackingPayload, fileName })
+          });
+          addToast('success', '✅ Details saved to Google Sheets!');
+          return;
+        } catch (retryErr) {
+          console.error('[BOS] Fallback sync error:', retryErr);
+        }
+      }
       addToast('error', 'PDF downloaded locally, but Sheets sync failed. Check console.');
     }
   };
