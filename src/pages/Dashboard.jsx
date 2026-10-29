@@ -13,6 +13,9 @@ export default function Dashboard() {
   const navigate = useNavigate();
   
   const [services, setServices] = useState([]);
+  const [activeServiceId, setActiveServiceId] = useState(null);
+  const [viewMode, setViewMode] = useState('tabs'); // 'tabs' | 'all'
+  const [clientProfile, setClientProfile] = useState(null);
   const [documents, setDocuments] = useState([]);
   const [docsLoading, setDocsLoading] = useState(true);
   const [googleDriveUrl, setGoogleDriveUrl] = useState(null);
@@ -86,6 +89,9 @@ export default function Dashboard() {
           };
         }) || [];
         setServices(services);
+        if (services.length > 0) {
+          setActiveServiceId(prev => (prev && services.some(s => s.id === prev) ? prev : services[0].id));
+        }
         setFetching(false);
       },
       (error) => {
@@ -95,10 +101,11 @@ export default function Dashboard() {
       }
     );
 
-    // Fetch and subscribe to client profile in Firestore for driveFolderUrl
+    // Fetch and subscribe to client profile in Firestore for driveFolderUrl and officeState
     const unsubClient = onSnapshot(doc(db, 'clients', user.uid), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
+        setClientProfile(data);
         const driveLink = data.driveFolderUrl || data.googleDriveLink || data.driveUrl || data.drive_url;
         if (driveLink) {
           setGoogleDriveUrl(driveLink);
@@ -295,15 +302,79 @@ export default function Dashboard() {
         
         {/* Section 1 - MY SERVICES */}
         <div className="mb-10 fade-up-enter" style={{ animationDelay: '0s' }}>
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4">
-            <div className="text-[11px] font-semibold tracking-[0.08em] text-[rgba(17,17,16,0.4)]">MY SERVICES</div>
-            <button 
-              onClick={() => setShowRequestModal(true)}
-              className="mt-2 sm:mt-0 bg-transparent border border-[rgba(27,107,47,0.25)] text-[#1B6B2F] rounded-[100px] px-4 py-1.5 text-[13px] font-semibold hover:bg-[rgba(27,107,47,0.04)] hover:border-[rgba(27,107,47,0.4)] hover:-translate-y-[1px] transition-all duration-200 w-full sm:w-auto"
-            >
-              + Request a Service
-            </button>
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">
+            <div>
+              <div className="text-[11px] font-semibold tracking-[0.08em] text-[rgba(17,17,16,0.4)] uppercase">MY SERVICES</div>
+              {services.length > 1 && (
+                <div className="text-[12px] text-[rgba(17,17,16,0.55)] font-medium mt-0.5">
+                  You have <span className="font-bold text-[#1B6B2F]">{services.length} services</span> active with Bharat Office Setu
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              {services.length > 1 && (
+                <div className="inline-flex bg-white border border-[rgba(17,17,16,0.1)] rounded-full p-0.5 shadow-xs">
+                  <button
+                    onClick={() => setViewMode('tabs')}
+                    className={`px-3 py-1 text-[11px] font-bold rounded-full transition-all cursor-pointer ${
+                      viewMode === 'tabs' ? 'bg-[#1B6B2F] text-white shadow-xs' : 'text-[rgba(17,17,16,0.6)] hover:text-[#111110]'
+                    }`}
+                  >
+                    Focus Tab
+                  </button>
+                  <button
+                    onClick={() => setViewMode('all')}
+                    className={`px-3 py-1 text-[11px] font-bold rounded-full transition-all cursor-pointer ${
+                      viewMode === 'all' ? 'bg-[#1B6B2F] text-white shadow-xs' : 'text-[rgba(17,17,16,0.6)] hover:text-[#111110]'
+                    }`}
+                  >
+                    View All ({services.length})
+                  </button>
+                </div>
+              )}
+
+              <button 
+                onClick={() => setShowRequestModal(true)}
+                className="bg-transparent border border-[rgba(27,107,47,0.25)] text-[#1B6B2F] rounded-[100px] px-3.5 py-1.5 text-[12px] font-semibold hover:bg-[rgba(27,107,47,0.04)] hover:border-[rgba(27,107,47,0.4)] transition-all cursor-pointer shrink-0"
+              >
+                + Request a Service
+              </button>
+            </div>
           </div>
+
+          {/* Service Switcher Tabs (Shown when > 1 service and in 'tabs' mode) */}
+          {services.length > 1 && (
+            <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-4 no-scrollbar">
+              {services.map((s, idx) => {
+                const isSelected = viewMode === 'tabs' ? activeServiceId === s.id : false;
+                const isComplete = s.status === 'completed';
+                const sState = s.state || (s.name === 'Virtual Office' ? clientProfile?.officeState : null);
+                return (
+                  <button
+                    key={s.id || idx}
+                    onClick={() => {
+                      setActiveServiceId(s.id);
+                      if (viewMode !== 'tabs') setViewMode('tabs');
+                    }}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all shrink-0 cursor-pointer border ${
+                      isSelected
+                        ? 'bg-[#1B6B2F] text-white border-[#1B6B2F] shadow-sm'
+                        : 'bg-white border-[rgba(17,17,16,0.1)] text-[#111110] hover:bg-[#FAF9F5] hover:border-[rgba(17,17,16,0.2)]'
+                    }`}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${isComplete ? 'bg-[#25D366]' : isSelected ? 'bg-amber-300' : 'bg-[#F4831F]'}`}></span>
+                    <span>{s.name}</span>
+                    {sState && (
+                      <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold ${isSelected ? 'bg-white/20 text-white' : 'bg-[#F4F3EE] text-[#1B6B2F]'}`}>
+                        📍 {sState}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
           
           {(!services || (services?.length || 0) === 0) ? (
             <div className="bg-white rounded-[16px] border border-[rgba(17,17,16,0.08)] p-10 flex flex-col items-center justify-center text-center">
@@ -312,9 +383,13 @@ export default function Dashboard() {
               <div className="text-[13px] text-[rgba(17,17,16,0.4)] mt-1">Our team is setting up your account</div>
             </div>
           ) : (
-            (services || []).map((service) => {
+            (viewMode === 'tabs' && services.length > 1
+              ? (services.filter(s => s.id === activeServiceId).length ? services.filter(s => s.id === activeServiceId) : [services[0]])
+              : services
+            ).map((service) => {
               const steps = (service?.name && SERVICE_STEPS[service.name]) || ['Order Received', 'In Progress', 'Completed'];
               const currentIndex = (steps || []).indexOf(service?.currentStep);
+              const effectiveState = service.state || (service.name === 'Virtual Office' ? clientProfile?.officeState : null);
               
               return (
                 <div key={service?.id || service?.name} className="bg-white rounded-[16px] border border-[rgba(17,17,16,0.08)] p-6 mb-4 relative overflow-hidden card-lift">
@@ -326,10 +401,10 @@ export default function Dashboard() {
                     <div>
                       <div className="text-[16px] font-bold text-[#111110] mb-0.5 flex items-center gap-2 flex-wrap">
                         <span>{service?.name}</span>
-                        {service?.state && (
+                        {effectiveState && (
                           <span className="bg-[#FAF9F5] border border-[rgba(17,17,16,0.1)] text-[#111110] text-[11px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1">
                             <MapPin size={11} className="text-[#1B6B2F]" />
-                            {service.state}
+                            {effectiveState}
                           </span>
                         )}
                       </div>
@@ -348,12 +423,12 @@ export default function Dashboard() {
                   </div>
 
                   {/* Virtual Office Details Bar */}
-                  {(service?.name === 'Virtual Office' || service?.type === 'Virtual Office' || service?.state || service?.expiryDate) && (
+                  {(service?.name === 'Virtual Office' || service?.type === 'Virtual Office' || effectiveState || service?.expiryDate) && (
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5 p-3.5 bg-[#FAF9F5] border border-[rgba(17,17,16,0.06)] rounded-[12px]">
                       <div>
                         <div className="text-[10px] font-bold text-[rgba(17,17,16,0.4)] uppercase tracking-wider">Office State</div>
                         <div className="text-[13px] font-bold text-[#111110] mt-0.5">
-                          {service.state ? `📍 ${service.state}` : 'State Not Set'}
+                          {effectiveState ? `📍 ${effectiveState}` : 'State Not Set'}
                         </div>
                       </div>
                       <div>
@@ -434,6 +509,26 @@ export default function Dashboard() {
                 </div>
               );
             })
+          )}
+
+          {/* Quick Switch Tray when in Focus Tab view */}
+          {viewMode === 'tabs' && services.length > 1 && (
+            <div className="p-3 bg-white border border-[rgba(17,17,16,0.08)] rounded-[12px] flex items-center justify-between flex-wrap gap-2 text-[12px] shadow-xs">
+              <span className="text-[rgba(17,17,16,0.5)] font-medium">Other Active Services:</span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {services.filter(s => s.id !== activeServiceId).map(other => (
+                  <button
+                    key={other.id}
+                    onClick={() => setActiveServiceId(other.id)}
+                    className="px-2.5 py-1 bg-[#FAF9F5] hover:bg-[#F0F5EA] text-[#111110] border border-[rgba(17,17,16,0.08)] hover:border-[rgba(27,107,47,0.3)] rounded-full font-semibold text-[11px] transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <span>{other.name}</span>
+                    {other.state && <span className="text-[#1B6B2F]">({other.state})</span>}
+                    <span className="text-[rgba(17,17,16,0.4)]">→</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
         </div>
 

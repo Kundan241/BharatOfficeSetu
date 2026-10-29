@@ -975,6 +975,8 @@ function ClientDetailView({ showConfirm }) {
   const { addToast } = useToast();
   const [client, setClient] = useState(null);
   const [services, setServices] = useState([]);
+  const [selectedAdminTab, setSelectedAdminTab] = useState('tabs');
+  const [selectedAdminServiceId, setSelectedAdminServiceId] = useState(null);
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddService, setShowAddService] = useState(false);
@@ -1009,6 +1011,9 @@ function ClientDetailView({ showConfirm }) {
       const arr = [];
       snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
       setServices(arr);
+      if (arr.length > 0) {
+        setSelectedAdminServiceId(prev => (prev && arr.some(x => x.id === prev) ? prev : arr[0].id));
+      }
       setLoading(false);
     });
 
@@ -1083,12 +1088,65 @@ function ClientDetailView({ showConfirm }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* LEFT COL */}
-        <div className="lg:col-span-3 flex flex-col gap-5">
-          <div className="text-[11px] font-[600] tracking-[0.08em] text-[rgba(17,17,16,0.4)]">SERVICES</div>
+        <div className="lg:col-span-3 flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div className="text-[11px] font-[600] tracking-[0.08em] text-[rgba(17,17,16,0.4)]">
+              SERVICES ({services?.length || 0})
+            </div>
+            {services?.length > 1 && (
+              <div className="inline-flex bg-[#F4F3EE] border border-[rgba(17,17,16,0.08)] rounded-full p-0.5 text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => setSelectedAdminTab('tabs')}
+                  className={`px-2.5 py-0.5 font-bold rounded-full transition-all cursor-pointer ${
+                    selectedAdminTab === 'tabs' ? 'bg-[#111110] text-white shadow-2xs' : 'text-[rgba(17,17,16,0.55)] hover:text-[#111110]'
+                  }`}
+                >
+                  Tab Focus
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedAdminTab('all')}
+                  className={`px-2.5 py-0.5 font-bold rounded-full transition-all cursor-pointer ${
+                    selectedAdminTab === 'all' ? 'bg-[#111110] text-white shadow-2xs' : 'text-[rgba(17,17,16,0.55)] hover:text-[#111110]'
+                  }`}
+                >
+                  Show All ({services.length})
+                </button>
+              </div>
+            )}
+          </div>
+
+          {services?.length > 1 && selectedAdminTab === 'tabs' && (
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+              {services.map((s) => {
+                const isSelected = (selectedAdminServiceId === s.id) || (!selectedAdminServiceId && s.id === services[0].id);
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setSelectedAdminServiceId(s.id)}
+                    className={`px-3 py-1.5 rounded-[8px] text-[12px] font-bold transition-all shrink-0 border cursor-pointer ${
+                      isSelected
+                        ? 'bg-[#1B6B2F] text-white border-[#1B6B2F] shadow-2xs'
+                        : 'bg-white border-[rgba(17,17,16,0.1)] text-[#111110] hover:bg-[#FAF9F5]'
+                    }`}
+                  >
+                    <span>{s.type}</span>
+                    {s.state && <span className="ml-1 opacity-80 text-[10px]">({s.state})</span>}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           {(!services || (services?.length || 0) === 0) ? (
             <div className="bg-white rounded-[14px] border border-[rgba(17,17,16,0.08)] p-8 text-center text-[13px] text-[rgba(17,17,16,0.4)]">No services added yet</div>
           ) : (
-            (services || []).map(s => <ServiceCard key={s.id} client={client} service={s} showConfirm={showConfirm} />)
+            (selectedAdminTab === 'tabs' && services.length > 1
+              ? (services.filter(s => s.id === (selectedAdminServiceId || services[0].id)).length ? services.filter(s => s.id === (selectedAdminServiceId || services[0].id)) : [services[0]])
+              : services
+            ).map(s => <ServiceCard key={s.id} client={client} service={s} showConfirm={showConfirm} />)
           )}
         </div>
 
@@ -1126,17 +1184,23 @@ function ServiceCard({ client, service, showConfirm }) {
   const [notes, setNotes] = useState(service.notes || '');
   const [notesChanged, setNotesChanged] = useState(false);
 
-  // Virtual Office / Custom fields
-  const [isEditingDetails, setIsEditingDetails] = useState(false);
-  const [stateValue, setStateValue] = useState(service.state || '');
+  // Virtual Office / State & Expiry fields
+  const [stateValue, setStateValue] = useState(service.state || (service.type === 'Virtual Office' ? (client.officeState || 'Maharashtra') : ''));
   const [startDateValue, setStartDateValue] = useState(
     service.startDate?.toDate ? service.startDate.toDate().toISOString().split('T')[0] : 
-    (typeof service.startDate === 'string' && service.startDate.includes('-') ? service.startDate : '')
+    (typeof service.startDate === 'string' && service.startDate.includes('-') ? service.startDate : new Date().toISOString().split('T')[0])
   );
-  const [expiryDateValue, setExpiryDateValue] = useState(
-    service.expiryDate?.toDate ? service.expiryDate.toDate().toISOString().split('T')[0] : 
-    (typeof service.expiryDate === 'string' && service.expiryDate.includes('-') ? service.expiryDate : '')
-  );
+  const [expiryDateValue, setExpiryDateValue] = useState(() => {
+    if (service.expiryDate?.toDate) {
+      return service.expiryDate.toDate().toISOString().split('T')[0];
+    }
+    if (typeof service.expiryDate === 'string' && service.expiryDate.includes('-')) {
+      return service.expiryDate;
+    }
+    const d = new Date();
+    d.setFullYear(d.getFullYear() + 1);
+    return d.toISOString().split('T')[0];
+  });
 
   const handleSaveDetails = async () => {
     try {
@@ -1146,12 +1210,41 @@ function ServiceCard({ client, service, showConfirm }) {
         expiryDate: expiryDateValue ? new Date(expiryDateValue) : null,
       };
       await updateDoc(doc(db, 'clients', client.id, 'services', service.id), payload);
-      setIsEditingDetails(false);
-      addToast('success', 'Virtual office details updated');
+      if (service.type === 'Virtual Office' && stateValue.trim()) {
+        await updateDoc(doc(db, 'clients', client.id), {
+          officeState: stateValue.trim()
+        });
+      }
+      addToast('success', 'Office state & dates updated ✓');
     } catch (e) {
       console.error(e);
       addToast('error', 'Failed to update service details');
     }
+  };
+
+  const handleDeleteService = () => {
+    showConfirm({
+      title: `Delete ${service.type}?`,
+      message: `Are you sure you want to permanently delete this ${service.type} service? It will be removed from the client's dashboard immediately.`,
+      confirmText: 'Delete Service',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(db, 'clients', client.id, 'services', service.id));
+          await addDoc(collection(db, 'activity_log'), {
+            type: 'service_deleted',
+            clientName: client.name,
+            clientId: client.id,
+            description: `${client.name} — Deleted service: ${service.type}`,
+            timestamp: serverTimestamp()
+          });
+          addToast('success', `${service.type} service removed`);
+        } catch (e) {
+          console.error(e);
+          addToast('error', 'Failed to remove service');
+        }
+      }
+    });
   };
 
   const handleNextStep = async () => {
@@ -1230,7 +1323,7 @@ function ServiceCard({ client, service, showConfirm }) {
   const displayExpiry = service.expiryDate?.toDate ? service.expiryDate.toDate().toLocaleDateString('en-GB') : (service.expiryDate ? String(service.expiryDate) : null);
 
   return (
-    <div className="bg-white rounded-[14px] border border-[rgba(17,17,16,0.08)] p-5 relative overflow-hidden">
+    <div className="bg-white rounded-[14px] border border-[rgba(17,17,16,0.08)] p-5 relative overflow-hidden shadow-2xs">
       <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${isCompleted ? 'bg-[#1B6B2F]' : 'bg-[#F4831F]'}`}></div>
       
       <div className="flex justify-between items-start mb-4 pl-1">
@@ -1255,89 +1348,84 @@ function ServiceCard({ client, service, showConfirm }) {
         </div>
       </div>
 
-      {/* Virtual Office State & Expiry Box */}
-      <div className="bg-[#FAF9F5] rounded-[10px] p-3 mb-4 pl-3 border border-[rgba(17,17,16,0.06)]">
-        {!isEditingDetails ? (
-          <div className="flex items-center justify-between gap-3">
-            <div className="grid grid-cols-3 gap-2 flex-1">
-              <div>
-                <span className="text-[10px] font-bold text-[rgba(17,17,16,0.4)] uppercase">Office State</span>
-                <div className="text-[12px] font-bold text-[#111110] truncate">{service.state || 'Not Set'}</div>
-              </div>
-              <div>
-                <span className="text-[10px] font-bold text-[rgba(17,17,16,0.4)] uppercase">Start Date</span>
-                <div className="text-[12px] font-medium text-[#111110]">{displayStart || '—'}</div>
-              </div>
-              <div>
-                <span className="text-[10px] font-bold text-[rgba(17,17,16,0.4)] uppercase">Expiry Date</span>
-                <div className="text-[12px] font-bold text-[#1B6B2F]">{displayExpiry || '—'}</div>
-              </div>
+      {/* Virtual Office State & Expiry Box (Directly Interactive) */}
+      {(service.type === 'Virtual Office' || service.type === 'GST Registration' || service.state) && (
+        <div className="bg-[#FAF9F5] rounded-[12px] p-3.5 mb-4 border border-[rgba(27,107,47,0.18)] shadow-2xs">
+          <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-[rgba(17,17,16,0.06)]">
+            <div className="flex items-center gap-1.5 text-[12px] font-bold text-[#111110]">
+              <MapPin size={14} className="text-[#1B6B2F]" />
+              <span>Office State & Expiry Settings</span>
             </div>
+            {service.state ? (
+              <span className="text-[10px] font-bold bg-[#EBF7EE] text-[#1B6B2F] px-2 py-0.5 rounded-full border border-[rgba(27,107,47,0.2)]">
+                Active: {service.state}
+              </span>
+            ) : (
+              <span className="text-[10px] font-bold bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200 animate-pulse">
+                ⚠️ State Not Set
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div>
+              <label className="text-[10px] font-bold text-[rgba(17,17,16,0.55)] uppercase tracking-wider block mb-1">
+                Office State *
+              </label>
+              <select
+                value={stateValue}
+                onChange={(e) => setStateValue(e.target.value)}
+                className="w-full h-[36px] bg-white border border-[rgba(17,17,16,0.18)] rounded-[8px] px-2.5 text-[13px] font-semibold text-[#111110] outline-none focus:border-[#1B6B2F] shadow-2xs"
+              >
+                <option value="">-- Select Indian State --</option>
+                {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-[rgba(17,17,16,0.55)] uppercase tracking-wider block mb-1">
+                Start / Purchase Date
+              </label>
+              <input
+                type="date"
+                value={startDateValue}
+                onChange={(e) => {
+                  setStartDateValue(e.target.value);
+                  if (e.target.value && !expiryDateValue) {
+                    const d = new Date(e.target.value);
+                    d.setFullYear(d.getFullYear() + 1);
+                    setExpiryDateValue(d.toISOString().split('T')[0]);
+                  }
+                }}
+                className="w-full h-[36px] bg-white border border-[rgba(17,17,16,0.18)] rounded-[8px] px-2.5 text-[13px] outline-none focus:border-[#1B6B2F] shadow-2xs"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-[rgba(17,17,16,0.55)] uppercase tracking-wider block mb-1">
+                Valid Till / Expiry Date
+              </label>
+              <input
+                type="date"
+                value={expiryDateValue}
+                onChange={(e) => setExpiryDateValue(e.target.value)}
+                className="w-full h-[36px] bg-white border border-[rgba(17,17,16,0.18)] rounded-[8px] px-2.5 text-[13px] outline-none focus:border-[#1B6B2F] shadow-2xs"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-[rgba(17,17,16,0.06)]">
+            <span className="text-[11px] text-[rgba(17,17,16,0.45)]">
+              Client dashboard will show this state and expiry immediately.
+            </span>
             <button
-              onClick={() => setIsEditingDetails(true)}
-              className="text-[11px] font-semibold text-[#1B6B2F] hover:underline shrink-0"
+              onClick={handleSaveDetails}
+              className="h-[32px] px-4 bg-[#1B6B2F] hover:bg-[#145324] text-white rounded-[6px] text-[12px] font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
             >
-              Edit Details
+              <Check size={14} />
+              <span>Save State & Dates</span>
             </button>
           </div>
-        ) : (
-          <div className="flex flex-col gap-2.5">
-            <div className="text-[11px] font-bold text-[#111110]">Edit Service Details</div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div>
-                <label className="text-[10px] font-semibold text-[rgba(17,17,16,0.5)]">State</label>
-                <select
-                  value={stateValue}
-                  onChange={(e) => setStateValue(e.target.value)}
-                  className="w-full h-[34px] bg-white border border-[rgba(17,17,16,0.15)] rounded-[6px] px-2 text-[12px] outline-none"
-                >
-                  <option value="">Select State</option>
-                  {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="text-[10px] font-semibold text-[rgba(17,17,16,0.5)]">Purchase Date</label>
-                <input
-                  type="date"
-                  value={startDateValue}
-                  onChange={(e) => {
-                    setStartDateValue(e.target.value);
-                    if (e.target.value && !expiryDateValue) {
-                      const d = new Date(e.target.value);
-                      d.setFullYear(d.getFullYear() + 1);
-                      setExpiryDateValue(d.toISOString().split('T')[0]);
-                    }
-                  }}
-                  className="w-full h-[34px] bg-white border border-[rgba(17,17,16,0.15)] rounded-[6px] px-2 text-[12px] outline-none"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-semibold text-[rgba(17,17,16,0.5)]">Expiry Date</label>
-                <input
-                  type="date"
-                  value={expiryDateValue}
-                  onChange={(e) => setExpiryDateValue(e.target.value)}
-                  className="w-full h-[34px] bg-white border border-[rgba(17,17,16,0.15)] rounded-[6px] px-2 text-[12px] outline-none"
-                />
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 mt-1">
-              <button
-                onClick={() => setIsEditingDetails(false)}
-                className="px-3 h-[28px] text-[11px] text-[rgba(17,17,16,0.5)] hover:text-[#111110]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveDetails}
-                className="px-3 h-[28px] bg-[#1B6B2F] text-white rounded-[6px] text-[11px] font-bold hover:bg-[#145324]"
-              >
-                Save Details
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="bg-[#F9F8F5] rounded-[12px] p-5 mb-5 pl-1.5">
         <div className="text-[13px] font-[500] text-[rgba(17,17,16,0.55)] mb-3">
@@ -1370,11 +1458,21 @@ function ServiceCard({ client, service, showConfirm }) {
           onChange={(e) => { setNotes(e.target.value); setNotesChanged(true); }}
           className="w-full mt-1 bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[8px] p-2.5 text-[13px] outline-none focus:border-[rgba(27,107,47,0.4)] resize-none font-sans"
         />
-        {notesChanged && (
-          <button onClick={saveNotes} className="mt-2 h-[30px] px-3 rounded-[100px] border border-[rgba(27,107,47,0.25)] text-[#1B6B2F] text-[12px] font-[600] hover:bg-[#F0F5EA] transition-colors">
-            Save Notes
+        <div className="flex items-center justify-between mt-3 pt-3 border-t border-[rgba(17,17,16,0.06)]">
+          <button 
+            onClick={handleDeleteService} 
+            className="text-[11px] font-semibold text-[#DC2626] hover:bg-red-50 px-2.5 py-1.5 rounded-[6px] transition-colors flex items-center gap-1 cursor-pointer"
+          >
+            <Trash2 size={13} />
+            <span>Remove This Service</span>
           </button>
-        )}
+          
+          {notesChanged && (
+            <button onClick={saveNotes} className="h-[30px] px-3.5 rounded-full bg-[#1B6B2F] text-white text-[12px] font-[600] hover:bg-[#145324] transition-colors cursor-pointer">
+              Save Notes
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
