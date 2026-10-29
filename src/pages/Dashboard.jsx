@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Check, FileText, Download, MessageCircle, X as XIcon } from 'lucide-react';
+import { LogOut, Check, FileText, Download, MessageCircle, X as XIcon, FolderOpen, ExternalLink, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '../components/AuthContext';
 import { SERVICE_STEPS } from '../services/services';
 import { auth, db } from '../firebase';
 import { getClient } from '../services/clients';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { getClientDocuments, getDocumentDownloadUrl, getClientDriveFolder } from '../services/documents';
+import { supabase } from '../services/supabaseClient';
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
@@ -13,6 +15,8 @@ export default function Dashboard() {
   
   const [services, setServices] = useState([]);
   const [documents, setDocuments] = useState([]);
+  const [docsLoading, setDocsLoading] = useState(true);
+  const [googleDriveUrl, setGoogleDriveUrl] = useState(null);
   const [fetching, setFetching] = useState(true);
 
   // Modal State
@@ -82,27 +86,47 @@ export default function Dashboard() {
       }
     );
 
-    const docsRef = collection(db, 'clients', user.uid, 'documents');
-    
-    const unsubDocs = onSnapshot(
-      docsRef,
-      (snapshot) => {
-        const documents = snapshot?.docs?.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          uploadedAt: doc.data()?.uploadedAt?.toDate?.() || null
-        })) || [];
-        setDocuments(documents);
-      },
-      (error) => {
-        console.error('Documents error:', error);
-        setDocuments([]);
+    // Fetch documents from Supabase client_documents table
+    const loadDocuments = async () => {
+      try {
+        setDocsLoading(true);
+        const docs = await getClientDocuments(user.uid);
+        setDocuments(docs);
+      } catch (err) {
+        console.error('Supabase getClientDocuments error:', err);
+      } finally {
+        setDocsLoading(false);
       }
-    );
+    };
+
+    // Fetch associated Google Drive link if present
+    const loadDriveFolder = async () => {
+      try {
+        const driveLink = await getClientDriveFolder(user.uid);
+        if (driveLink) setGoogleDriveUrl(driveLink);
+      } catch (err) {
+        console.error('Failed to get client drive folder:', err);
+      }
+    };
+
+    loadDocuments();
+    loadDriveFolder();
+
+    // Supabase Realtime subscription for client_documents
+    const docsChannel = supabase
+      .channel(`client_dash_docs_${user.uid}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'client_documents', filter: `client_id=eq.${user.uid}` },
+        () => {
+          loadDocuments();
+        }
+      )
+      .subscribe();
 
     return () => {
       unsubServices();
-      unsubDocs();
+      supabase.removeChannel(docsChannel);
     };
     
   }, [user]);
@@ -199,6 +223,20 @@ export default function Dashboard() {
       setSubmitError('Something went wrong.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDownloadDocument = async (doc) => {
+    try {
+      const url = await getDocumentDownloadUrl(doc);
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } else {
+        alert('Could not generate download link for this document.');
+      }
+    } catch (err) {
+      console.error('Error opening document:', err);
+      if (doc?.url) window.open(typeof doc.url === 'string' ? doc.url : doc.url?.url, '_blank');
     }
   };
 
@@ -376,30 +414,64 @@ export default function Dashboard() {
 
         {/* Section 2 - MY DOCUMENTS */}
         <div className="mb-12 fade-up-enter" style={{ animationDelay: '0.1s' }}>
-          <div className="text-[11px] font-semibold tracking-[0.08em] text-[rgba(17,17,16,0.4)] mb-4">MY DOCUMENTS</div>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div className="text-[11px] font-semibold tracking-[0.08em] text-[rgba(17,17,16,0.4)]">MY DOCUMENTS</div>
+            {googleDriveUrl && (
+              <a
+                href={googleDriveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-[#F0F5EA] hover:bg-[#e1ebd5] text-[#1B6B2F] border border-[rgba(27,107,47,0.25)] px-3.5 py-1.5 rounded-[100px] text-[12px] font-bold transition-all hover:-translate-y-[1px] shadow-sm"
+              >
+                <FolderOpen size={15} className="text-[#1B6B2F]" />
+                <span>Open Google Drive Folder</span>
+                <ExternalLink size={13} className="opacity-70" />
+              </a>
+            )}
+          </div>
           
           <div className="bg-white rounded-[16px] border border-[rgba(17,17,16,0.08)] px-6 py-5">
-            {(!documents || (documents?.length || 0) === 0) ? (
+            {docsLoading ? (
+              <div className="text-[14px] text-[rgba(17,17,16,0.4)] text-center py-6 flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-[#1B6B2F] border-t-transparent rounded-full animate-spin"></div>
+                Loading documents...
+              </div>
+            ) : (!documents || documents.length === 0) ? (
               <div className="text-[14px] text-[rgba(17,17,16,0.4)] text-center py-6">
                 No documents yet. They will appear here as your service progresses.
               </div>
             ) : (
               <div className="flex flex-col">
-                {(documents || []).map((doc, i) => (
-                  <div key={doc?.id || i} className={`flex items-center justify-between h-[52px] ${i !== (documents?.length || 0) - 1 ? 'border-b border-[rgba(17,17,16,0.06)]' : ''}`}>
-                    <div className="flex items-center gap-3">
-                      <FileText className="text-[#F4831F]" size={20} />
-                      <span className="text-[14px] font-medium text-[#111110]">{doc?.name}</span>
+                {documents.map((doc, i) => {
+                  const isImage = (doc.name || doc.fileName || '').match(/\.(jpe?g|png)$/i);
+                  return (
+                    <div key={doc?.id || i} className={`flex items-center justify-between py-3.5 ${i !== documents.length - 1 ? 'border-b border-[rgba(17,17,16,0.06)]' : ''}`}>
+                      <div className="flex items-center gap-3 min-w-0 pr-4">
+                        <div className="w-9 h-9 rounded-lg bg-[rgba(244,131,31,0.08)] flex items-center justify-center flex-shrink-0">
+                          {isImage ? (
+                            <ImageIcon className="text-[#2563EB]" size={18} />
+                          ) : (
+                            <FileText className="text-[#F4831F]" size={18} />
+                          )}
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[14px] font-medium text-[#111110] truncate">{doc?.name || doc?.fileName}</span>
+                          <span className="text-[11px] text-[rgba(17,17,16,0.4)] capitalize">
+                            {doc?.documentType ? doc.documentType.replace(/_/g, ' ') : (isImage ? 'Image' : 'PDF Document')}
+                            {doc?.uploadedAt ? ` • ${new Date(doc.uploadedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}` : ''}
+                          </span>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => handleDownloadDocument(doc)}
+                        className="border border-[rgba(27,107,47,0.2)] text-[#1B6B2F] rounded-[100px] px-3.5 py-1.5 text-[12px] font-bold hover:bg-[#F0F5EA] hover:border-[#1B6B2F] transition-colors flex items-center gap-1.5 flex-shrink-0"
+                      >
+                        <Download size={14} />
+                        Download
+                      </button>
                     </div>
-                    <button 
-                      onClick={() => window.open(typeof doc?.url === 'string' ? doc.url : doc?.url?.url, '_blank')}
-                      className="border border-[rgba(27,107,47,0.2)] text-[#1B6B2F] rounded-[100px] px-3.5 py-1.5 text-[12px] font-bold hover:bg-[#F0F5EA] hover:border-[#1B6B2F] transition-colors flex items-center gap-1.5"
-                    >
-                      <Download size={14} />
-                      Download
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

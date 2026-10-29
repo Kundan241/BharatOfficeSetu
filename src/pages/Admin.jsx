@@ -6,7 +6,7 @@ import {
   LogOut, Search, FileText, ChevronRight, 
   ArrowLeft, Plus, Check, Trash2, LayoutDashboard, 
   Users, UserPlus, Menu, X as XIcon, UploadCloud, Eye, EyeOff, MoreVertical,
-  AlertTriangle, Pencil, IndianRupee
+  AlertTriangle, Pencil, IndianRupee, FolderOpen, ExternalLink, Image as ImageIcon
 } from 'lucide-react';
 import { SERVICE_STEPS } from '../services/services';
 import { auth, db } from '../firebase';
@@ -18,8 +18,15 @@ import {
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { createClientAccount } from '../services/auth';
 import { updateServiceStatus, addService } from '../services/services';
-import { uploadDocument, deleteDocument } from '../services/documents';
-import { uploadFile } from '../services/cloudinary';
+import { 
+  uploadClientDocument, 
+  getClientDocuments, 
+  deleteClientDocument, 
+  getDocumentDownloadUrl,
+  getClientDriveFolder,
+  saveClientDriveFolder 
+} from '../services/documents';
+import { supabase } from '../services/supabaseClient';
 import AdminBlogEditor from '../components/AdminBlogEditor';
 import AdminSalesLedger from '../components/AdminSalesLedger';
 import emailjs from '@emailjs/browser';
@@ -371,6 +378,13 @@ function AdminDashboard() {
           const docSnap = await getDocs(collection(db, 'clients', cDoc.id, 'documents'));
           docsCount += docSnap.size;
         }
+
+        try {
+          const { count } = await supabase.from('client_documents').select('*', { count: 'exact', head: true });
+          if (typeof count === 'number' && count > 0) {
+            docsCount = count;
+          }
+        } catch (_) {}
 
         setStats({ totalClients, activeServices: activeServ, completedThisMonth: completedMonth, docsUploaded: docsCount });
       } catch (err) {
@@ -893,6 +907,25 @@ function ClientDetailView({ showConfirm }) {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddService, setShowAddService] = useState(false);
+  const [driveFolderUrl, setDriveFolderUrl] = useState('');
+
+  const loadDocuments = async () => {
+    try {
+      const docs = await getClientDocuments(uid);
+      setDocuments(docs);
+    } catch (e) {
+      console.error('Failed to load documents from Supabase:', e);
+    }
+  };
+
+  const loadDriveFolder = async () => {
+    try {
+      const link = await getClientDriveFolder(uid);
+      if (link) setDriveFolderUrl(link);
+    } catch (e) {
+      console.error('Failed to fetch client drive folder:', e);
+    }
+  };
 
   useEffect(() => {
     const fetchClient = async () => {
@@ -904,6 +937,8 @@ function ClientDetailView({ showConfirm }) {
       }
     };
     fetchClient();
+    loadDocuments();
+    loadDriveFolder();
 
     const unsubServices = onSnapshot(collection(db, 'clients', uid, 'services'), (snap) => {
       const arr = [];
@@ -912,13 +947,22 @@ function ClientDetailView({ showConfirm }) {
       setLoading(false);
     });
 
-    const unsubDocs = onSnapshot(collection(db, 'clients', uid, 'documents'), (snap) => {
-      const arr = [];
-      snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
-      setDocuments(arr);
-    });
+    // Supabase Realtime channel for client_documents
+    const channel = supabase
+      .channel(`admin_client_docs_${uid}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'client_documents', filter: `client_id=eq.${uid}` },
+        () => {
+          loadDocuments();
+        }
+      )
+      .subscribe();
 
-    return () => { unsubServices(); unsubDocs(); };
+    return () => { 
+      unsubServices(); 
+      supabase.removeChannel(channel);
+    };
   }, [uid]);
 
   if (loading || !client) {
@@ -999,7 +1043,18 @@ function ClientDetailView({ showConfirm }) {
         {/* RIGHT COL */}
         <div className="lg:col-span-2 flex flex-col gap-5">
           <div className="text-[11px] font-[600] tracking-[0.08em] text-[rgba(17,17,16,0.4)]">DOCUMENTS</div>
-          <DocumentsCard client={client} documents={documents} showConfirm={showConfirm} />
+          <DocumentsCard 
+            client={client} 
+            documents={documents} 
+            showConfirm={showConfirm} 
+            onRefresh={loadDocuments}
+            driveFolderUrl={driveFolderUrl}
+            onSaveDriveUrl={async (url) => {
+              await saveClientDriveFolder(client.id, url);
+              setDriveFolderUrl(url);
+              addToast('success', 'Google Drive folder link saved');
+            }}
+          />
           <ClientNotesCard client={client} />
           <PasswordCard client={client} />
         </div>
@@ -1145,67 +1200,104 @@ function ServiceCard({ client, service, showConfirm }) {
   );
 }
 
-// Documents Card Component
-function DocumentsCard({ client, documents, showConfirm }) {
+// Documents Card Component (Supabase Integration)
+function DocumentsCard({ client, documents, showConfirm, onRefresh, driveFolderUrl, onSaveDriveUrl }) {
   const { addToast } = useToast();
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [isEditingDrive, setIsEditingDrive] = useState(false);
+  const [driveInput, setDriveInput] = useState(driveFolderUrl || '');
+
+  useEffect(() => {
+    setDriveInput(driveFolderUrl || '');
+  }, [driveFolderUrl]);
 
   const handleUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.type !== 'application/pdf') {
-      addToast('error', 'PDF files only');
+
+    // Validate file type: .pdf, .jpg, .jpeg, .png
+    const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png'];
+    const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+    const isAllowed = allowedExtensions.includes(fileExt) || 
+      ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'].includes(file.type);
+
+    if (!isAllowed) {
+      addToast('error', 'Only .pdf, .jpg, and .png files are accepted');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      addToast('error', 'File size must be under 10MB');
       return;
     }
     
     setIsUploading(true);
-    setUploadProgress(0);
+    setUploadProgress(20);
     
     try {
-      const downloadURL = await uploadFile(file, (progress) => {
-        setUploadProgress(progress);
-      });
-      
-      const filePath = `clients/${client.id}/${Date.now()}_${file.name}`;
-      
-      await addDoc(collection(db, 'clients', client.id, 'documents'), {
-        name: file.name,
-        url: downloadURL.url,
-        path: filePath,
-        uploadedAt: serverTimestamp()
-      });
-
-      await addDoc(collection(db, 'activity_log'), {
-        type: 'document_uploaded',
-        clientName: client.name,
+      setUploadProgress(50);
+      await uploadClientDocument({
         clientId: client.id,
-        description: `${client.name} — ${file.name} uploaded`,
-        timestamp: serverTimestamp()
+        file: file
       });
+      setUploadProgress(90);
 
-      addToast('success', 'Document uploaded successfully');
+      // Log activity
+      try {
+        await addDoc(collection(db, 'activity_log'), {
+          type: 'document_uploaded',
+          clientName: client.name,
+          clientId: client.id,
+          description: `${client.name} — ${file.name} uploaded to Supabase`,
+          timestamp: serverTimestamp()
+        });
+      } catch (_) {}
+
+      setUploadProgress(100);
+      addToast('success', 'Document uploaded to Supabase successfully');
       setIsUploading(false);
+      if (onRefresh) onRefresh();
     } catch (error) {
-      console.error(error);
-      addToast('error', 'Upload failed');
+      console.error('Supabase upload error:', error);
+      addToast('error', error.message || 'Supabase upload failed');
       setIsUploading(false);
+    } finally {
+      e.target.value = '';
     }
   };
 
-  const handleDelete = (docId, path, name) => {
+  const handleOpenDoc = async (d) => {
+    try {
+      const url = await getDocumentDownloadUrl(d);
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } else {
+        addToast('error', 'Could not open document link');
+      }
+    } catch (e) {
+      addToast('error', 'Failed to generate download link');
+    }
+  };
+
+  const handleDelete = (docItem) => {
+    const docId = docItem.id;
+    const path = docItem.file_path || docItem.path;
+    const name = docItem.file_name || docItem.name || 'Document';
+
     showConfirm({
       title: `Delete ${name}?`,
-      message: 'This cannot be undone.',
+      message: 'This will permanently remove the file from Supabase.',
       confirmText: 'Delete',
       type: 'danger',
       onConfirm: async () => {
         try {
-          await deleteDocument(client.id, docId, path); // Dummy call
-          await deleteDoc(doc(db, 'clients', client.id, 'documents', docId));
-          addToast('success', 'Document deleted');
+          await deleteClientDocument(docId, path);
+          addToast('success', 'Document deleted from Supabase');
+          if (onRefresh) onRefresh();
         } catch(e) {
-          addToast('error', 'Failed to delete');
+          console.error(e);
+          addToast('error', 'Failed to delete from Supabase');
         }
       }
     });
@@ -1213,26 +1305,113 @@ function DocumentsCard({ client, documents, showConfirm }) {
 
   return (
     <div className="bg-white rounded-[14px] border border-[rgba(17,17,16,0.08)] overflow-hidden">
+      {/* Google Drive Link Section */}
+      <div className="p-3.5 bg-[#FAF9F5] border-b border-[rgba(17,17,16,0.06)] flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-[12px] font-[600] text-[#111110]">
+            <FolderOpen size={16} className="text-[#1B6B2F]" />
+            <span>Google Drive KYC Folder</span>
+          </div>
+          {driveFolderUrl && !isEditingDrive && (
+            <div className="flex items-center gap-2">
+              <a 
+                href={driveFolderUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-[12px] font-[600] text-[#1B6B2F] hover:underline flex items-center gap-1"
+              >
+                Open Folder <ExternalLink size={12} />
+              </a>
+              <button 
+                onClick={() => setIsEditingDrive(true)} 
+                className="text-[11px] text-[rgba(17,17,16,0.4)] hover:text-[#111110]"
+              >
+                Edit
+              </button>
+            </div>
+          )}
+          {!driveFolderUrl && !isEditingDrive && (
+            <button 
+              onClick={() => setIsEditingDrive(true)} 
+              className="text-[11px] font-[600] text-[#1B6B2F] hover:underline"
+            >
+              + Link Drive Folder
+            </button>
+          )}
+        </div>
+
+        {isEditingDrive && (
+          <div className="flex items-center gap-2 mt-1">
+            <input 
+              type="text" 
+              placeholder="Paste Google Drive folder URL" 
+              value={driveInput} 
+              onChange={(e) => setDriveInput(e.target.value)} 
+              className="flex-1 bg-white border border-[rgba(17,17,16,0.15)] rounded-[6px] px-2.5 py-1 text-[12px] outline-none focus:border-[#1B6B2F]"
+            />
+            <button 
+              onClick={async () => {
+                if (onSaveDriveUrl) await onSaveDriveUrl(driveInput.trim());
+                setIsEditingDrive(false);
+              }}
+              className="bg-[#1B6B2F] text-white px-2.5 py-1 rounded-[6px] text-[11px] font-[600] hover:bg-[#145324]"
+            >
+              Save
+            </button>
+            <button 
+              onClick={() => setIsEditingDrive(false)} 
+              className="text-[11px] text-[rgba(17,17,16,0.4)] hover:text-[#111110]"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+      </div>
+
       <div className="max-h-[300px] overflow-y-auto">
         {(!documents || (documents?.length || 0) === 0) ? (
           <div className="p-7 text-center text-[14px] text-[rgba(17,17,16,0.4)]">No documents uploaded yet</div>
         ) : (
-          (documents || []).map(d => (
-            <div key={d.id} className="h-[56px] px-4 flex items-center justify-between border-b border-[rgba(17,17,16,0.05)] last:border-0">
-              <div className="flex items-center gap-3 overflow-hidden">
-                <FileText size={20} className="text-[#F4831F] shrink-0" />
-                <div className="truncate text-[14px] font-[500] text-[#111110]">{d.name}</div>
+          (documents || []).map(d => {
+            const isPdf = (d.file_name || d.name || '').toLowerCase().endsWith('.pdf');
+            return (
+              <div key={d.id} className="h-[56px] px-4 flex items-center justify-between border-b border-[rgba(17,17,16,0.05)] last:border-0">
+                <div className="flex items-center gap-3 overflow-hidden mr-2">
+                  {isPdf ? (
+                    <FileText size={20} className="text-[#F4831F] shrink-0" />
+                  ) : (
+                    <ImageIcon size={20} className="text-[#2563EB] shrink-0" />
+                  )}
+                  <div className="flex flex-col overflow-hidden">
+                    <div className="truncate text-[13px] font-[500] text-[#111110]">
+                      {d.file_name || d.name}
+                    </div>
+                    {d.document_type && (
+                      <span className="text-[10px] text-[rgba(17,17,16,0.45)]">
+                        {d.document_type}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button 
+                    onClick={() => handleOpenDoc(d)} 
+                    title="View / Download" 
+                    className="w-8 h-8 flex items-center justify-center rounded-full text-[rgba(17,17,16,0.4)] hover:text-[#1B6B2F] hover:bg-[rgba(27,107,47,0.05)] transition-colors"
+                  >
+                    <UploadCloud size={18} className="rotate-180" />
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(d)} 
+                    title="Delete" 
+                    className="w-8 h-8 flex items-center justify-center rounded-full text-[rgba(17,17,16,0.25)] hover:text-[#DC2626] hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-1 shrink-0 ml-3">
-                <button onClick={() => window.open(d.url, '_blank')} className="w-8 h-8 flex items-center justify-center rounded-full text-[rgba(17,17,16,0.4)] hover:text-[#1B6B2F] hover:bg-[rgba(27,107,47,0.05)] transition-colors">
-                  <UploadCloud size={18} className="rotate-180" />
-                </button>
-                <button onClick={() => handleDelete(d.id, d.path, d.name)} className="w-8 h-8 flex items-center justify-center rounded-full text-[rgba(17,17,16,0.25)] hover:text-[#DC2626] hover:bg-red-50 transition-colors">
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
@@ -1242,14 +1421,19 @@ function DocumentsCard({ client, documents, showConfirm }) {
             <div className="h-1 bg-[rgba(27,107,47,0.1)] rounded-[100px] mb-2 overflow-hidden">
               <div className="h-full bg-[#1B6B2F] transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
             </div>
-            <div className="text-[12px] text-[rgba(17,17,16,0.5)]">Uploading... {Math.round(uploadProgress)}%</div>
+            <div className="text-[12px] text-[rgba(17,17,16,0.5)]">Uploading to Supabase... {Math.round(uploadProgress)}%</div>
           </div>
         ) : (
-          <label className="border-2 border-dashed border-[rgba(17,17,16,0.15)] rounded-[12px] p-5 flex flex-col items-center text-center cursor-pointer hover:border-[rgba(27,107,47,0.4)] hover:bg-[rgba(27,107,47,0.02)] transition-all">
-            <input type="file" accept=".pdf" className="hidden" onChange={handleUpload} />
-            <UploadCloud size={24} className="text-[rgba(17,17,16,0.25)] mb-1" />
-            <div className="text-[13px] text-[rgba(17,17,16,0.45)]">Drop PDF here or click to upload</div>
-            <div className="text-[11px] text-[rgba(17,17,16,0.3)] mt-0.5">PDF files only, max 10MB</div>
+          <label className="border-2 border-dashed border-[rgba(17,17,16,0.15)] rounded-[12px] p-5 flex flex-col items-center text-center cursor-pointer hover:border-[#1B6B2F] hover:bg-[rgba(27,107,47,0.02)] transition-all">
+            <input 
+              type="file" 
+              accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" 
+              className="hidden" 
+              onChange={handleUpload} 
+            />
+            <UploadCloud size={24} className="text-[#1B6B2F] mb-1" />
+            <div className="text-[13px] font-[500] text-[#111110]">Drop PDF or Image here, or click to upload</div>
+            <div className="text-[11px] text-[rgba(17,17,16,0.4)] mt-0.5">.pdf, .jpg, .png up to 10MB • Saved to Supabase</div>
           </label>
         )}
       </div>
