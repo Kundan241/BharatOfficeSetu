@@ -680,10 +680,33 @@ function AddClientForm({ showConfirm }) {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const [formData, setFormData] = useState({
-    name: '', phone: '', email: '', serviceType: 'GST Registration', startDate: new Date().toISOString().split('T')[0], notes: ''
+    name: '',
+    phone: '',
+    email: '',
+    serviceType: 'Virtual Office',
+    state: 'Maharashtra',
+    startDate: new Date().toISOString().split('T')[0],
+    expiryDate: (() => {
+      const d = new Date();
+      d.setFullYear(d.getFullYear() + 1);
+      return d.toISOString().split('T')[0];
+    })(),
+    notes: ''
   });
   const [loading, setLoading] = useState(false);
   const [shakeFields, setShakeFields] = useState(false);
+
+  const handleStartDateChange = (val) => {
+    setFormData(prev => {
+      const next = { ...prev, startDate: val };
+      if (val) {
+        const d = new Date(val);
+        d.setFullYear(d.getFullYear() + 1);
+        next.expiryDate = d.toISOString().split('T')[0];
+      }
+      return next;
+    });
+  };
 
   const generateTempPassword = (phone) => {
     if (!phone || phone.length < 4) return 'BOS@XXXX';
@@ -722,6 +745,7 @@ function AddClientForm({ showConfirm }) {
         name: formData.name,
         phone: '+91' + formData.phone,
         email: formData.email,
+        officeState: formData.state || 'Maharashtra',
         createdAt: serverTimestamp(),
         createdBy: 'admin',
         tempPasswordUsed: true
@@ -734,14 +758,21 @@ function AddClientForm({ showConfirm }) {
 
       console.log('Service being created:', serviceType, firstStepVal);
 
-      await addDoc(collection(db, 'clients', uid, 'services'), {
+      const servicePayload = {
         type: String(serviceType),
         status: String(firstStepVal),
         statusIndex: 0,
-        startDate: serverTimestamp(),
+        startDate: formData.startDate ? new Date(formData.startDate) : serverTimestamp(),
         completedDate: null,
         notes: String(formData.notes || '')
-      });
+      };
+
+      if (serviceType === 'Virtual Office' || formData.state) {
+        servicePayload.state = formData.state || 'Maharashtra';
+        servicePayload.expiryDate = formData.expiryDate ? new Date(formData.expiryDate) : null;
+      }
+
+      await addDoc(collection(db, 'clients', uid, 'services'), servicePayload);
 
       // 6. Log Activity
       await addDoc(collection(db, 'activity_log'), {
@@ -832,12 +863,12 @@ function AddClientForm({ showConfirm }) {
               <label className="text-[13px] font-[600] text-[#111110]">Service Type *</label>
               <select required value={formData.serviceType} onChange={(e) => setFormData(prev => ({ ...prev, serviceType: e.target.value }))} className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)]">
                 <option value="" disabled>Select a service</option>
+                <option value="Virtual Office">Virtual Office</option>
                 <option value="GST Registration">GST Registration</option>
                 <option value="GST Return Filing">GST Return Filing</option>
                 <option value="Trademark Registration">Trademark Registration</option>
                 <option value="Company Incorporation">Company Incorporation</option>
                 <option value="LLP Registration">LLP Registration</option>
-                <option value="Virtual Office">Virtual Office</option>
                 <option value="Compliance">Compliance</option>
                 <option value="Copyright Registration">Copyright Registration</option>
                 <option value="FSSAI Registration">FSSAI Registration</option>
@@ -852,10 +883,52 @@ function AddClientForm({ showConfirm }) {
             </div>
             
             <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] font-[600] text-[#111110]">Start Date *</label>
-              <input required type="date" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)]" />
+              <label className="text-[13px] font-[600] text-[#111110]">Start Date (Purchase Date) *</label>
+              <input required type="date" value={formData.startDate} onChange={e => handleStartDateChange(e.target.value)} className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)]" />
             </div>
           </div>
+
+          {/* Virtual Office State Dropdown & Expiry Date */}
+          {(formData.serviceType === 'Virtual Office' || formData.serviceType === 'GST Registration') && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4 p-4 bg-[#FAF9F5] border border-[rgba(27,107,47,0.2)] rounded-[12px]">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[13px] font-[600] text-[#111110] flex items-center gap-1.5">
+                  <MapPin size={15} className="text-[#1B6B2F]" />
+                  <span>Office State (Virtual Office Location) *</span>
+                </label>
+                <select 
+                  required 
+                  value={formData.state} 
+                  onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))} 
+                  className="h-[44px] bg-white border border-[rgba(17,17,16,0.15)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] font-medium"
+                >
+                  {INDIAN_STATES.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+                <span className="text-[11px] text-[rgba(17,17,16,0.45)]">
+                  The client will see this state prominently in their Virtual Office dashboard.
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[13px] font-[600] text-[#111110] flex items-center gap-1.5">
+                  <Calendar size={15} className="text-[#1B6B2F]" />
+                  <span>Expiry / Renewal Date *</span>
+                </label>
+                <input 
+                  required 
+                  type="date" 
+                  value={formData.expiryDate} 
+                  onChange={e => setFormData(prev => ({ ...prev, expiryDate: e.target.value }))} 
+                  className="h-[44px] bg-white border border-[rgba(17,17,16,0.15)] rounded-[10px] px-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] font-medium" 
+                />
+                <span className="text-[11px] text-[rgba(17,17,16,0.45)]">
+                  Auto-calculated 1 year validity from start date (editable).
+                </span>
+              </div>
+            </div>
+          )}
 
           <div className="h-[1px] bg-[rgba(17,17,16,0.06)] my-2"></div>
           <div className="text-[11px] font-[600] tracking-[0.08em] text-[rgba(17,17,16,0.4)] mb-1">INTERNAL NOTES</div>
