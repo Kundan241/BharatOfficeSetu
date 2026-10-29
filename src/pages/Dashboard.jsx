@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Check, FileText, Download, MessageCircle, X as XIcon, FolderOpen, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { LogOut, Check, FileText, Download, MessageCircle, X as XIcon, FolderOpen, ExternalLink, MapPin, Calendar } from 'lucide-react';
 import { useAuth } from '../components/AuthContext';
 import { SERVICE_STEPS } from '../services/services';
 import { auth, db } from '../firebase';
 import { getClient } from '../services/clients';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { getClientDocuments, getDocumentDownloadUrl, getClientDriveFolder } from '../services/documents';
-import { supabase } from '../services/supabaseClient';
+import { collection, doc, onSnapshot } from 'firebase/firestore';
+import { getClientDriveFolder } from '../services/documents';
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
@@ -65,17 +64,27 @@ export default function Dashboard() {
     const unsubServices = onSnapshot(
       servicesRef,
       (snapshot) => {
-        const services = snapshot?.docs?.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          // Mapping 'type' to 'name' and 'status' to 'currentStep' to match UI
-          name: doc.data()?.type,
-          currentStep: doc.data()?.status,
-          status: doc.data()?.completedDate ? 'completed' : 'active',
-          startDate: doc.data()?.startDate?.toDate?.().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) || 'Just now',
-          completedDate: doc.data()?.completedDate?.toDate?.() || null,
-          lastUpdated: doc.data()?.startDate ? Math.floor((new Date() - doc.data().startDate.toDate()) / (1000 * 60 * 60 * 24)) : 0
-        })) || [];
+        const services = snapshot?.docs?.map(doc => {
+          const data = doc.data();
+          const startDateObj = data.startDate?.toDate ? data.startDate.toDate() : (data.startDate ? new Date(data.startDate) : null);
+          const expiryDateObj = data.expiryDate?.toDate ? data.expiryDate.toDate() : (data.expiryDate ? new Date(data.expiryDate) : null);
+          const now = new Date();
+          const daysLeft = expiryDateObj ? Math.ceil((expiryDateObj - now) / (1000 * 60 * 60 * 24)) : null;
+
+          return {
+            id: doc.id,
+            ...data,
+            name: data?.type,
+            currentStep: data?.status,
+            status: data?.completedDate ? 'completed' : 'active',
+            state: data?.state || null,
+            startDate: startDateObj ? startDateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Just now',
+            expiryDate: expiryDateObj ? expiryDateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : null,
+            daysLeft,
+            completedDate: data?.completedDate?.toDate?.() || null,
+            lastUpdated: startDateObj ? Math.floor((now - startDateObj) / (1000 * 60 * 60 * 24)) : 0
+          };
+        }) || [];
         setServices(services);
         setFetching(false);
       },
@@ -86,47 +95,20 @@ export default function Dashboard() {
       }
     );
 
-    // Fetch documents from Supabase client_documents table
-    const loadDocuments = async () => {
-      try {
-        setDocsLoading(true);
-        const docs = await getClientDocuments(user.uid);
-        setDocuments(docs);
-      } catch (err) {
-        console.error('Supabase getClientDocuments error:', err);
-      } finally {
-        setDocsLoading(false);
-      }
-    };
-
-    // Fetch associated Google Drive link if present
-    const loadDriveFolder = async () => {
-      try {
-        const driveLink = await getClientDriveFolder(user.uid);
-        if (driveLink) setGoogleDriveUrl(driveLink);
-      } catch (err) {
-        console.error('Failed to get client drive folder:', err);
-      }
-    };
-
-    loadDocuments();
-    loadDriveFolder();
-
-    // Supabase Realtime subscription for client_documents
-    const docsChannel = supabase
-      .channel(`client_dash_docs_${user.uid}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'client_documents', filter: `client_id=eq.${user.uid}` },
-        () => {
-          loadDocuments();
+    // Fetch and subscribe to client profile in Firestore for driveFolderUrl
+    const unsubClient = onSnapshot(doc(db, 'clients', user.uid), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const driveLink = data.driveFolderUrl || data.googleDriveLink || data.driveUrl || data.drive_url;
+        if (driveLink) {
+          setGoogleDriveUrl(driveLink);
         }
-      )
-      .subscribe();
+      }
+    });
 
     return () => {
       unsubServices();
-      supabase.removeChannel(docsChannel);
+      unsubClient();
     };
     
   }, [user]);
@@ -340,9 +322,17 @@ export default function Dashboard() {
                     ${service?.status === 'active' ? 'bg-[#F4831F]' : 'bg-[#1B6B2F]'}`}
                   ></div>
                   
-                  <div className="flex justify-between items-start mb-6">
+                  <div className="flex justify-between items-start mb-4">
                     <div>
-                      <div className="text-[16px] font-bold text-[#111110] mb-0.5">{service?.name}</div>
+                      <div className="text-[16px] font-bold text-[#111110] mb-0.5 flex items-center gap-2 flex-wrap">
+                        <span>{service?.name}</span>
+                        {service?.state && (
+                          <span className="bg-[#FAF9F5] border border-[rgba(17,17,16,0.1)] text-[#111110] text-[11px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                            <MapPin size={11} className="text-[#1B6B2F]" />
+                            {service.state}
+                          </span>
+                        )}
+                      </div>
                       <div className="text-[12px] text-[rgba(17,17,16,0.45)]">Started {service?.startDate}</div>
                     </div>
                     
@@ -356,6 +346,41 @@ export default function Dashboard() {
                       </div>
                     )}
                   </div>
+
+                  {/* Virtual Office Details Bar */}
+                  {(service?.name === 'Virtual Office' || service?.type === 'Virtual Office' || service?.state || service?.expiryDate) && (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5 p-3.5 bg-[#FAF9F5] border border-[rgba(17,17,16,0.06)] rounded-[12px]">
+                      <div>
+                        <div className="text-[10px] font-bold text-[rgba(17,17,16,0.4)] uppercase tracking-wider">Office State</div>
+                        <div className="text-[13px] font-bold text-[#111110] mt-0.5">
+                          {service.state ? `📍 ${service.state}` : 'State Not Set'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-bold text-[rgba(17,17,16,0.4)] uppercase tracking-wider">Purchased On</div>
+                        <div className="text-[13px] font-semibold text-[#111110] mt-0.5">
+                          {service.startDate || '—'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-bold text-[rgba(17,17,16,0.4)] uppercase tracking-wider">Valid Till / Expiry</div>
+                        <div className="text-[13px] font-semibold text-[#1B6B2F] mt-0.5 flex items-center gap-1.5 flex-wrap">
+                          {service.expiryDate ? (
+                            <>
+                              <span>{service.expiryDate}</span>
+                              {service.daysLeft != null && (
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${service.daysLeft > 30 ? 'bg-[#EBF7EE] text-[#1B6B2F]' : 'bg-red-50 text-red-600'}`}>
+                                  {service.daysLeft > 0 ? `(${service.daysLeft}d left)` : '(Expired)'}
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-[rgba(17,17,16,0.4)] font-normal">1 Year Validity</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="relative pt-2 pb-6 overflow-x-auto no-scrollbar">
                     <div className="min-w-[500px] flex items-center justify-between relative px-4">
@@ -414,66 +439,44 @@ export default function Dashboard() {
 
         {/* Section 2 - MY DOCUMENTS */}
         <div className="mb-12 fade-up-enter" style={{ animationDelay: '0.1s' }}>
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <div className="text-[11px] font-semibold tracking-[0.08em] text-[rgba(17,17,16,0.4)]">MY DOCUMENTS</div>
-            {googleDriveUrl && (
-              <a
-                href={googleDriveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-[#F0F5EA] hover:bg-[#e1ebd5] text-[#1B6B2F] border border-[rgba(27,107,47,0.25)] px-3.5 py-1.5 rounded-[100px] text-[12px] font-bold transition-all hover:-translate-y-[1px] shadow-sm"
-              >
-                <FolderOpen size={15} className="text-[#1B6B2F]" />
-                <span>Open Google Drive Folder</span>
-                <ExternalLink size={13} className="opacity-70" />
-              </a>
-            )}
-          </div>
+          <div className="text-[11px] font-semibold tracking-[0.08em] text-[rgba(17,17,16,0.4)] mb-3">MY DOCUMENTS</div>
           
-          <div className="bg-white rounded-[16px] border border-[rgba(17,17,16,0.08)] px-6 py-5">
-            {docsLoading ? (
-              <div className="text-[14px] text-[rgba(17,17,16,0.4)] text-center py-6 flex items-center justify-center gap-2">
-                <div className="w-4 h-4 border-2 border-[#1B6B2F] border-t-transparent rounded-full animate-spin"></div>
-                Loading documents...
+          <div className="bg-white rounded-[16px] border border-[rgba(17,17,16,0.08)] p-6 sm:p-7 shadow-sm">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+              <div className="flex items-start gap-4">
+                <div className="w-13 h-13 rounded-2xl bg-[#EBF7EE] border border-[rgba(27,107,47,0.15)] flex items-center justify-center text-[#1B6B2F] shrink-0">
+                  <FolderOpen size={28} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-[17px] font-bold text-[#111110]">Google Drive KYC & Agreement Documents</h3>
+                    <span className="bg-[#EBF7EE] text-[#1B6B2F] border border-[rgba(27,107,47,0.2)] text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                      All Files in One Place
+                    </span>
+                  </div>
+                  <p className="text-[13px] text-[rgba(17,17,16,0.55)] mt-1.5 max-w-[520px] leading-relaxed">
+                    All your agreement drafts, GST registration certificates, rent agreements, NOCs, and KYC verifications are organized and stored in your dedicated Google Drive folder.
+                  </p>
+                </div>
               </div>
-            ) : (!documents || documents.length === 0) ? (
-              <div className="text-[14px] text-[rgba(17,17,16,0.4)] text-center py-6">
-                No documents yet. They will appear here as your service progresses.
-              </div>
-            ) : (
-              <div className="flex flex-col">
-                {documents.map((doc, i) => {
-                  const isImage = (doc.name || doc.fileName || '').match(/\.(jpe?g|png)$/i);
-                  return (
-                    <div key={doc?.id || i} className={`flex items-center justify-between py-3.5 ${i !== documents.length - 1 ? 'border-b border-[rgba(17,17,16,0.06)]' : ''}`}>
-                      <div className="flex items-center gap-3 min-w-0 pr-4">
-                        <div className="w-9 h-9 rounded-lg bg-[rgba(244,131,31,0.08)] flex items-center justify-center flex-shrink-0">
-                          {isImage ? (
-                            <ImageIcon className="text-[#2563EB]" size={18} />
-                          ) : (
-                            <FileText className="text-[#F4831F]" size={18} />
-                          )}
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                          <span className="text-[14px] font-medium text-[#111110] truncate">{doc?.name || doc?.fileName}</span>
-                          <span className="text-[11px] text-[rgba(17,17,16,0.4)] capitalize">
-                            {doc?.documentType ? doc.documentType.replace(/_/g, ' ') : (isImage ? 'Image' : 'PDF Document')}
-                            {doc?.uploadedAt ? ` • ${new Date(doc.uploadedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}` : ''}
-                          </span>
-                        </div>
-                      </div>
-                      <button 
-                        onClick={() => handleDownloadDocument(doc)}
-                        className="border border-[rgba(27,107,47,0.2)] text-[#1B6B2F] rounded-[100px] px-3.5 py-1.5 text-[12px] font-bold hover:bg-[#F0F5EA] hover:border-[#1B6B2F] transition-colors flex items-center gap-1.5 flex-shrink-0"
-                      >
-                        <Download size={14} />
-                        Download
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+
+              {googleDriveUrl ? (
+                <a
+                  href={googleDriveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto h-[46px] px-6 rounded-[100px] bg-[#1B6B2F] hover:bg-[#145324] text-white font-bold text-[14px] flex items-center justify-center gap-2.5 transition-all hover:-translate-y-[1px] shadow-[0_4px_14px_rgba(27,107,47,0.25)] shrink-0"
+                >
+                  <FolderOpen size={18} />
+                  <span>Open Google Drive Folder</span>
+                  <ExternalLink size={15} />
+                </a>
+              ) : (
+                <div className="text-[12px] text-[rgba(17,17,16,0.45)] italic bg-[#FAF9F5] px-4 py-2.5 rounded-[8px] border border-[rgba(17,17,16,0.06)] shrink-0">
+                  Folder being prepared by admin
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

@@ -4,6 +4,7 @@ import { useToast } from '../components/ToastContext';
 import { useAuth } from '../components/AuthContext';
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { autoLinkDriveFolderByClientInfo } from '../services/documents';
 const ACCESS_PASSWORD = 'BOS@Drafts2026';
 
 const TEMPLATES = [
@@ -348,6 +349,18 @@ export default function DraftGenerator() {
         if (result.driveUrl) {
           addToast('success', '✅ Draft saved to Sheets & Drive!');
           window.open(result.driveUrl, '_blank', 'noopener,noreferrer');
+
+          // Auto-link Google Drive folder to client profile
+          try {
+            await autoLinkDriveFolderByClientInfo({
+              companyName: trackingPayload.companyName,
+              clientName: trackingPayload.clientName,
+              email: trackingPayload.email,
+              driveUrl: result.driveUrl
+            });
+          } catch (linkErr) {
+            console.warn('Auto link drive folder error:', linkErr);
+          }
         } else {
           addToast('success', '✅ Details saved to Google Sheets!');
         }

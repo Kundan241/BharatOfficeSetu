@@ -6,7 +6,8 @@ import {
   LogOut, Search, FileText, ChevronRight, 
   ArrowLeft, Plus, Check, Trash2, LayoutDashboard, 
   Users, UserPlus, Menu, X as XIcon, UploadCloud, Eye, EyeOff, MoreVertical,
-  AlertTriangle, Pencil, IndianRupee, FolderOpen, ExternalLink, Image as ImageIcon
+  AlertTriangle, Pencil, IndianRupee, FolderOpen, ExternalLink, Image as ImageIcon,
+  MapPin, Calendar
 } from 'lucide-react';
 import { SERVICE_STEPS } from '../services/services';
 import { auth, db } from '../firebase';
@@ -19,14 +20,9 @@ import { sendPasswordResetEmail } from 'firebase/auth';
 import { createClientAccount } from '../services/auth';
 import { updateServiceStatus, addService } from '../services/services';
 import { 
-  uploadClientDocument, 
-  getClientDocuments, 
-  deleteClientDocument, 
-  getDocumentDownloadUrl,
   getClientDriveFolder,
   saveClientDriveFolder 
 } from '../services/documents';
-import { supabase } from '../services/supabaseClient';
 import AdminBlogEditor from '../components/AdminBlogEditor';
 import AdminSalesLedger from '../components/AdminSalesLedger';
 import emailjs from '@emailjs/browser';
@@ -41,6 +37,15 @@ import {
 import { processSheetRecords } from '../utils/ledgerUtils';
 
 const ADMIN_GATE_PASSWORD = 'BOS@Admin2026';
+
+export const INDIAN_STATES = [
+  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+  'Delhi', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh',
+  'Jammu & Kashmir', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh',
+  'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland',
+  'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
+  'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
+];
 
 // --- Toast & Confirm components (Mocked globally or handled here) ---
 // Toast is from useToast
@@ -378,13 +383,6 @@ function AdminDashboard() {
           const docSnap = await getDocs(collection(db, 'clients', cDoc.id, 'documents'));
           docsCount += docSnap.size;
         }
-
-        try {
-          const { count } = await supabase.from('client_documents').select('*', { count: 'exact', head: true });
-          if (typeof count === 'number' && count > 0) {
-            docsCount = count;
-          }
-        } catch (_) {}
 
         setStats({ totalClients, activeServices: activeServ, completedThisMonth: completedMonth, docsUploaded: docsCount });
       } catch (err) {
@@ -909,15 +907,6 @@ function ClientDetailView({ showConfirm }) {
   const [showAddService, setShowAddService] = useState(false);
   const [driveFolderUrl, setDriveFolderUrl] = useState('');
 
-  const loadDocuments = async () => {
-    try {
-      const docs = await getClientDocuments(uid);
-      setDocuments(docs);
-    } catch (e) {
-      console.error('Failed to load documents from Supabase:', e);
-    }
-  };
-
   const loadDriveFolder = async () => {
     try {
       const link = await getClientDriveFolder(uid);
@@ -931,13 +920,16 @@ function ClientDetailView({ showConfirm }) {
     const fetchClient = async () => {
       try {
         const snap = await getDoc(doc(db, 'clients', uid));
-        if (snap.exists()) setClient({ id: snap.id, ...snap.data() });
+        if (snap.exists()) {
+          const cData = { id: snap.id, ...snap.data() };
+          setClient(cData);
+          if (cData.driveFolderUrl) setDriveFolderUrl(cData.driveFolderUrl);
+        }
       } catch (e) {
         console.error(e);
       }
     };
     fetchClient();
-    loadDocuments();
     loadDriveFolder();
 
     const unsubServices = onSnapshot(collection(db, 'clients', uid, 'services'), (snap) => {
@@ -947,21 +939,8 @@ function ClientDetailView({ showConfirm }) {
       setLoading(false);
     });
 
-    // Supabase Realtime channel for client_documents
-    const channel = supabase
-      .channel(`admin_client_docs_${uid}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'client_documents', filter: `client_id=eq.${uid}` },
-        () => {
-          loadDocuments();
-        }
-      )
-      .subscribe();
-
     return () => { 
       unsubServices(); 
-      supabase.removeChannel(channel);
     };
   }, [uid]);
 
@@ -1045,9 +1024,6 @@ function ClientDetailView({ showConfirm }) {
           <div className="text-[11px] font-[600] tracking-[0.08em] text-[rgba(17,17,16,0.4)]">DOCUMENTS</div>
           <DocumentsCard 
             client={client} 
-            documents={documents} 
-            showConfirm={showConfirm} 
-            onRefresh={loadDocuments}
             driveFolderUrl={driveFolderUrl}
             onSaveDriveUrl={async (url) => {
               await saveClientDriveFolder(client.id, url);
@@ -1076,6 +1052,34 @@ function ServiceCard({ client, service, showConfirm }) {
 
   const [notes, setNotes] = useState(service.notes || '');
   const [notesChanged, setNotesChanged] = useState(false);
+
+  // Virtual Office / Custom fields
+  const [isEditingDetails, setIsEditingDetails] = useState(false);
+  const [stateValue, setStateValue] = useState(service.state || '');
+  const [startDateValue, setStartDateValue] = useState(
+    service.startDate?.toDate ? service.startDate.toDate().toISOString().split('T')[0] : 
+    (typeof service.startDate === 'string' && service.startDate.includes('-') ? service.startDate : '')
+  );
+  const [expiryDateValue, setExpiryDateValue] = useState(
+    service.expiryDate?.toDate ? service.expiryDate.toDate().toISOString().split('T')[0] : 
+    (typeof service.expiryDate === 'string' && service.expiryDate.includes('-') ? service.expiryDate : '')
+  );
+
+  const handleSaveDetails = async () => {
+    try {
+      const payload = {
+        state: stateValue.trim(),
+        startDate: startDateValue ? new Date(startDateValue) : null,
+        expiryDate: expiryDateValue ? new Date(expiryDateValue) : null,
+      };
+      await updateDoc(doc(db, 'clients', client.id, 'services', service.id), payload);
+      setIsEditingDetails(false);
+      addToast('success', 'Virtual office details updated');
+    } catch (e) {
+      console.error(e);
+      addToast('error', 'Failed to update service details');
+    }
+  };
 
   const handleNextStep = async () => {
     const nextIndex = currentIndex + 1;
@@ -1148,15 +1152,118 @@ function ServiceCard({ client, service, showConfirm }) {
     addToast('success', 'Saved ✓');
   };
 
+  // Formatted date helpers
+  const displayStart = service.startDate?.toDate ? service.startDate.toDate().toLocaleDateString('en-GB') : (service.startDate ? String(service.startDate) : null);
+  const displayExpiry = service.expiryDate?.toDate ? service.expiryDate.toDate().toLocaleDateString('en-GB') : (service.expiryDate ? String(service.expiryDate) : null);
+
   return (
     <div className="bg-white rounded-[14px] border border-[rgba(17,17,16,0.08)] p-5 relative overflow-hidden">
       <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${isCompleted ? 'bg-[#1B6B2F]' : 'bg-[#F4831F]'}`}></div>
       
-      <div className="flex justify-between items-start mb-6 pl-1">
-        <div className="text-[16px] font-[700] text-[#111110]">{service.type}</div>
+      <div className="flex justify-between items-start mb-4 pl-1">
+        <div>
+          <div className="text-[16px] font-[700] text-[#111110] flex items-center gap-2 flex-wrap">
+            <span>{service.type}</span>
+            {service.state && (
+              <span className="bg-[#FAF9F5] border border-[rgba(17,17,16,0.1)] text-[#111110] text-[11px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <MapPin size={11} className="text-[#1B6B2F]" />
+                {service.state}
+              </span>
+            )}
+          </div>
+          {displayStart && (
+            <div className="text-[11px] text-[rgba(17,17,16,0.45)] mt-0.5">
+              Purchased: {displayStart} {displayExpiry ? `• Expiry: ${displayExpiry}` : ''}
+            </div>
+          )}
+        </div>
         <div className={`px-2.5 py-0.5 rounded-[100px] text-[10px] font-[700] uppercase ${isCompleted ? 'bg-[rgba(27,107,47,0.1)] text-[#1B6B2F]' : 'bg-[rgba(244,131,31,0.1)] text-[#F4831F]'}`}>
           {isCompleted ? 'Completed ✓' : 'In Progress'}
         </div>
+      </div>
+
+      {/* Virtual Office State & Expiry Box */}
+      <div className="bg-[#FAF9F5] rounded-[10px] p-3 mb-4 pl-3 border border-[rgba(17,17,16,0.06)]">
+        {!isEditingDetails ? (
+          <div className="flex items-center justify-between gap-3">
+            <div className="grid grid-cols-3 gap-2 flex-1">
+              <div>
+                <span className="text-[10px] font-bold text-[rgba(17,17,16,0.4)] uppercase">Office State</span>
+                <div className="text-[12px] font-bold text-[#111110] truncate">{service.state || 'Not Set'}</div>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-[rgba(17,17,16,0.4)] uppercase">Start Date</span>
+                <div className="text-[12px] font-medium text-[#111110]">{displayStart || '—'}</div>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-[rgba(17,17,16,0.4)] uppercase">Expiry Date</span>
+                <div className="text-[12px] font-bold text-[#1B6B2F]">{displayExpiry || '—'}</div>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsEditingDetails(true)}
+              className="text-[11px] font-semibold text-[#1B6B2F] hover:underline shrink-0"
+            >
+              Edit Details
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2.5">
+            <div className="text-[11px] font-bold text-[#111110]">Edit Service Details</div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div>
+                <label className="text-[10px] font-semibold text-[rgba(17,17,16,0.5)]">State</label>
+                <select
+                  value={stateValue}
+                  onChange={(e) => setStateValue(e.target.value)}
+                  className="w-full h-[34px] bg-white border border-[rgba(17,17,16,0.15)] rounded-[6px] px-2 text-[12px] outline-none"
+                >
+                  <option value="">Select State</option>
+                  {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold text-[rgba(17,17,16,0.5)]">Purchase Date</label>
+                <input
+                  type="date"
+                  value={startDateValue}
+                  onChange={(e) => {
+                    setStartDateValue(e.target.value);
+                    if (e.target.value && !expiryDateValue) {
+                      const d = new Date(e.target.value);
+                      d.setFullYear(d.getFullYear() + 1);
+                      setExpiryDateValue(d.toISOString().split('T')[0]);
+                    }
+                  }}
+                  className="w-full h-[34px] bg-white border border-[rgba(17,17,16,0.15)] rounded-[6px] px-2 text-[12px] outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold text-[rgba(17,17,16,0.5)]">Expiry Date</label>
+                <input
+                  type="date"
+                  value={expiryDateValue}
+                  onChange={(e) => setExpiryDateValue(e.target.value)}
+                  className="w-full h-[34px] bg-white border border-[rgba(17,17,16,0.15)] rounded-[6px] px-2 text-[12px] outline-none"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-1">
+              <button
+                onClick={() => setIsEditingDetails(false)}
+                className="px-3 h-[28px] text-[11px] text-[rgba(17,17,16,0.5)] hover:text-[#111110]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveDetails}
+                className="px-3 h-[28px] bg-[#1B6B2F] text-white rounded-[6px] text-[11px] font-bold hover:bg-[#145324]"
+              >
+                Save Details
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="bg-[#F9F8F5] rounded-[12px] p-5 mb-5 pl-1.5">
@@ -1200,11 +1307,9 @@ function ServiceCard({ client, service, showConfirm }) {
   );
 }
 
-// Documents Card Component (Supabase Integration)
-function DocumentsCard({ client, documents, showConfirm, onRefresh, driveFolderUrl, onSaveDriveUrl }) {
+// Documents Card Component (Google Drive KYC Hub)
+function DocumentsCard({ client, driveFolderUrl, onSaveDriveUrl }) {
   const { addToast } = useToast();
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
   const [isEditingDrive, setIsEditingDrive] = useState(false);
   const [driveInput, setDriveInput] = useState(driveFolderUrl || '');
 
@@ -1212,229 +1317,114 @@ function DocumentsCard({ client, documents, showConfirm, onRefresh, driveFolderU
     setDriveInput(driveFolderUrl || '');
   }, [driveFolderUrl]);
 
-  const handleUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // Validate file type: .pdf, .jpg, .jpeg, .png
-    const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png'];
-    const fileExt = '.' + file.name.split('.').pop().toLowerCase();
-    const isAllowed = allowedExtensions.includes(fileExt) || 
-      ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'].includes(file.type);
-
-    if (!isAllowed) {
-      addToast('error', 'Only .pdf, .jpg, and .png files are accepted');
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      addToast('error', 'File size must be under 10MB');
-      return;
-    }
-    
-    setIsUploading(true);
-    setUploadProgress(20);
-    
-    try {
-      setUploadProgress(50);
-      await uploadClientDocument({
-        clientId: client.id,
-        file: file
-      });
-      setUploadProgress(90);
-
-      // Log activity
-      try {
-        await addDoc(collection(db, 'activity_log'), {
-          type: 'document_uploaded',
-          clientName: client.name,
-          clientId: client.id,
-          description: `${client.name} — ${file.name} uploaded to Supabase`,
-          timestamp: serverTimestamp()
-        });
-      } catch (_) {}
-
-      setUploadProgress(100);
-      addToast('success', 'Document uploaded to Supabase successfully');
-      setIsUploading(false);
-      if (onRefresh) onRefresh();
-    } catch (error) {
-      console.error('Supabase upload error:', error);
-      addToast('error', error.message || 'Supabase upload failed');
-      setIsUploading(false);
-    } finally {
-      e.target.value = '';
-    }
-  };
-
-  const handleOpenDoc = async (d) => {
-    try {
-      const url = await getDocumentDownloadUrl(d);
-      if (url) {
-        window.open(url, '_blank', 'noopener,noreferrer');
-      } else {
-        addToast('error', 'Could not open document link');
-      }
-    } catch (e) {
-      addToast('error', 'Failed to generate download link');
-    }
-  };
-
-  const handleDelete = (docItem) => {
-    const docId = docItem.id;
-    const path = docItem.file_path || docItem.path;
-    const name = docItem.file_name || docItem.name || 'Document';
-
-    showConfirm({
-      title: `Delete ${name}?`,
-      message: 'This will permanently remove the file from Supabase.',
-      confirmText: 'Delete',
-      type: 'danger',
-      onConfirm: async () => {
-        try {
-          await deleteClientDocument(docId, path);
-          addToast('success', 'Document deleted from Supabase');
-          if (onRefresh) onRefresh();
-        } catch(e) {
-          console.error(e);
-          addToast('error', 'Failed to delete from Supabase');
-        }
-      }
-    });
+  const handleCopyLink = () => {
+    if (!driveFolderUrl) return;
+    navigator.clipboard.writeText(driveFolderUrl);
+    addToast('success', 'Google Drive folder link copied');
   };
 
   return (
-    <div className="bg-white rounded-[14px] border border-[rgba(17,17,16,0.08)] overflow-hidden">
-      {/* Google Drive Link Section */}
-      <div className="p-3.5 bg-[#FAF9F5] border-b border-[rgba(17,17,16,0.06)] flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-[12px] font-[600] text-[#111110]">
-            <FolderOpen size={16} className="text-[#1B6B2F]" />
-            <span>Google Drive KYC Folder</span>
+    <div className="bg-white rounded-[14px] border border-[rgba(17,17,16,0.08)] overflow-hidden shadow-sm">
+      <div className="p-4 bg-[#FAF9F5] border-b border-[rgba(17,17,16,0.06)] flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[rgba(27,107,47,0.1)] flex items-center justify-center text-[#1B6B2F]">
+            <FolderOpen size={18} />
           </div>
-          {driveFolderUrl && !isEditingDrive && (
+          <div>
+            <div className="text-[13px] font-[700] text-[#111110]">Google Drive KYC Documents</div>
+            <div className="text-[11px] text-[rgba(17,17,16,0.45)]">All client files, drafts & KYC in one place</div>
+          </div>
+        </div>
+        {driveFolderUrl && (
+          <span className="bg-[#EBF7EE] text-[#1B6B2F] border border-[rgba(27,107,47,0.2)] text-[10px] font-bold px-2 py-0.5 rounded-full">
+            Linked ✓
+          </span>
+        )}
+      </div>
+
+      <div className="p-4 flex flex-col gap-3">
+        {driveFolderUrl && !isEditingDrive ? (
+          <div className="flex flex-col gap-3">
+            <div className="p-3 bg-[#FAF9F5] border border-[rgba(17,17,16,0.08)] rounded-[10px] flex items-center justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] text-[rgba(17,17,16,0.4)] uppercase tracking-wider font-bold">Client Folder URL</div>
+                <div className="text-[12px] font-medium text-[#111110] truncate mt-0.5">{driveFolderUrl}</div>
+              </div>
+              <button 
+                onClick={handleCopyLink} 
+                className="px-2.5 py-1 text-[11px] font-bold text-[#1B6B2F] border border-[rgba(27,107,47,0.25)] rounded-[6px] hover:bg-white"
+              >
+                Copy
+              </button>
+            </div>
+
             <div className="flex items-center gap-2">
               <a 
                 href={driveFolderUrl} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="text-[12px] font-[600] text-[#1B6B2F] hover:underline flex items-center gap-1"
+                className="flex-1 h-[42px] bg-[#1B6B2F] hover:bg-[#145324] text-white rounded-[8px] text-[12px] font-[700] flex items-center justify-center gap-2 transition-all shadow-sm"
               >
-                Open Folder <ExternalLink size={12} />
+                <FolderOpen size={16} />
+                <span>Open in Google Drive</span>
+                <ExternalLink size={13} className="opacity-80" />
               </a>
               <button 
                 onClick={() => setIsEditingDrive(true)} 
-                className="text-[11px] text-[rgba(17,17,16,0.4)] hover:text-[#111110]"
+                className="h-[42px] px-4 border border-[rgba(17,17,16,0.15)] text-[rgba(17,17,16,0.65)] hover:text-[#111110] hover:bg-[#FAF9F5] rounded-[8px] text-[12px] font-medium"
               >
-                Edit
+                Change Link
               </button>
             </div>
-          )}
-          {!driveFolderUrl && !isEditingDrive && (
-            <button 
-              onClick={() => setIsEditingDrive(true)} 
-              className="text-[11px] font-[600] text-[#1B6B2F] hover:underline"
-            >
-              + Link Drive Folder
-            </button>
-          )}
-        </div>
 
-        {isEditingDrive && (
-          <div className="flex items-center gap-2 mt-1">
-            <input 
-              type="text" 
-              placeholder="Paste Google Drive folder URL" 
-              value={driveInput} 
-              onChange={(e) => setDriveInput(e.target.value)} 
-              className="flex-1 bg-white border border-[rgba(17,17,16,0.15)] rounded-[6px] px-2.5 py-1 text-[12px] outline-none focus:border-[#1B6B2F]"
-            />
-            <button 
-              onClick={async () => {
-                if (onSaveDriveUrl) await onSaveDriveUrl(driveInput.trim());
-                setIsEditingDrive(false);
-              }}
-              className="bg-[#1B6B2F] text-white px-2.5 py-1 rounded-[6px] text-[11px] font-[600] hover:bg-[#145324]"
-            >
-              Save
-            </button>
-            <button 
-              onClick={() => setIsEditingDrive(false)} 
-              className="text-[11px] text-[rgba(17,17,16,0.4)] hover:text-[#111110]"
-            >
-              Cancel
-            </button>
-          </div>
-        )}
-      </div>
-
-      <div className="max-h-[300px] overflow-y-auto">
-        {(!documents || (documents?.length || 0) === 0) ? (
-          <div className="p-7 text-center text-[14px] text-[rgba(17,17,16,0.4)]">No documents uploaded yet</div>
-        ) : (
-          (documents || []).map(d => {
-            const isPdf = (d.file_name || d.name || '').toLowerCase().endsWith('.pdf');
-            return (
-              <div key={d.id} className="h-[56px] px-4 flex items-center justify-between border-b border-[rgba(17,17,16,0.05)] last:border-0">
-                <div className="flex items-center gap-3 overflow-hidden mr-2">
-                  {isPdf ? (
-                    <FileText size={20} className="text-[#F4831F] shrink-0" />
-                  ) : (
-                    <ImageIcon size={20} className="text-[#2563EB] shrink-0" />
-                  )}
-                  <div className="flex flex-col overflow-hidden">
-                    <div className="truncate text-[13px] font-[500] text-[#111110]">
-                      {d.file_name || d.name}
-                    </div>
-                    {d.document_type && (
-                      <span className="text-[10px] text-[rgba(17,17,16,0.45)]">
-                        {d.document_type}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <button 
-                    onClick={() => handleOpenDoc(d)} 
-                    title="View / Download" 
-                    className="w-8 h-8 flex items-center justify-center rounded-full text-[rgba(17,17,16,0.4)] hover:text-[#1B6B2F] hover:bg-[rgba(27,107,47,0.05)] transition-colors"
-                  >
-                    <UploadCloud size={18} className="rotate-180" />
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(d)} 
-                    title="Delete" 
-                    className="w-8 h-8 flex items-center justify-center rounded-full text-[rgba(17,17,16,0.25)] hover:text-[#DC2626] hover:bg-red-50 transition-colors"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
-
-      <div className="p-4 border-t border-[rgba(17,17,16,0.05)]">
-        {isUploading ? (
-          <div className="border-2 dashed border-[rgba(17,17,16,0.1)] rounded-[12px] p-5 text-center">
-            <div className="h-1 bg-[rgba(27,107,47,0.1)] rounded-[100px] mb-2 overflow-hidden">
-              <div className="h-full bg-[#1B6B2F] transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+            <div className="text-[11px] text-[rgba(17,17,16,0.45)] leading-relaxed">
+              📁 <strong>Single Source of Truth:</strong> Agreement drafts, Aadhaar, PAN, and GST certificates are managed directly in this folder. The client can open this exact folder from their dashboard.
             </div>
-            <div className="text-[12px] text-[rgba(17,17,16,0.5)]">Uploading to Supabase... {Math.round(uploadProgress)}%</div>
           </div>
         ) : (
-          <label className="border-2 border-dashed border-[rgba(17,17,16,0.15)] rounded-[12px] p-5 flex flex-col items-center text-center cursor-pointer hover:border-[#1B6B2F] hover:bg-[rgba(27,107,47,0.02)] transition-all">
-            <input 
-              type="file" 
-              accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" 
-              className="hidden" 
-              onChange={handleUpload} 
-            />
-            <UploadCloud size={24} className="text-[#1B6B2F] mb-1" />
-            <div className="text-[13px] font-[500] text-[#111110]">Drop PDF or Image here, or click to upload</div>
-            <div className="text-[11px] text-[rgba(17,17,16,0.4)] mt-0.5">.pdf, .jpg, .png up to 10MB • Saved to Supabase</div>
-          </label>
+          <div className="flex flex-col gap-2.5">
+            <div className="text-[12px] text-[rgba(17,17,16,0.6)]">
+              Paste the Google Drive folder link for this client (from the Draft Generator or Drive):
+            </div>
+            <div className="flex items-center gap-2">
+              <input 
+                type="text" 
+                placeholder="https://drive.google.com/drive/folders/..." 
+                value={driveInput} 
+                onChange={(e) => setDriveInput(e.target.value)} 
+                className="flex-1 bg-white border border-[rgba(17,17,16,0.15)] rounded-[8px] px-3 py-2 text-[12px] outline-none focus:border-[#1B6B2F]"
+              />
+              <button 
+                onClick={async () => {
+                  if (onSaveDriveUrl) await onSaveDriveUrl(driveInput.trim());
+                  setIsEditingDrive(false);
+                }} 
+                className="bg-[#1B6B2F] text-white px-4 py-2 rounded-[8px] text-[12px] font-[600] hover:bg-[#145324]"
+              >
+                Save
+              </button>
+              {isEditingDrive && (
+                <button 
+                  onClick={() => setIsEditingDrive(false)} 
+                  className="text-[12px] text-[rgba(17,17,16,0.4)] hover:text-[#111110] px-2"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-[rgba(17,17,16,0.06)] flex items-center justify-between text-[11px]">
+              <span className="text-[rgba(17,17,16,0.45)]">Need to browse all drafts?</span>
+              <a 
+                href="https://drive.google.com/drive/folders/1A6srVB8LCyy4S5YEoICwld9OXu46Y_eV-" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-[#1B6B2F] font-[600] hover:underline flex items-center gap-1"
+              >
+                Open BOS Drafts Root ↗
+              </a>
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -1603,34 +1593,58 @@ function PasswordCard({ client }) {
 // Add Service Modal
 function AddServiceModal({ client, onClose }) {
   const { addToast } = useToast();
-  const [type, setType] = useState('GST Registration');
+  const [type, setType] = useState('Virtual Office');
+  const [state, setState] = useState('Maharashtra');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [expiryDate, setExpiryDate] = useState(() => {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() + 1);
+    return d.toISOString().split('T')[0];
+  });
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const handleStartDateChange = (val) => {
+    setDate(val);
+    if (val) {
+      const d = new Date(val);
+      d.setFullYear(d.getFullYear() + 1);
+      setExpiryDate(d.toISOString().split('T')[0]);
+    }
+  };
 
   const submit = async () => {
     setLoading(true);
     try {
-      await addService(client.id, type, notes); // dummy
-      const steps = SERVICE_STEPS[type] || ['Order Received'];
-      await addDoc(collection(db, 'clients', client.id, 'services'), {
+      await addService(client.id, type, notes);
+      const steps = SERVICE_STEPS[type] || ['Order Received', 'In Progress', 'Completed'];
+      
+      const payload = {
         type: String(type),
         status: String(steps[0]),
         statusIndex: 0,
-        startDate: serverTimestamp(),
+        startDate: date ? new Date(date) : serverTimestamp(),
         completedDate: null,
         notes: String(notes || '')
-      });
+      };
+
+      if (type === 'Virtual Office' || state) {
+        payload.state = state;
+        payload.expiryDate = expiryDate ? new Date(expiryDate) : null;
+      }
+
+      await addDoc(collection(db, 'clients', client.id, 'services'), payload);
       await addDoc(collection(db, 'activity_log'), {
         type: 'service_added',
         clientName: client.name,
         clientId: client.id,
-        description: `${client.name} — Added service: ${type}`,
+        description: `${client.name} — Added service: ${type} ${state ? `(${state})` : ''}`,
         timestamp: serverTimestamp()
       });
-      addToast('success', 'Service added');
+      addToast('success', 'Service added successfully');
       onClose();
     } catch(e) {
+      console.error(e);
       addToast('error', 'Failed to add service');
       setLoading(false);
     }
@@ -1639,7 +1653,7 @@ function AddServiceModal({ client, onClose }) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-[4px]" onClick={onClose}></div>
-      <div className="bg-white rounded-[16px] p-7 w-full max-w-[440px] relative z-10 fade-up-enter">
+      <div className="bg-white rounded-[16px] p-7 w-full max-w-[480px] relative z-10 fade-up-enter max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-[18px] font-[800] text-[#111110]">Add Service for {client.name.split(' ')[0]}</h3>
           <button onClick={onClose} className="text-[rgba(17,17,16,0.4)] hover:text-[#111110]"><XIcon size={20}/></button>
@@ -1649,13 +1663,12 @@ function AddServiceModal({ client, onClose }) {
           <div className="flex flex-col gap-1.5">
             <label className="text-[12px] font-[600] text-[#111110]">Service Type</label>
             <select value={type} onChange={(e) => setType(e.target.value)} className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none">
-                <option value="" disabled>Select a service</option>
+                <option value="Virtual Office">Virtual Office</option>
                 <option value="GST Registration">GST Registration</option>
                 <option value="GST Return Filing">GST Return Filing</option>
                 <option value="Trademark Registration">Trademark Registration</option>
                 <option value="Company Incorporation">Company Incorporation</option>
                 <option value="LLP Registration">LLP Registration</option>
-                <option value="Virtual Office">Virtual Office</option>
                 <option value="Compliance">Compliance</option>
                 <option value="Copyright Registration">Copyright Registration</option>
                 <option value="FSSAI Registration">FSSAI Registration</option>
@@ -1665,10 +1678,44 @@ function AddServiceModal({ client, onClose }) {
                 <option value="Sole Proprietorship Registration">Sole Proprietorship Registration</option>
             </select>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[12px] font-[600] text-[#111110]">Start Date</label>
-            <input type="date" value={date} onChange={e=>setDate(e.target.value)} className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none" />
+
+          {/* Virtual Office State Dropdown */}
+          {(type === 'Virtual Office' || type === 'GST Registration') && (
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-[600] text-[#111110]">State</label>
+              <select 
+                value={state} 
+                onChange={(e) => setState(e.target.value)} 
+                className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none"
+              >
+                {INDIAN_STATES.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-[600] text-[#111110]">Start Date (Purchase Date)</label>
+              <input 
+                type="date" 
+                value={date} 
+                onChange={e => handleStartDateChange(e.target.value)} 
+                className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none" 
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-[600] text-[#111110]">Expiry Date (Valid Till)</label>
+              <input 
+                type="date" 
+                value={expiryDate} 
+                onChange={e => setExpiryDate(e.target.value)} 
+                className="h-[44px] bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] px-3 text-[14px] outline-none" 
+              />
+            </div>
           </div>
+
           <div className="flex flex-col gap-1.5">
             <label className="text-[12px] font-[600] text-[#111110]">Internal Notes</label>
             <textarea rows={2} value={notes} onChange={e=>setNotes(e.target.value)} className="bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] p-3 text-[14px] outline-none resize-none" />
