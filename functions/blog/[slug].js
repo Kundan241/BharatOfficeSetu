@@ -36,7 +36,7 @@ export async function onRequestGet(context) {
   const { request, env, params } = context;
   const slug = params?.slug;
 
-  const assetUrl = new URL('/index.html', request.url);
+  const assetUrl = new URL('/', request.url);
   const baseResponse = await env.ASSETS.fetch(new Request(assetUrl.toString(), { method: 'GET' }));
 
   const supabaseUrl = env.VITE_SUPABASE_URL || env.SUPABASE_URL;
@@ -47,7 +47,7 @@ export async function onRequestGet(context) {
   }
 
   try {
-    const apiUrl = `${supabaseUrl.replace(/\/$/, '')}/rest/v1/blog_posts?slug=eq.${encodeURIComponent(slug)}&select=title,slug,excerpt,category,image_url,cover_image,created_at,content&limit=1`;
+    const apiUrl = `${supabaseUrl.replace(/\/$/, '')}/rest/v1/blog_posts?slug=eq.${encodeURIComponent(slug)}&select=title,slug,excerpt,category,image_url,created_at,content&limit=1`;
     const postRes = await fetch(apiUrl, {
       headers: {
         apikey: supabaseKey,
@@ -70,7 +70,7 @@ export async function onRequestGet(context) {
     const fullTitle = `${postTitle} | Bharat Office Setu`;
     const description = (post.excerpt || postTitle).replace(/\s+/g, ' ').trim().slice(0, 160);
     const canonicalUrl = `${siteUrl}/blog/${encodeURIComponent(post.slug || slug)}`;
-    const rawImage = post.image_url || post.cover_image || `${siteUrl}/logo.png`;
+    const rawImage = post.image_url || `${siteUrl}/logo.png`;
     const ogImage = rawImage.startsWith('http') ? rawImage : `${siteUrl}${rawImage}`;
     const cleanBody = normalizeTextHtml(post.content || '');
 
@@ -170,3 +170,4 @@ export async function onRequestGet(context) {
     return baseResponse;
   }
 }
+
