@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import FooterBanner from '../components/FooterBanner';
 import WhatsAppWidget from '../components/WhatsAppWidget';
+import BlogShareBar from '../components/BlogShareBar';
 import { supabase } from '../services/supabaseClient';
+import { cleanBlogTitle } from '../utils/blogFormat';
+import { applySeoMeta } from '../utils/seo';
 
 const TAGS = ['All', 'GST', 'Virtual Office', 'Company Setup', 'Compliance', 'Expansion'];
 
@@ -18,12 +21,13 @@ export default function BlogListing() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    document.title = "Insights & Guides | Bharat Office Setu";
-    const link = document.createElement('link');
-    link.rel = 'canonical';
-    link.href = 'https://bharatofficesetu.com/blog';
-    document.head.appendChild(link);
-    return () => document.head.removeChild(link);
+    applySeoMeta({
+      title: 'Insights & Guides | Bharat Office Setu',
+      description: 'Weekly guides on GST, virtual office compliance, company registration, and business expansion across India.',
+      url: 'https://bharatofficesetu.com/blog',
+      image: 'https://bharatofficesetu.com/logo.png',
+      type: 'website',
+    });
   }, []);
 
   const fetchPosts = async (tag, pageNum, append = false) => {
@@ -177,6 +181,9 @@ export default function BlogListing() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {posts.map((post, index) => {
                 const isFeatured = index === 0 && activeTag === 'All' && page === 1;
+                const displayTitle = cleanBlogTitle(post.title);
+                const postUrl = `https://bharatofficesetu.com/blog/${post.slug}`;
+                const coverImg = post.cover_image || post.image_url;
                 
                 return (
                   <div
@@ -195,28 +202,37 @@ export default function BlogListing() {
                             {post.category}
                           </span>
                         )}
-                        <h2 className={`font-bold text-[#111110] leading-snug mb-2 line-clamp-2 ${isFeatured ? 'text-[24px] lg:text-[28px]' : 'text-[17px]'}`}>
-                          {post.title}
+                        <h2 className={`font-bold text-[#111110] leading-snug mb-2 line-clamp-2 ${isFeatured ? 'text-[24px] lg:text-[28px]' : 'text-[17px]'}`} style={{ textWrap: 'balance' }}>
+                          {displayTitle}
                         </h2>
-                        <p className={`text-black/50 leading-relaxed line-clamp-3 mb-4 ${isFeatured ? 'text-[15px]' : 'text-[14px]'}`}>
+                        <p className={`text-black/55 leading-relaxed line-clamp-3 mb-4 ${isFeatured ? 'text-[15px]' : 'text-[14px]'}`} style={{ textWrap: 'pretty' }}>
                           {post.excerpt || post.brief}
                         </p>
                       </div>
                       
                       <div>
                         {isFeatured && (
-                          <button className="h-10 px-5 rounded-full border border-[#1B6B2F]/25 text-[#1B6B2F] font-semibold text-[13px] mb-6 flex items-center group-hover:bg-[#1B6B2F] group-hover:text-white transition-colors">
+                          <button type="button" className="min-h-[40px] px-5 py-2 rounded-full border border-[#1B6B2F]/25 text-[#1B6B2F] font-semibold text-[13px] mb-6 flex items-center group-hover:bg-[#1B6B2F] group-hover:text-white transition-colors">
                             Read Article <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
                           </button>
                         )}
                         
-                        <div className="flex items-center justify-between pt-3 border-t border-black/5 mt-auto">
-                          <span className="text-[12px] text-black/35">{formatDate(post.created_at || post.publishedAt)}</span>
-                          <div className="flex items-center text-[12px] text-black/35 gap-1.5">
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            {post.read_time || post.readTimeInMinutes || 3} min read
+                        <div className="flex items-center justify-between gap-2 pt-3 border-t border-black/5 mt-auto">
+                          <span className="text-[12px] text-black/40">{formatDate(post.created_at || post.publishedAt)}</span>
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center text-[12px] text-black/40 gap-1.5">
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              {post.read_time || post.readTimeInMinutes || 3} min read
+                            </div>
+                            <BlogShareBar
+                              compact
+                              title={displayTitle}
+                              excerpt={post.excerpt || post.brief}
+                              imageUrl={coverImg}
+                              url={postUrl}
+                            />
                           </div>
                         </div>
                       </div>

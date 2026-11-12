@@ -1,0 +1,66 @@
+# Robots.txt for Bharat Office Setu (SEO + GEO for Search & AI Engines)
+
+User-agent: *
+Allow: /
+Allow: /blog
+Allow: /blog/
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /partner-dashboard
+Disallow: /login
+Disallow: /set-password
+Disallow: /change-password
+Disallow: /drafts
+
+# OpenAI ChatGPT / SearchGPT crawlers
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /partner-dashboard
+Disallow: /login
+Disallow: /drafts
+
+User-agent: GPTBot
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /partner-dashboard
+Disallow: /login
+Disallow: /drafts
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /partner-dashboard
+Disallow: /login
+Disallow: /drafts
+
+# Perplexity, Anthropic Claude, and Google AI crawlers
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /partner-dashboard
+Disallow: /login
+Disallow: /drafts
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /partner-dashboard
+Disallow: /login
+Disallow: /drafts
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /partner-dashboard
+Disallow: /login
+Disallow: /drafts
+
+Sitemap: https://bharatofficesetu.com/sitemap.xml
+# AI Context File: https://bharatofficesetu.com/llms.txt

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllPosts } from '../services/blog';
+import { supabase } from '../services/supabaseClient';
+import { cleanBlogTitle } from '../utils/blogFormat';
 
 function SkeletonCard() {
   return (
@@ -28,9 +30,22 @@ export default function BlogPreview() {
   useEffect(() => {
     const fetchLatest = async () => {
       try {
+        // Primary: fetch latest 3 published posts from Supabase
+        const { data: supaPosts, error: supaErr } = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('published', true)
+          .order('created_at', { ascending: false })
+          .limit(3);
+
+        if (!supaErr && Array.isArray(supaPosts) && supaPosts.length > 0) {
+          setPosts(supaPosts);
+          return;
+        }
+
+        // Fallback: Hashnode
         const data = await getAllPosts(1);
         if (data.error) throw new Error(data.error);
-        // Take only top 3
         setPosts(data.posts.slice(0, 3));
       } catch (err) {
         setError(err.message);
@@ -45,13 +60,14 @@ export default function BlogPreview() {
   if (error || (!loading && posts.length === 0)) return null;
 
   const renderCover = (post) => {
-    if (post.coverImage?.url) {
-      return <img src={post.coverImage.url} alt={post.title} className="w-full h-full object-cover" />;
+    const coverUrl = post.image_url || post.cover_image || post.coverImage?.url;
+    if (coverUrl) {
+      return <img src={coverUrl} alt={cleanBlogTitle(post.title)} className="w-full h-full object-cover" loading="lazy" />;
     }
     return (
       <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, rgba(27,107,47,0.08), rgba(244,131,31,0.06))' }}>
         <div className="w-full h-full flex items-center justify-center text-[#1B6B2F]/20">
-          <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5L18.5 7H20" />
           </svg>
         </div>
@@ -93,26 +109,26 @@ export default function BlogPreview() {
                 
                 <div className="flex flex-col justify-between p-5 flex-1">
                   <div>
-                    {post.tags?.[0] && (
+                    {(post.category || post.tags?.[0]) && (
                       <span className="inline-block px-2.5 py-1 rounded-full bg-[#1B6B2F]/10 text-[#1B6B2F] font-semibold text-[10px] mb-2.5">
-                        {post.tags[0].name}
+                        {post.category || post.tags[0].name}
                       </span>
                     )}
-                    <h3 className="font-bold text-[#111110] leading-snug mb-2 line-clamp-2 text-[16px]">
-                      {post.title}
+                    <h3 className="font-bold text-[#111110] leading-snug mb-2 line-clamp-2 text-[16px]" style={{ textWrap: 'balance' }}>
+                      {cleanBlogTitle(post.title)}
                     </h3>
-                    <p className="text-black/50 leading-relaxed line-clamp-3 mb-4 text-[13px]">
-                      {post.brief}
+                    <p className="text-black/55 leading-relaxed line-clamp-3 mb-4 text-[13px]" style={{ textWrap: 'pretty' }}>
+                      {post.excerpt || post.brief}
                     </p>
                   </div>
                   
                   <div className="flex items-center justify-between pt-3 border-t border-black/5 mt-auto">
-                    <span className="text-[11px] text-black/35">{formatDate(post.publishedAt)}</span>
-                    <div className="flex items-center text-[11px] text-black/35 gap-1.5">
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <span className="text-[11px] text-black/40">{formatDate(post.created_at || post.publishedAt)}</span>
+                    <div className="flex items-center text-[11px] text-black/40 gap-1.5">
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      {post.readTimeInMinutes || 3} min read
+                      {post.read_time || post.readTimeInMinutes || 3} min read
                     </div>
                   </div>
                 </div>
