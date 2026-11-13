@@ -75,3 +75,4 @@ export function applySeoMeta({
   upsertMeta('name', 'twitter:description', cleanDesc);
   upsertMeta('name', 'twitter:image', fullImage);
 }
+

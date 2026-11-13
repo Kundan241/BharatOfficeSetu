@@ -1,122 +1,30 @@
 import React, { useState, useMemo } from 'react';
+import { 
+  Search, 
+  Download, 
+  ChevronLeft, 
+  ChevronRight, 
+  ArrowUpDown, 
+  ArrowUp, 
+  ArrowDown, 
+  Building2, 
+  FileCheck2, 
+  FileText, 
+  IndianRupee, 
+  Filter, 
+  X,
+  UserCheck
+} from 'lucide-react';
+import { INDIA_FILINGS_SALES_DATA } from '../data/indiaFilingsSalesData';
 
-const ACTUAL_DATA = [
-  { id: 1, salesName: "AADHYA CREATION", company: "MALANI HETALBEN HIRENBHAI", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 9311.0 },
-  { id: 2, salesName: "AAMO HOMES LLP", company: "AAMO HOMES LLP", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 9521.0 },
-  { id: 3, salesName: "Aarya Creation", company: "GOPI NILESH RADADIYA", location: "Haryana - Gurugram", relationshipManager: "Siddhi Rajendra Pawar", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 4, salesName: "Aavi Enterprise", company: "VIKAS MULEY", location: "Haryana - Gurugram", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 10578.0 },
-  { id: 5, salesName: "Abhishek tambi", company: "ABHISHEK TAMBI", location: "Haryana - Gurugram", relationshipManager: "Siddhi Rajendra Pawar", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 6, salesName: "ABK Internet", company: "ABK INTERNET PRIVATE LIMITED", location: "Haryana - Gurugram", relationshipManager: "Vishal Shyamkaran Yadav", serviceType: "Virtual Office - India Renewal", amount: 9676.0 },
-  { id: 7, salesName: "Aditya", company: "UNNIKRISHNAN ADITYA KRISHNAN", location: "Personal", relationshipManager: "Aishwarya Vijay Danavale", serviceType: "Gazette Name Change - Personal", amount: 11256.0 },
-  { id: 8, salesName: "Aditya Jayant Salunkhe", company: "ADITYA JAYANT SALUNKHE", location: "Haryana", relationshipManager: "Vishal Shyamkaran Yadav", serviceType: "Virtual Office - India Renewal", amount: 8850.0 },
-  { id: 9, salesName: "AJIT", company: "TRIVIAL GLOBAL LLP", location: "Haryana - Gurugram", relationshipManager: "MD farid", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 10578.0 },
-  { id: 10, salesName: "Amol", company: "PARMOD", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 9811.0 },
-  { id: 11, salesName: "AMOL PAWAR", company: "RIYA JAIN", location: "Rajasthan", relationshipManager: "Vishal Shyamkaran Yadav", serviceType: "Virtual Office - India", amount: 8856.0 },
-  { id: 12, salesName: "AMOL PAWAR", company: "CHANCHAL SHARMA", location: "Rajasthan", relationshipManager: "Vishal Shyamkaran Yadav", serviceType: "GST Registration (APOB + PPOB)", amount: 8856.0 },
-  { id: 13, salesName: "Aniket Yadav", company: "ANIKET YADAV", location: "Rajasthan", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 8856.0 },
-  { id: 14, salesName: "Ankit Gupta", company: "Ankit Gupta", location: "Haryana - Gurugram", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 15, salesName: "Arvind Mathur", company: "BYTECHNIK INDIA PRIVATE LIMITED", location: "Delhi", relationshipManager: "B BHAVESH", serviceType: "Virtual Office - India", amount: 10620.0 },
-  { id: 16, salesName: "Avijit", company: "AVIJIT GHOSH", location: "Haryana - Gurugram", relationshipManager: "Vishal Shyamkaran Yadav", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 11210.0 },
-  { id: 17, salesName: "Beena Khemka", company: "KIRTI KHEMKA", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 9521.0 },
-  { id: 18, salesName: "Boat International", company: "RACHIT BHATIA", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 19, salesName: "COLORTRADES", company: "KAPIL SUBHASH BHANDARI", location: "Haryana", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 11830.0 },
-  { id: 20, salesName: "D Brothers", company: "MITHUN KUMAR", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 9520.0 },
-  { id: 21, salesName: "Danish Rughwani", company: "DANISH RUGHWANI", location: "Haryana - Gurugram", relationshipManager: "Vishal Shyamkaran Yadav", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 22, salesName: "Darshan Kankotiya", company: "DARSHAN RAMESHBHAI KANKOTIYA", location: "Haryana", relationshipManager: "Siddhi Rajendra Pawar", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 10140.0 },
-  { id: 23, salesName: "Deconstruct", company: "BAYPURE LIFESTYLE PRIVATE LIMITED", location: "Haryana - Gurugram", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 11210.0 },
-  { id: 24, salesName: "DEELMO", company: "VAGHELA PARULBEN NARESHBHAI", location: "Haryana - Gurugram", relationshipManager: "Vishal Shyamkaran Yadav", serviceType: "Virtual Office - India Renewal", amount: 10161.0 },
-  { id: 25, salesName: "Dilip yadav", company: "KAMLA YADAV", location: "Haryana - Gurugram", relationshipManager: "Vishal Shyamkaran Yadav", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 11210.0 },
-  { id: 26, salesName: "DJSONSCONSUMERGOODSPVT", company: "DJ SONS CONSUMER GOODS PRIVATE LIMITED", location: "Haryana - Gurugram", relationshipManager: "Vishal Shyamkaran Yadav", serviceType: "Virtual Office - India Renewal", amount: 9210.0 },
-  { id: 27, salesName: "Emart", company: "TUSHARBHAI SHAMBHUBHAI DONDA", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 8601.0 },
-  { id: 28, salesName: "FASHION RETAIL", company: "SANDEEP BHATIA", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 29, salesName: "G jewels", company: "RAJENDRA KESHAWLAL VYAS", location: "Haryana", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "Virtual Office - India Renewal", amount: 10578.0 },
-  { id: 30, salesName: "GANESH ENT", company: "SHILABEN DIPAKBHAI SUTARIYA", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 9811.0 },
-  { id: 31, salesName: "GLAM COSMETICS", company: "GLAM21 COSMETICS", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 32, salesName: "Gopal Patel", company: "GOPAL BHACHUBHAI PATEL", location: "Haryana - Gurugram", relationshipManager: "Tahaziya Tabassum A", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 10578.0 },
-  { id: 33, salesName: "GPN PRINT TECHNOLOGY", company: "NAVIN PREMJI GAMI", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 9811.0 },
-  { id: 34, salesName: "Hardik Gabani", company: "HARDIK BHARATBHAI GABANI", location: "Haryana - Gurugram", relationshipManager: "Siddhi Rajendra Pawar", serviceType: "Virtual Office - India Renewal", amount: 9811.0 },
-  { id: 35, salesName: "Hinnis Consumer Pvt Ltd", company: "HINISS CONSUMER PRIVATE LIMITED", location: "Haryana - Gurugram", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 10111.0 },
-  { id: 36, salesName: "Honey", company: "ANKITA KUMAWAT", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 11210.0 },
-  { id: 37, salesName: "IndianFestivals", company: "JAYDIPBHAI NARASHIBHAI GANGANI", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 9311.0 },
-  { id: 38, salesName: "Kanhelal Multitrade Pvt Ltd", company: "KANHELAL MULTI TRADE PRIVATE LIMITED", location: "Haryana - Gurugram", relationshipManager: "Vishal Shyamkaran Yadav", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 39, salesName: "KHUSH ENTERPRISE", company: "KHUSH ENTERPRISE", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 40, salesName: "Kovilampati Naresh", company: "KOVILAMPATI NARESH", location: "Personal", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "Gazette Name Change - Personal", amount: 11256.0 },
-  { id: 41, salesName: "krishna collection", company: "RABINDRA KUMAR BHAGAT", location: "Haryana - Gurugram", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "Virtual Office - India Renewal", amount: 8311.0 },
-  { id: 42, salesName: "LUKHI NEEL NIKULBHAI", company: "LUKHI NEEL NIKULBHAI", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 9811.0 },
-  { id: 43, salesName: "MAA TEXTILE", company: "ANSI", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 11210.0 },
-  { id: 44, salesName: "Mallory", company: "MUSIRUL HAQUK", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 45, salesName: "MANLINO", company: "KNIT KINGDOM", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 46, salesName: "MANO KNITTING MILLS", company: "AM GARMENTS", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 47, salesName: "Mohammad Zubair Jan", company: "NABSHAR HEALTHTECH PRIVATE LIMITED", location: "Haryana - Gurugram", relationshipManager: "Vishal Shyamkaran Yadav", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 9811.0 },
-  { id: 48, salesName: "Mohit Arora", company: "MOHIT ARORA", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 9520.0 },
-  { id: 49, salesName: "Mr.askcolorfit", company: "ANKUSH AGARWAL", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 10578.0 },
-  { id: 50, salesName: "Ms.Jinander Jain", company: "JINANDER KUMAR JAIN", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 51, salesName: "Ms.Rajesh Khanna", company: "RAJESH ENTERPRISES", location: "Haryana - Gurugram", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 52, salesName: "NAKUL", company: "VOLUME BRANDS PRIVATE LIMITED", location: "Haryana - Gurugram", relationshipManager: "Siddhi Rajendra Pawar", serviceType: "Virtual Office - India Renewal", amount: 9811.0 },
-  { id: 53, salesName: "NAMAN BATRA", company: "NAMAN BATRA", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 10210.0 },
-  { id: 54, salesName: "Nice foto makers pvt.ltd.", company: "NICE FOTOMAKERS PRIVATE LIMITED", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 55, salesName: "Nick", company: "ACOFEL INDIA PRIVATE LIMITED", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 11210.0 },
-  { id: 56, salesName: "Nikhil", company: "HARSHIT BHANDARI", location: "Haryana", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "Virtual Office - India Renewal", amount: 10578.0 },
-  { id: 57, salesName: "NIRVIKA E Retail India Pvt Ltd", company: "NIRVIKA E-RETAIL INDIA PRIVATE LIMITED", location: "Haryana - Gurugram", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "Virtual Office - India Renewal", amount: 9521.0 },
-  { id: 58, salesName: "Omnitail", company: "VANEETA RANI", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 9521.0 },
-  { id: 59, salesName: "Oobs", company: "SANJEEV PURI", location: "Haryana", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "Virtual Office - India Renewal", amount: 9600.0 },
-  { id: 60, salesName: "PASSION PETALS", company: "SHILPA GUPTA", location: "Haryana - Gurugram", relationshipManager: "Siddhi Rajendra Pawar", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 61, salesName: "Pd Cloth Villa", company: "GITABEN DEVRAJBHAI ANGHAN", location: "Haryana", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "Virtual Office - India Renewal", amount: 11830.0 },
-  { id: 62, salesName: "priyanka", company: "PRIYANKA SAHA", location: "Haryana", relationshipManager: "Vishal Shyamkaran Yadav", serviceType: "Virtual Office - India Renewal", amount: 8850.0 },
-  { id: 63, salesName: "Raghu chilukoori", company: "RAGHU CHILUKOORI", location: "Personal", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "Gazette Name Change - Personal", amount: 11256.0 },
-  { id: 64, salesName: "raj yogi", company: "JAY RAVINDRA KHATRI", location: "Haryana", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 11830.0 },
-  { id: 65, salesName: "Ravi Verma", company: "Ravi Verma", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 10210.0 },
-  { id: 66, salesName: "Rohit Tiwari", company: "ROHIT TIWARI", location: "Rajasthan", relationshipManager: "Vishal Shyamkaran Yadav", serviceType: "Virtual Office - India Renewal", amount: 7828.0 },
-  { id: 67, salesName: "Roshan Singh", company: "MOHAMMAD ZUBAIR", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 10210.0 },
-  { id: 68, salesName: "SABARI HOMWELL CORPORATION", company: "SABARI HOMWELL CORPORATION", location: "Haryana", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 11830.0 },
-  { id: 69, salesName: "sachinbishtcvg", company: "AYUSHI KUSHWAHA", location: "Haryana - Gurugram", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 11210.0 },
-  { id: 70, salesName: "Sai Enterprises", company: "ATIT MAKOL", location: "Haryana", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 10578.0 },
-  { id: 71, salesName: "SAnat kumar", company: "SANAT KUMAR", location: "Haryana - Gurugram", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 72, salesName: "Sanjeev", company: "SANJEEV", location: "Haryana - Gurugram", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 11210.0 },
-  { id: 73, salesName: "SANTRAM ENTERPRISE", company: "JAYKUMAR KIRITBHAI PATEL", location: "Haryana - Gurugram", relationshipManager: "Vishal Shyamkaran Yadav", serviceType: "Virtual Office - India Renewal", amount: 10210.0 },
-  { id: 74, salesName: "Sarvesh Dhamani", company: "SARVESH DHAMANI", location: "Haryana - Gurugram", relationshipManager: "Vishal Shyamkaran Yadav", serviceType: "Virtual Office - India Renewal", amount: 12578.0 },
-  { id: 75, salesName: "satyamfab", company: "SATYAM FAB", location: "Haryana - Gurugram", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "Virtual Office - India Renewal", amount: 9521.0 },
-  { id: 76, salesName: "senthil prakash", company: "SENTHIL PRAKASH SEENI", location: "Personal", relationshipManager: "PRATHAP N", serviceType: "Gazette Name Change - Personal", amount: 11256.0 },
-  { id: 77, salesName: "Shailesh...", company: "HITESH RAMESH JAIN (HUF)", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 9521.0 },
-  { id: 78, salesName: "SharkTribe Fashion India Pvt. Ltd.", company: "SHARKTRIBE FASHION (INDIA) PRIVATE LIMITED", location: "Haryana - Gurugram", relationshipManager: "Vishal Shyamkaran Yadav", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 79, salesName: "SHEYN FASHION", company: "RAHUL KUMAR", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 10210.0 },
-  { id: 80, salesName: "shivani Jaiswal", company: "VISTAARAI INFOTECH PRIVATE LIMITED", location: "Haryana - Gurugram", relationshipManager: "Bikash mahato L", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 11210.0 },
-  { id: 81, salesName: "SHOPPING STATION", company: "SHOPPING STATION", location: "Haryana", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 8850.0 },
-  { id: 82, salesName: "ShreeRAm ENT.", company: "PREM RAMJI VAVIYA", location: "Haryana - Gurugram", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "Virtual Office - India Renewal", amount: 10311.0 },
-  { id: 83, salesName: "SLNS MARKETING", company: "UGRANARASIMHAPPA DHANANJAYA", location: "Haryana - Gurugram", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 84, salesName: "SNENTERPRIESES", company: "VISHAL KUMAR", location: "Haryana - Gurugram", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 85, salesName: "Sridhar Sampathirao", company: "ZENVOKE LABS PRIVATE LIMITED", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 9521.0 },
-  { id: 86, salesName: "staify international", company: "Vasani Yamit Hirabhai", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 9811.0 },
-  { id: 87, salesName: "SURYA TEJA VALA", company: "FLUXCHARGE INDIA PRIVATE LIMITED", location: "Rajasthan", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 12354.0 },
-  { id: 88, salesName: "SWAMI TRADING COMPANY", company: "GAURAV MANWANI", location: "Haryana", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 11830.0 },
-  { id: 89, salesName: "THE LASER ART", company: "KAILASHBEN RAJESHBHAI SHEKHADA", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 90, salesName: "The sky store", company: "DEV PRAVEEN PATEL", location: "Haryana - Gurugram", relationshipManager: "Siddhi Rajendra Pawar", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 12578.0 },
-  { id: 91, salesName: "the table tales", company: "EKTA KRUNAL KAKADIYA", location: "Haryana - Gurugram", relationshipManager: "Siddhi Rajendra Pawar", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 12578.0 },
-  { id: 92, salesName: "Tresna Collection", company: "TANYA YADAV", location: "Haryana - Gurugram", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 11210.0 },
-  { id: 93, salesName: "TRISHAKTI ALLOYS INDUSTRIES", company: "MAHENDER SINGH", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 9521.0 },
-  { id: 94, salesName: "United Denims", company: "UNITED DENIMS", location: "Haryana", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 11830.0 },
-  { id: 95, salesName: "Uno Aroma", company: "CASH CHEM", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 10578.0 },
-  { id: 96, salesName: "Variety bazaar", company: "R K FASHION ACCESSORIES PRIVATE LIMITED", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 97, salesName: "Varni sales", company: "REENABEN AKSHAY DESAI", location: "Haryana - Gurugram", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "Virtual Office - India Renewal", amount: 10311.0 },
-  { id: 98, salesName: "Vikash", company: "BIOSPHERE NATURE POOLS LLP", location: "Rajasthan", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 8856.0 },
-  { id: 99, salesName: "Wcsenterprise", company: "KACHHAD SAVITRIBEN UMESHBHAI", location: "Haryana - Gurugram", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 10210.0 },
-  { id: 100, salesName: "XELECTRON TECHNOLOGIES PRIVATE LIMITED", company: "XELECTRON TECHNOLOGIES PRIVATE LIMITED", location: "Haryana - Gurugram", relationshipManager: "Siddhi Rajendra Pawar", serviceType: "Virtual Office - India Renewal", amount: 10210.0 },
-  { id: 101, salesName: "Yasmin Mollick", company: "JASMIN SARKAR", location: "Haryana - Gurugram", relationshipManager: "Payal Ashok Vishwakarma", serviceType: "Virtual Office - India Renewal", amount: 11210.0 },
-  { id: 102, salesName: "Yogesh Deshmukh", company: "VIKRAM TEA PROCESSOR PRIVATE LIMITED", location: "Haryana", relationshipManager: "Rinku Ruparam Prajapati", serviceType: "Virtual Office - India Renewal", amount: 10578.0 },
-  { id: 103, salesName: "yug apparels", company: "SALECHA BHARAT LOONCHAND HUF", location: "Haryana - Gurugram", relationshipManager: "Siddhi Rajendra Pawar", serviceType: "GST Registration (APOB + PPOB) + Virtual Office - India", amount: 10578.0 },
-];
-
-const AdminSalesLedger = ({ isAdmin = false, data = ACTUAL_DATA }) => {
+const AdminSalesLedger = ({ isAdmin = true, data = INDIA_FILINGS_SALES_DATA }) => {
   const [searchTerm, setSearchTerm] = useState('');
-
-  const filteredData = useMemo(() => {
-    if (!searchTerm) return data;
-    const lowerSearch = searchTerm.toLowerCase();
-    return data.filter(item => 
-      (item.salesName && item.salesName.toLowerCase().includes(lowerSearch)) || 
-      (item.company && item.company.toLowerCase().includes(lowerSearch))
-    );
-  }, [data, searchTerm]);
+  const [serviceFilter, setServiceFilter] = useState('ALL');
+  const [locationFilter, setLocationFilter] = useState('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25); // 25 default matching Ledgers Pro
+  const [sortField, setSortField] = useState('id'); // default by #
+  const [sortOrder, setSortOrder] = useState('asc'); // asc 1..187
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
@@ -124,16 +32,207 @@ const AdminSalesLedger = ({ isAdmin = false, data = ACTUAL_DATA }) => {
       currency: 'INR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(amount);
+    }).format(amount || 0);
+  };
+
+  // Distinct service types & locations for filter dropdowns
+  const serviceOptions = useMemo(() => {
+    const set = new Set();
+    data.forEach(item => {
+      if (item.serviceType) set.add(item.serviceType);
+    });
+    return Array.from(set).sort();
+  }, [data]);
+
+  const locationOptions = useMemo(() => {
+    const set = new Set();
+    data.forEach(item => {
+      if (item.location) set.add(item.location);
+    });
+    return Array.from(set).sort();
+  }, [data]);
+
+  // Overall dataset summary statistics
+  const overallStats = useMemo(() => {
+    const totalCount = data.length;
+    const totalAmount = data.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    const voCount = data.filter(item => (item.serviceType || '').includes('Virtual Office')).length;
+    const gstCount = data.filter(item => (item.serviceType || '').includes('GST')).length;
+    return { totalCount, totalAmount, voCount, gstCount };
+  }, [data]);
+
+  // Filtering
+  const filteredData = useMemo(() => {
+    let result = [...data];
+
+    if (serviceFilter !== 'ALL') {
+      result = result.filter(item => item.serviceType === serviceFilter);
+    }
+
+    if (locationFilter !== 'ALL') {
+      result = result.filter(item => item.location === locationFilter);
+    }
+
+    if (searchTerm.trim()) {
+      const q = searchTerm.toLowerCase().trim();
+      result = result.filter(item => {
+        const idStr = String(item.id || '');
+        const name = (item.salesName || '').toLowerCase();
+        const comp = (item.company || '').toLowerCase();
+        const serv = (item.serviceType || '').toLowerCase();
+        const loc = (item.location || '').toLowerCase();
+        const rm = (item.relationshipManager || '').toLowerCase();
+        const am = (item.accountManager || '').toLowerCase();
+        const gstin = (item.gstin || '').toLowerCase();
+
+        return idStr.includes(q) ||
+          name.includes(q) ||
+          comp.includes(q) ||
+          serv.includes(q) ||
+          loc.includes(q) ||
+          rm.includes(q) ||
+          am.includes(q) ||
+          gstin.includes(q);
+      });
+    }
+
+    // Sorting
+    result.sort((a, b) => {
+      let aVal = a[sortField];
+      let bVal = b[sortField];
+
+      if (sortField === 'id' || sortField === 'amount') {
+        aVal = Number(aVal) || 0;
+        bVal = Number(bVal) || 0;
+      } else {
+        aVal = (aVal || '').toString().toLowerCase();
+        bVal = (bVal || '').toString().toLowerCase();
+      }
+
+      if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return result;
+  }, [data, searchTerm, serviceFilter, locationFilter, sortField, sortOrder]);
+
+  // Pagination calculation
+  const totalItems = filteredData.length;
+  const effectivePageSize = pageSize === 'ALL' ? totalItems : Number(pageSize);
+  const totalPages = effectivePageSize > 0 ? Math.ceil(totalItems / effectivePageSize) : 1;
+  const safeCurrentPage = Math.min(Math.max(currentPage, 1), Math.max(totalPages, 1));
+
+  const paginatedData = useMemo(() => {
+    if (pageSize === 'ALL') return filteredData;
+    const startIndex = (safeCurrentPage - 1) * effectivePageSize;
+    return filteredData.slice(startIndex, startIndex + effectivePageSize);
+  }, [filteredData, safeCurrentPage, effectivePageSize, pageSize]);
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+    setCurrentPage(1);
+  };
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setServiceFilter('ALL');
+    setLocationFilter('ALL');
+    setCurrentPage(1);
+  };
+
+  const exportCSV = () => {
+    const headers = ['Sr No', 'Sales Name', 'Company/Entity', 'Service Type', 'Location', 'Relationship Manager', 'Account Manager', 'GSTIN', 'Amount (INR)'];
+    const rows = filteredData.map(item => [
+      item.id,
+      `"${(item.salesName || '').replace(/"/g, '""')}"`,
+      `"${(item.company || '').replace(/"/g, '""')}"`,
+      `"${(item.serviceType || '').replace(/"/g, '""')}"`,
+      `"${(item.location || '').replace(/"/g, '""')}"`,
+      `"${(item.relationshipManager || '').replace(/"/g, '""')}"`,
+      `"${(item.accountManager || '').replace(/"/g, '""')}"`,
+      `"${(item.gstin || '').replace(/"/g, '""')}"`,
+      item.amount || 0
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `India_Filings_Sales_Ledger_${filteredData.length}_Cases.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const getServiceBadge = (service) => {
+    if (!service) return null;
+    if (service.includes('Renewal')) {
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
+          VO Renewal
+        </span>
+      );
+    }
+    if (service.includes('Virtual Office')) {
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200">
+          Virtual Office
+        </span>
+      );
+    }
+    if (service.includes('PPOB')) {
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+          GST (PPOB)
+        </span>
+      );
+    }
+    if (service.includes('APOB')) {
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-50 text-purple-800 border border-purple-200">
+          GST (APOB)
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
+        {service}
+      </span>
+    );
+  };
+
+  const getGstinBadge = (gstin) => {
+    if (!gstin || gstin === 'N/A') {
+      return <span className="text-xs text-gray-400 font-mono">N/A</span>;
+    }
+    if (gstin === 'Add GSTIN') {
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+          Add GSTIN
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        {gstin}
+      </span>
+    );
   };
 
   // 1. Access Control (Admin Only)
   if (!isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center py-20 bg-gray-50 rounded-lg border border-gray-200">
-        <svg className="w-16 h-16 text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-        </svg>
+        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-600 mb-4">
+          <FileText size={32} />
+        </div>
         <h2 className="text-2xl font-bold text-gray-800 mb-2">403 Unauthorized</h2>
         <p className="text-gray-600 text-center max-w-md">
           Access Denied. You do not have the necessary permissions to view the Sales Ledger. This area is restricted to administrators only.
@@ -142,93 +241,407 @@ const AdminSalesLedger = ({ isAdmin = false, data = ACTUAL_DATA }) => {
     );
   }
 
-  // 2. The Data Table UI
   return (
-    <div className="w-full bg-white rounded-lg shadow-sm border border-gray-200">
-      {/* Header and Search */}
-      <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <h2 className="text-xl font-bold text-gray-800">India Filings Sales</h2>
-        
-        {/* 3. Interactivity: Search Bar at the top right */}
-        <div className="relative w-full sm:w-80 ml-auto">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
-            </svg>
+    <div className="w-full space-y-6">
+      {/* Page Title & Export Button */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl font-bold text-gray-900">India Filings Sales Ledger</h1>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+              187 Cases Active
+            </span>
           </div>
-          <input
-            type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-150 ease-in-out"
-            placeholder="Search by Sales Name or Company..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <p className="text-sm text-gray-500 mt-1">
+            Complete sequential case registry synced with LEDGERS PRO Marketplace (Bharat Office Setu Private Limited)
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={exportCSV}
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
+          >
+            <Download size={16} />
+            Export CSV ({totalItems})
+          </button>
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Sales Name
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Company/Entity
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Service Details
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Location
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Relationship Manager
-              </th>
-              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Amount
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredData.length > 0 ? (
-              filteredData.map((row, index) => (
-                <tr key={row.id || index} className="hover:bg-gray-50 transition-colors duration-150">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {row.salesName}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {row.company}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {row.serviceType}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {row.location}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {row.relationshipManager}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
-                    {formatCurrency(row.amount)}
+      {/* KPI Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+            <Building2 size={24} />
+          </div>
+          <div>
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Cases</div>
+            <div className="text-2xl font-bold text-gray-900 mt-0.5">{overallStats.totalCount}</div>
+            <div className="text-xs text-gray-400 mt-0.5">Cases #1 to #{overallStats.totalCount}</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <IndianRupee size={24} />
+          </div>
+          <div>
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sales Volume</div>
+            <div className="text-2xl font-bold text-gray-900 mt-0.5">{formatCurrency(overallStats.totalAmount)}</div>
+            <div className="text-xs text-emerald-600 font-medium mt-0.5">Assured Marketplace</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <FileText size={24} />
+          </div>
+          <div>
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Virtual Office</div>
+            <div className="text-2xl font-bold text-gray-900 mt-0.5">{overallStats.voCount}</div>
+            <div className="text-xs text-gray-400 mt-0.5">New &amp; Renewal cases</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+            <FileCheck2 size={24} />
+          </div>
+          <div>
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">GST Registrations</div>
+            <div className="text-2xl font-bold text-gray-900 mt-0.5">{overallStats.gstCount}</div>
+            <div className="text-xs text-gray-400 mt-0.5">PPOB &amp; APOB filings</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Ledger Card */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        {/* Search & Filter Toolbar */}
+        <div className="p-4 border-b border-gray-200 bg-gray-50/50 space-y-3">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            {/* Search Input */}
+            <div className="relative flex-1 max-w-md">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                <Search size={16} />
+              </div>
+              <input
+                type="text"
+                className="w-full pl-9 pr-8 py-2 text-sm bg-white border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm transition"
+                placeholder="Search case #, client, company, RM, GSTIN..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+              />
+              {searchTerm && (
+                <button 
+                  onClick={() => setSearchTerm('')} 
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            {/* Filter Dropdowns */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                <Filter size={14} />
+                <span>Filters:</span>
+              </div>
+
+              {/* Service filter */}
+              <select
+                className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                value={serviceFilter}
+                onChange={(e) => {
+                  setServiceFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+              >
+                <option value="ALL">All Services ({data.length})</option>
+                {serviceOptions.map(srv => (
+                  <option key={srv} value={srv}>{srv}</option>
+                ))}
+              </select>
+
+              {/* Location filter */}
+              <select
+                className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                value={locationFilter}
+                onChange={(e) => {
+                  setLocationFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+              >
+                <option value="ALL">All Locations</option>
+                {locationOptions.map(loc => (
+                  <option key={loc} value={loc}>{loc}</option>
+                ))}
+              </select>
+
+              {(searchTerm || serviceFilter !== 'ALL' || locationFilter !== 'ALL') && (
+                <button
+                  onClick={clearFilters}
+                  className="px-2.5 py-1.5 text-xs text-emerald-700 hover:bg-emerald-50 rounded-lg transition font-medium"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Data Table with Prominent Row Numbering */}
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">
+              <tr>
+                {/* Sr. No. / Case Number Column */}
+                <th 
+                  scope="col" 
+                  onClick={() => handleSort('id')}
+                  className="px-4 py-3.5 text-center w-16 cursor-pointer hover:bg-gray-100 transition select-none"
+                  title="Click to sort by Case Number"
+                >
+                  <div className="inline-flex items-center gap-1">
+                    <span>#</span>
+                    {sortField === 'id' ? (
+                      sortOrder === 'asc' ? <ArrowUp size={12} className="text-emerald-600" /> : <ArrowDown size={12} className="text-emerald-600" />
+                    ) : (
+                      <ArrowUpDown size={12} className="text-gray-400" />
+                    )}
+                  </div>
+                </th>
+
+                <th 
+                  scope="col" 
+                  onClick={() => handleSort('salesName')}
+                  className="px-5 py-3.5 text-left cursor-pointer hover:bg-gray-100 transition select-none"
+                >
+                  <div className="flex items-center gap-1">
+                    <span>Client / Company</span>
+                    {sortField === 'salesName' && (
+                      sortOrder === 'asc' ? <ArrowUp size={12} className="text-emerald-600" /> : <ArrowDown size={12} className="text-emerald-600" />
+                    )}
+                  </div>
+                </th>
+
+                <th 
+                  scope="col" 
+                  onClick={() => handleSort('serviceType')}
+                  className="px-4 py-3.5 text-left cursor-pointer hover:bg-gray-100 transition select-none"
+                >
+                  <div className="flex items-center gap-1">
+                    <span>Service Details</span>
+                    {sortField === 'serviceType' && (
+                      sortOrder === 'asc' ? <ArrowUp size={12} className="text-emerald-600" /> : <ArrowDown size={12} className="text-emerald-600" />
+                    )}
+                  </div>
+                </th>
+
+                <th scope="col" className="px-4 py-3.5 text-left">
+                  Location
+                </th>
+
+                <th scope="col" className="px-4 py-3.5 text-left">
+                  Managers (RM / AM)
+                </th>
+
+                <th scope="col" className="px-4 py-3.5 text-left">
+                  GSTIN
+                </th>
+
+                <th 
+                  scope="col" 
+                  onClick={() => handleSort('amount')}
+                  className="px-5 py-3.5 text-right cursor-pointer hover:bg-gray-100 transition select-none"
+                >
+                  <div className="flex items-center justify-end gap-1">
+                    <span>Amount</span>
+                    {sortField === 'amount' && (
+                      sortOrder === 'asc' ? <ArrowUp size={12} className="text-emerald-600" /> : <ArrowDown size={12} className="text-emerald-600" />
+                    )}
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-100 text-sm">
+              {paginatedData.length > 0 ? (
+                paginatedData.map((row) => (
+                  <tr 
+                    key={row.id} 
+                    className="hover:bg-emerald-50/40 transition-colors duration-150"
+                  >
+                    {/* Row Sequential Numbering (#1 to #187) */}
+                    <td className="px-4 py-3 text-center whitespace-nowrap">
+                      <span className="inline-flex items-center justify-center min-w-[28px] h-6 px-1.5 rounded bg-gray-100 text-gray-700 font-mono text-xs font-semibold">
+                        {row.id}
+                      </span>
+                    </td>
+
+                    {/* Client & Legal Company Name */}
+                    <td className="px-5 py-3">
+                      <div className="font-semibold text-gray-900 leading-tight">
+                        {row.salesName}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5 flex items-center gap-1 font-mono">
+                        <span className="text-[10px] text-gray-400 font-sans">GID:</span>
+                        <span className="truncate max-w-[220px]" title={row.company}>
+                          {row.company}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Service Type with Color Badge */}
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex flex-col gap-1 items-start">
+                        {getServiceBadge(row.serviceType)}
+                        <span className="text-xs text-gray-700 font-medium">{row.serviceType}</span>
+                      </div>
+                    </td>
+
+                    {/* Location / State */}
+                    <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-600 font-medium">
+                      {row.location}
+                    </td>
+
+                    {/* Relationship Manager & Account Manager */}
+                    <td className="px-4 py-3 text-xs text-gray-700">
+                      <div className="font-medium text-gray-900 flex items-center gap-1">
+                        <UserCheck size={13} className="text-emerald-600 flex-shrink-0" />
+                        <span>{row.relationshipManager}</span>
+                      </div>
+                      {row.accountManager && (
+                        <div className="text-[11px] text-gray-500 mt-0.5 leading-tight">
+                          {row.accountManager}
+                        </div>
+                      )}
+                    </td>
+
+                    {/* GSTIN / Add GSTIN status */}
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {getGstinBadge(row.gstin)}
+                    </td>
+
+                    {/* Amount */}
+                    <td className="px-5 py-3 whitespace-nowrap text-right font-semibold text-gray-900 font-mono">
+                      {row.amount > 0 ? formatCurrency(row.amount) : (
+                        <span className="text-gray-400 text-xs">Included</span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="px-6 py-12 text-center text-sm text-gray-500">
+                    <div className="flex flex-col items-center justify-center">
+                      <Search size={32} className="text-gray-300 mb-2" />
+                      <p className="font-medium text-gray-700">No cases found</p>
+                      <p className="text-xs text-gray-400 mt-1">Try adjusting your search terms or filters</p>
+                      <button
+                        onClick={clearFilters}
+                        className="mt-3 text-xs font-semibold text-emerald-600 hover:text-emerald-700"
+                      >
+                        Reset All Filters
+                      </button>
+                    </div>
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="6" className="px-6 py-12 text-center text-sm text-gray-500">
-                  <div className="flex flex-col items-center justify-center">
-                    <svg className="w-10 h-10 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                    No records found matching "{searchTerm}"
-                  </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination & Ledger Stats Bar */}
+        <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600">
+          <div className="flex items-center gap-4">
+            <div>
+              Showing{' '}
+              <span className="font-semibold text-gray-900">
+                {totalItems === 0 ? 0 : (safeCurrentPage - 1) * effectivePageSize + 1}
+              </span>
+              {' '}-{' '}
+              <span className="font-semibold text-gray-900">
+                {pageSize === 'ALL' ? totalItems : Math.min(safeCurrentPage * effectivePageSize, totalItems)}
+              </span>
+              {' '}of{' '}
+              <span className="font-semibold text-gray-900">{totalItems}</span>
+              {' '}cases
+            </div>
+
+            <div className="flex items-center gap-1.5 border-l border-gray-300 pl-4">
+              <span>Rows per page:</span>
+              <select
+                className="bg-white border border-gray-300 rounded px-2 py-1 text-xs text-gray-700 font-medium focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                value={pageSize}
+                onChange={(e) => {
+                  const val = e.target.value === 'ALL' ? 'ALL' : Number(e.target.value);
+                  setPageSize(val);
+                  setCurrentPage(1);
+                }}
+              >
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value="ALL">All (187)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Page Controls */}
+          {pageSize !== 'ALL' && totalPages > 1 && (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={safeCurrentPage === 1}
+                className="p-1.5 rounded border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                title="Previous Page"
+              >
+                <ChevronLeft size={14} />
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                // Show current page, edges, and close neighbors
+                if (
+                  pageNum === 1 ||
+                  pageNum === totalPages ||
+                  (pageNum >= safeCurrentPage - 1 && pageNum <= safeCurrentPage + 1)
+                ) {
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`min-w-[28px] h-7 px-1.5 rounded border text-xs font-medium transition ${
+                        pageNum === safeCurrentPage
+                          ? 'bg-emerald-600 text-white border-emerald-600'
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                } else if (
+                  pageNum === safeCurrentPage - 2 ||
+                  pageNum === safeCurrentPage + 2
+                ) {
+                  return <span key={pageNum} className="px-1 text-gray-400">...</span>;
+                }
+                return null;
+              })}
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={safeCurrentPage === totalPages}
+                className="p-1.5 rounded border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                title="Next Page"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
