@@ -13,18 +13,30 @@ import {
   IndianRupee, 
   Filter, 
   X,
-  UserCheck
+  UserCheck,
+  Layers,
+  ListFilter
 } from 'lucide-react';
-import { INDIA_FILINGS_SALES_DATA } from '../data/indiaFilingsSalesData';
+import { 
+  INDIA_FILINGS_DEDUPED_DATA, 
+  INDIA_FILINGS_RAW_DATA 
+} from '../data/indiaFilingsSalesData';
 
-const AdminSalesLedger = ({ isAdmin = true, data = INDIA_FILINGS_SALES_DATA }) => {
+const AdminSalesLedger = ({ isAdmin = true }) => {
+  // 'deduped' (114 unique client cases) or 'raw' (187 line items)
+  const [viewMode, setViewMode] = useState('deduped');
   const [searchTerm, setSearchTerm] = useState('');
   const [serviceFilter, setServiceFilter] = useState('ALL');
   const [locationFilter, setLocationFilter] = useState('ALL');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25); // 25 default matching Ledgers Pro
+  const [pageSize, setPageSize] = useState(25);
   const [sortField, setSortField] = useState('id'); // default by #
-  const [sortOrder, setSortOrder] = useState('asc'); // asc 1..187
+  const [sortOrder, setSortOrder] = useState('asc'); // asc 1..N
+
+  // Select dataset based on view mode
+  const activeDataset = useMemo(() => {
+    return viewMode === 'deduped' ? INDIA_FILINGS_DEDUPED_DATA : INDIA_FILINGS_RAW_DATA;
+  }, [viewMode]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
@@ -38,32 +50,32 @@ const AdminSalesLedger = ({ isAdmin = true, data = INDIA_FILINGS_SALES_DATA }) =
   // Distinct service types & locations for filter dropdowns
   const serviceOptions = useMemo(() => {
     const set = new Set();
-    data.forEach(item => {
+    activeDataset.forEach(item => {
       if (item.serviceType) set.add(item.serviceType);
     });
     return Array.from(set).sort();
-  }, [data]);
+  }, [activeDataset]);
 
   const locationOptions = useMemo(() => {
     const set = new Set();
-    data.forEach(item => {
+    activeDataset.forEach(item => {
       if (item.location) set.add(item.location);
     });
     return Array.from(set).sort();
-  }, [data]);
+  }, [activeDataset]);
 
   // Overall dataset summary statistics
-  const overallStats = useMemo(() => {
-    const totalCount = data.length;
-    const totalAmount = data.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-    const voCount = data.filter(item => (item.serviceType || '').includes('Virtual Office')).length;
-    const gstCount = data.filter(item => (item.serviceType || '').includes('GST')).length;
+  const stats = useMemo(() => {
+    const totalCount = activeDataset.length;
+    const totalAmount = activeDataset.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    const voCount = activeDataset.filter(item => (item.serviceType || '').includes('Virtual Office')).length;
+    const gstCount = activeDataset.filter(item => (item.serviceType || '').includes('GST')).length;
     return { totalCount, totalAmount, voCount, gstCount };
-  }, [data]);
+  }, [activeDataset]);
 
-  // Filtering
+  // Filtering & Sorting
   const filteredData = useMemo(() => {
-    let result = [...data];
+    let result = [...activeDataset];
 
     if (serviceFilter !== 'ALL') {
       result = result.filter(item => item.serviceType === serviceFilter);
@@ -115,7 +127,7 @@ const AdminSalesLedger = ({ isAdmin = true, data = INDIA_FILINGS_SALES_DATA }) =
     });
 
     return result;
-  }, [data, searchTerm, serviceFilter, locationFilter, sortField, sortOrder]);
+  }, [activeDataset, searchTerm, serviceFilter, locationFilter, sortField, sortOrder]);
 
   // Pagination calculation
   const totalItems = filteredData.length;
@@ -160,50 +172,110 @@ const AdminSalesLedger = ({ isAdmin = true, data = INDIA_FILINGS_SALES_DATA }) =
       item.amount || 0
     ]);
 
+    const filename = viewMode === 'deduped'
+      ? `India_Filings_Unique_Cases_${filteredData.length}.csv`
+      : `India_Filings_All_Line_Items_${filteredData.length}.csv`;
+
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `India_Filings_Sales_Ledger_${filteredData.length}_Cases.csv`);
+    link.setAttribute('download', filename);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  const getServiceBadge = (service) => {
-    if (!service) return null;
-    if (service.includes('Renewal')) {
+  const renderServiceBadges = (row) => {
+    // If we have servicesList (deduplicated combo)
+    if (row.servicesList && row.servicesList.length > 1) {
       return (
+        <div className="flex flex-col gap-1 items-start">
+          <div className="flex flex-wrap items-center gap-1">
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 uppercase">
+              Combo ({row.servicesList.length})
+            </span>
+            {row.servicesList.map((srv, idx) => {
+              if (srv.includes('PPOB')) {
+                return (
+                  <span key={idx} className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    GST PPOB
+                  </span>
+                );
+              }
+              if (srv.includes('APOB')) {
+                return (
+                  <span key={idx} className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-purple-50 text-purple-800 border border-purple-200">
+                    GST APOB
+                  </span>
+                );
+              }
+              if (srv.includes('Renewal')) {
+                return (
+                  <span key={idx} className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200">
+                    VO Renewal
+                  </span>
+                );
+              }
+              if (srv.includes('Virtual Office')) {
+                return (
+                  <span key={idx} className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-blue-50 text-blue-800 border border-blue-200">
+                    Virtual Office
+                  </span>
+                );
+              }
+              return (
+                <span key={idx} className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-gray-50 text-gray-700 border border-gray-200">
+                  {srv}
+                </span>
+              );
+            })}
+          </div>
+          <span className="text-xs text-gray-600 font-medium">{row.serviceType}</span>
+        </div>
+      );
+    }
+
+    // Single service badge
+    const service = row.serviceType || '';
+    let badge = null;
+    if (service.includes('Renewal')) {
+      badge = (
         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
           VO Renewal
         </span>
       );
-    }
-    if (service.includes('Virtual Office')) {
-      return (
+    } else if (service.includes('Virtual Office')) {
+      badge = (
         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200">
           Virtual Office
         </span>
       );
-    }
-    if (service.includes('PPOB')) {
-      return (
+    } else if (service.includes('PPOB')) {
+      badge = (
         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
           GST (PPOB)
         </span>
       );
-    }
-    if (service.includes('APOB')) {
-      return (
+    } else if (service.includes('APOB')) {
+      badge = (
         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-50 text-purple-800 border border-purple-200">
           GST (APOB)
         </span>
       );
+    } else {
+      badge = (
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
+          {service}
+        </span>
+      );
     }
+
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
-        {service}
-      </span>
+      <div className="flex flex-col gap-1 items-start">
+        {badge}
+        <span className="text-xs text-gray-700 font-medium">{service}</span>
+      </div>
     );
   };
 
@@ -226,7 +298,7 @@ const AdminSalesLedger = ({ isAdmin = true, data = INDIA_FILINGS_SALES_DATA }) =
     );
   };
 
-  // 1. Access Control (Admin Only)
+  // Access Control (Admin Only)
   if (!isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center py-20 bg-gray-50 rounded-lg border border-gray-200">
@@ -243,20 +315,55 @@ const AdminSalesLedger = ({ isAdmin = true, data = INDIA_FILINGS_SALES_DATA }) =
 
   return (
     <div className="w-full space-y-6">
-      {/* Page Title & Export Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Page Title & View Mode Switcher */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-2xl font-bold text-gray-900">India Filings Sales Ledger</h1>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-              187 Cases Active
+              {viewMode === 'deduped' ? `${INDIA_FILINGS_DEDUPED_DATA.length} Unique Cases` : `${INDIA_FILINGS_RAW_DATA.length} Line Items`}
             </span>
           </div>
           <p className="text-sm text-gray-500 mt-1">
-            Complete sequential case registry synced with LEDGERS PRO Marketplace (Bharat Office Setu Private Limited)
+            {viewMode === 'deduped' 
+              ? 'Deduplicated registry — each client deal listed once with combined services and proper sequential numbering.'
+              : 'Complete raw registry — individual service order line items as listed in LEDGERS PRO Marketplace.'}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+
+        {/* View Mode Toggle & Export */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="inline-flex p-1 bg-gray-100 rounded-lg border border-gray-200">
+            <button
+              onClick={() => {
+                setViewMode('deduped');
+                setCurrentPage(1);
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition ${
+                viewMode === 'deduped'
+                  ? 'bg-white text-emerald-700 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <ListFilter size={14} />
+              <span>Deduplicated Cases ({INDIA_FILINGS_DEDUPED_DATA.length})</span>
+            </button>
+            <button
+              onClick={() => {
+                setViewMode('raw');
+                setCurrentPage(1);
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition ${
+                viewMode === 'raw'
+                  ? 'bg-white text-emerald-700 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Layers size={14} />
+              <span>All Line Items ({INDIA_FILINGS_RAW_DATA.length})</span>
+            </button>
+          </div>
+
           <button
             onClick={exportCSV}
             className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
@@ -274,9 +381,11 @@ const AdminSalesLedger = ({ isAdmin = true, data = INDIA_FILINGS_SALES_DATA }) =
             <Building2 size={24} />
           </div>
           <div>
-            <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Cases</div>
-            <div className="text-2xl font-bold text-gray-900 mt-0.5">{overallStats.totalCount}</div>
-            <div className="text-xs text-gray-400 mt-0.5">Cases #1 to #{overallStats.totalCount}</div>
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {viewMode === 'deduped' ? 'Unique Client Cases' : 'Total Service Rows'}
+            </div>
+            <div className="text-2xl font-bold text-gray-900 mt-0.5">{stats.totalCount}</div>
+            <div className="text-xs text-gray-400 mt-0.5">Numbered #1 to #{stats.totalCount}</div>
           </div>
         </div>
 
@@ -285,9 +394,11 @@ const AdminSalesLedger = ({ isAdmin = true, data = INDIA_FILINGS_SALES_DATA }) =
             <IndianRupee size={24} />
           </div>
           <div>
-            <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sales Volume</div>
-            <div className="text-2xl font-bold text-gray-900 mt-0.5">{formatCurrency(overallStats.totalAmount)}</div>
-            <div className="text-xs text-emerald-600 font-medium mt-0.5">Assured Marketplace</div>
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Order Value</div>
+            <div className="text-2xl font-bold text-gray-900 mt-0.5">{formatCurrency(stats.totalAmount)}</div>
+            <div className="text-xs text-emerald-600 font-medium mt-0.5">
+              {viewMode === 'deduped' ? 'Accurate Order Revenue' : 'Raw Sum of Line Items'}
+            </div>
           </div>
         </div>
 
@@ -297,8 +408,10 @@ const AdminSalesLedger = ({ isAdmin = true, data = INDIA_FILINGS_SALES_DATA }) =
           </div>
           <div>
             <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Virtual Office</div>
-            <div className="text-2xl font-bold text-gray-900 mt-0.5">{overallStats.voCount}</div>
-            <div className="text-xs text-gray-400 mt-0.5">New &amp; Renewal cases</div>
+            <div className="text-2xl font-bold text-gray-900 mt-0.5">{stats.voCount}</div>
+            <div className="text-xs text-gray-400 mt-0.5">
+              {viewMode === 'deduped' ? 'Unique VO clients' : 'New & Renewal items'}
+            </div>
           </div>
         </div>
 
@@ -308,8 +421,10 @@ const AdminSalesLedger = ({ isAdmin = true, data = INDIA_FILINGS_SALES_DATA }) =
           </div>
           <div>
             <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">GST Registrations</div>
-            <div className="text-2xl font-bold text-gray-900 mt-0.5">{overallStats.gstCount}</div>
-            <div className="text-xs text-gray-400 mt-0.5">PPOB &amp; APOB filings</div>
+            <div className="text-2xl font-bold text-gray-900 mt-0.5">{stats.gstCount}</div>
+            <div className="text-xs text-gray-400 mt-0.5">
+              {viewMode === 'deduped' ? 'Clients with GST' : 'PPOB & APOB filings'}
+            </div>
           </div>
         </div>
       </div>
@@ -353,14 +468,14 @@ const AdminSalesLedger = ({ isAdmin = true, data = INDIA_FILINGS_SALES_DATA }) =
 
               {/* Service filter */}
               <select
-                className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 max-w-[220px]"
                 value={serviceFilter}
                 onChange={(e) => {
                   setServiceFilter(e.target.value);
                   setCurrentPage(1);
                 }}
               >
-                <option value="ALL">All Services ({data.length})</option>
+                <option value="ALL">All Services ({activeDataset.length})</option>
                 {serviceOptions.map(srv => (
                   <option key={srv} value={srv}>{srv}</option>
                 ))}
@@ -474,7 +589,7 @@ const AdminSalesLedger = ({ isAdmin = true, data = INDIA_FILINGS_SALES_DATA }) =
                     key={row.id} 
                     className="hover:bg-emerald-50/40 transition-colors duration-150"
                   >
-                    {/* Row Sequential Numbering (#1 to #187) */}
+                    {/* Row Sequential Numbering (#1 to #114) */}
                     <td className="px-4 py-3 text-center whitespace-nowrap">
                       <span className="inline-flex items-center justify-center min-w-[28px] h-6 px-1.5 rounded bg-gray-100 text-gray-700 font-mono text-xs font-semibold">
                         {row.id}
@@ -494,12 +609,9 @@ const AdminSalesLedger = ({ isAdmin = true, data = INDIA_FILINGS_SALES_DATA }) =
                       </div>
                     </td>
 
-                    {/* Service Type with Color Badge */}
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex flex-col gap-1 items-start">
-                        {getServiceBadge(row.serviceType)}
-                        <span className="text-xs text-gray-700 font-medium">{row.serviceType}</span>
-                      </div>
+                    {/* Service Type with Color Badges */}
+                    <td className="px-4 py-3">
+                      {renderServiceBadges(row)}
                     </td>
 
                     {/* Location / State */}
@@ -568,7 +680,7 @@ const AdminSalesLedger = ({ isAdmin = true, data = INDIA_FILINGS_SALES_DATA }) =
               </span>
               {' '}of{' '}
               <span className="font-semibold text-gray-900">{totalItems}</span>
-              {' '}cases
+              {' '}{viewMode === 'deduped' ? 'cases' : 'line items'}
             </div>
 
             <div className="flex items-center gap-1.5 border-l border-gray-300 pl-4">
@@ -585,7 +697,7 @@ const AdminSalesLedger = ({ isAdmin = true, data = INDIA_FILINGS_SALES_DATA }) =
                 <option value={25}>25</option>
                 <option value={50}>50</option>
                 <option value={100}>100</option>
-                <option value="ALL">All (187)</option>
+                <option value="ALL">All ({activeDataset.length})</option>
               </select>
             </div>
           </div>
@@ -603,7 +715,6 @@ const AdminSalesLedger = ({ isAdmin = true, data = INDIA_FILINGS_SALES_DATA }) =
               </button>
 
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
-                // Show current page, edges, and close neighbors
                 if (
                   pageNum === 1 ||
                   pageNum === totalPages ||

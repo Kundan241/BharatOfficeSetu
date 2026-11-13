@@ -1,7 +1,1787 @@
-// India Filings Marketplace Sales Ledger - 187 Verified Cases
+// India Filings Marketplace Sales Ledger Data
 // Sourced from LEDGERS PRO Marketplace (BHARAT OFFICE SETU PRIVATE LIMITED)
 
-export const INDIA_FILINGS_SALES_DATA = [
+// 1. Deduplicated unique cases (114 unique client deals, combo services merged into single cases)
+export const INDIA_FILINGS_DEDUPED_DATA = [
+  {
+    "id": 1,
+    "salesName": "Divyadevi narayanbhai balani",
+    "company": "DIVYABEN BALANI",
+    "serviceType": "Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Khushi Devendra Lakhmania",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 0.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 2,
+    "salesName": "Aavi Enterprise",
+    "company": "VIKAS MULEY",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India",
+      "GST Registration - APOB",
+      "GST Registration - PPOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Arfad Ibrahim - 8097454844",
+    "gstin": "06AIQPM4960M1ZK",
+    "amount": 10578.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 3,
+    "salesName": "GLAM COSMETICS",
+    "company": "GLAM21 COSMETICS",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Neetu Vinod Yadav - 8692069434",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 4,
+    "salesName": "ANAIMALAIS COCO",
+    "company": "ANAIMALAIS COCO",
+    "serviceType": "Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Pooja Prakash Patne",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "Add GSTIN",
+    "amount": 0.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 5,
+    "salesName": "Variety bazaar",
+    "company": "R K FASHION ACCESSORIES PRIVATE LIMITED",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 6,
+    "salesName": "Mr.askcolorfit",
+    "company": "ANKUSH AGARWAL",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Suraj Ram Kusekar - 6827322323",
+    "gstin": "Add GSTIN",
+    "amount": 10578.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 7,
+    "salesName": "Gopal Patel",
+    "company": "GOPAL BHACHUBHAI PATEL",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India",
+      "GST Registration - APOB",
+      "GST Registration - PPOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Tahaziya Tabassum A",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "06CHRPP2608B1ZF",
+    "amount": 10578.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 8,
+    "salesName": "BEVERLY HILLS PRIVATE LIMITED",
+    "company": "BEVERLY HILLS SALES PRIVATE LIMITED",
+    "serviceType": "Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India"
+    ],
+    "location": "Haryana",
+    "relationshipManager": "Vishal Shyamkaran Yadav",
+    "accountManager": "",
+    "gstin": "Add GSTIN",
+    "amount": 0.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 9,
+    "salesName": "Uno Aroma",
+    "company": "CASH CHEM",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 2
+  },
+  {
+    "id": 10,
+    "salesName": "yug apparels",
+    "company": "SALECHA BHARAT LOONCHAND HUF",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India",
+      "GST Registration - APOB",
+      "GST Registration - PPOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Siddhi Rajendra Pawar",
+    "accountManager": "AM: Suraj Ram Kusekar - 6827322323",
+    "gstin": "Add GSTIN",
+    "amount": 10578.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 11,
+    "salesName": "ABK Internet",
+    "company": "ABK INTERNET PRIVATE LIMITED",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Vishal Shyamkaran Yadav",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "Add GSTIN",
+    "amount": 9676.0,
+    "lineItemCount": 2
+  },
+  {
+    "id": 12,
+    "salesName": "Yogesh Deshmukh",
+    "company": "VIKRAM TEA PROCESSOR PRIVATE LIMITED",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Sampada Prakash Jadiyar - 8591200219",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 2
+  },
+  {
+    "id": 13,
+    "salesName": "priority ingredient",
+    "company": "MODAMINGLE FASHION PRIVATE LIMITED",
+    "serviceType": "Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Khushi Devendra Lakhmania",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "Add GSTIN",
+    "amount": 0.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 14,
+    "salesName": "Arvind Mathur",
+    "company": "BYTECHNIK INDIA PRIVATE LIMITED",
+    "serviceType": "Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India"
+    ],
+    "location": "Delhi",
+    "relationshipManager": "B BHAVESH",
+    "accountManager": "AM: DEEPAK CHOUDHARY - 7530027148",
+    "gstin": "Add GSTIN",
+    "amount": 10620.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 15,
+    "salesName": "Sai Enterprises",
+    "company": "ATIT MAKOL",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Samrudhi Manohar Khandait - 8657061946",
+    "gstin": "Add GSTIN",
+    "amount": 10578.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 16,
+    "salesName": "Nikhil",
+    "company": "HARSHIT BHANDARI",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: 8108445602",
+    "gstin": "Add GSTIN",
+    "amount": 10578.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 17,
+    "salesName": "AJIT",
+    "company": "TRIVIAL GLOBAL LLP",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - APOB",
+      "Virtual Office - India",
+      "GST Registration - PPOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "MD farid",
+    "accountManager": "AM: Mohammed Sohail Roshan Ali Shah - 8657443863",
+    "gstin": "06AAZFT6837H1ZD",
+    "amount": 10578.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 18,
+    "salesName": "G jewels",
+    "company": "RAJENDRA KESHAWLAL VYAS",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 10578.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 19,
+    "salesName": "Reeta",
+    "company": "WHITE ELEPHANT CLOTHING PRIVATE LIMITED",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - PPOB",
+      "Virtual Office - India",
+      "GST Registration - APOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 20,
+    "salesName": "The sky store",
+    "company": "DEV PRAVEEN PATEL",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India",
+      "GST Registration - PPOB",
+      "GST Registration - APOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Siddhi Rajendra Pawar",
+    "accountManager": "AM: Mohammed Sohail Roshan Ali Shah - 8657443863",
+    "gstin": "06BSCPP4992F1ZH",
+    "amount": 12578.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 21,
+    "salesName": "the table tales",
+    "company": "EKTA KRUNAL KAKADIYA",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - PPOB",
+      "Virtual Office - India",
+      "GST Registration - APOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Siddhi Rajendra Pawar",
+    "accountManager": "AM: Vivek Prasad - 9619692775",
+    "gstin": "06CMIPM2816C1ZC",
+    "amount": 12578.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 22,
+    "salesName": "Sarvesh Dhamani",
+    "company": "SARVESH DHAMANI",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Vishal Shyamkaran Yadav",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 12578.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 23,
+    "salesName": "Deconstruct",
+    "company": "BAYPURE LIFESTYLE PRIVATE LIMITED",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India",
+      "GST Registration - PPOB",
+      "GST Registration - APOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 24,
+    "salesName": "SABARI HOMWELL CORPORATION",
+    "company": "SABARI HOMWELL CORPORATION",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - PPOB",
+      "GST Registration - APOB",
+      "Virtual Office - India"
+    ],
+    "location": "Haryana",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 11830.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 25,
+    "salesName": "AMOL PAWAR",
+    "company": "RIYA JAIN",
+    "serviceType": "Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India"
+    ],
+    "location": "Rajasthan",
+    "relationshipManager": "Vishal Shyamkaran Yadav",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "Add GSTIN",
+    "amount": 8856.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 26,
+    "salesName": "AMOL PAWAR",
+    "company": "CHANCHAL SHARMA",
+    "serviceType": "GST Registration (APOB + PPOB)",
+    "servicesList": [
+      "GST Registration - PPOB",
+      "GST Registration - APOB"
+    ],
+    "location": "Rajasthan",
+    "relationshipManager": "Vishal Shyamkaran Yadav",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "08BOZPC9347G1ZA",
+    "amount": 8856.0,
+    "lineItemCount": 2
+  },
+  {
+    "id": 27,
+    "salesName": "COLORTRADES",
+    "company": "KAPIL SUBHASH BHANDARI",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: 8108445602",
+    "gstin": "Add GSTIN",
+    "amount": 11830.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 28,
+    "salesName": "Vikash",
+    "company": "BIOSPHERE NATURE POOLS LLP",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - PPOB",
+      "Virtual Office - India",
+      "GST Registration - APOB"
+    ],
+    "location": "Rajasthan",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Shivam Sanjay Chavan - 6827322104",
+    "gstin": "08AAYFB5010F1ZH0",
+    "amount": 8856.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 29,
+    "salesName": "United Denims",
+    "company": "UNITED DENIMS",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - APOB",
+      "GST Registration - PPOB",
+      "Virtual Office - India"
+    ],
+    "location": "Haryana",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "",
+    "gstin": "06AAPFT6881M2Z7",
+    "amount": 11830.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 30,
+    "salesName": "raj yogi",
+    "company": "JAY RAVINDRA KHATRI",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Mohammed Sohail Roshan Ali Shah - 8657443863",
+    "gstin": "Add GSTIN",
+    "amount": 11830.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 31,
+    "salesName": "SWAMI TRADING COMPANY",
+    "company": "GAURAV MANWANI",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Samrudhi Manohar Khandait - 8657061946",
+    "gstin": "Add GSTIN",
+    "amount": 11830.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 32,
+    "salesName": "Pd Cloth Villa",
+    "company": "GITABEN DEVRAJBHAI ANGHAN",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Mohammed Sohail Roshan Ali Shah - 8657443863",
+    "gstin": "Add GSTIN",
+    "amount": 11830.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 33,
+    "salesName": "sachinbishtcvg",
+    "company": "AYUSHI KUSHWAHA",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India",
+      "GST Registration - PPOB",
+      "GST Registration - APOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Shivam Sanjay Chavan - 6827322104",
+    "gstin": "06BHIPG1438A1ZY",
+    "amount": 11210.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 34,
+    "salesName": "Darshan Kankotiya",
+    "company": "DARSHAN RAMESHBHAI KANKOTIYA",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - APOB",
+      "GST Registration - PPOB",
+      "Virtual Office - India"
+    ],
+    "location": "Haryana",
+    "relationshipManager": "Siddhi Rajendra Pawar",
+    "accountManager": "AM: Shivam Sanjay Chavan - 6827322104",
+    "gstin": "06EPTPK1433R1Z5",
+    "amount": 10141.0,
+    "lineItemCount": 6
+  },
+  {
+    "id": 35,
+    "salesName": "Kovilampati Naresh",
+    "company": "KOVILAMPATI NARESH",
+    "serviceType": "Gazette Name Change - Personal",
+    "servicesList": [
+      "Gazette Name Change - Personal"
+    ],
+    "location": "Personal",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Shivam Sanjay Chavan - 6827322104",
+    "gstin": "Add GSTIN",
+    "amount": 11256.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 36,
+    "salesName": "shivani Jaiswal",
+    "company": "VISTAARAI INFOTECH PRIVATE LIMITED",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India",
+      "GST Registration - PPOB",
+      "GST Registration - APOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Bikash mahato L",
+    "accountManager": "AM: 8655922603",
+    "gstin": "06AAMCV4947Q1ZC",
+    "amount": 11210.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 37,
+    "salesName": "Ms.Jinander Jain",
+    "company": "JINANDER KUMAR JAIN",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 38,
+    "salesName": "SAnat kumar",
+    "company": "SANAT KUMAR",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Samrudhi Manohar Khandait - 8657061946",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 39,
+    "salesName": "Aditya",
+    "company": "UNNIKRISHNAN ADITYA KRISHNAN",
+    "serviceType": "Gazette Name Change - Personal",
+    "servicesList": [
+      "Gazette Name Change - Personal"
+    ],
+    "location": "Personal",
+    "relationshipManager": "Aishwarya Vijay Danavale",
+    "accountManager": "AM: Jayakumar R - 7845102731",
+    "gstin": "Add GSTIN",
+    "amount": 11256.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 40,
+    "salesName": "Raghu chilukoori",
+    "company": "RAGHU CHILUKOORI",
+    "serviceType": "Gazette Name Change - Personal",
+    "servicesList": [
+      "Gazette Name Change - Personal"
+    ],
+    "location": "Personal",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Gaznavie Ahad - 7397761348",
+    "gstin": "Add GSTIN",
+    "amount": 11256.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 41,
+    "salesName": "Abhishek tambi",
+    "company": "ABHISHEK TAMBI",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Siddhi Rajendra Pawar",
+    "accountManager": "",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 42,
+    "salesName": "Dilip yadav",
+    "company": "KAMLA YADAV",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India",
+      "GST Registration - APOB",
+      "GST Registration - PPOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Vishal Shyamkaran Yadav",
+    "accountManager": "AM: Sampada Prakash Jadiyar - 8591200219",
+    "gstin": "06ADVPY1249F1Z1",
+    "amount": 11210.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 43,
+    "salesName": "Ravi Verma",
+    "company": "Ravi Verma",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Mohammed Sohail Roshan Ali Shah - 8657443863",
+    "gstin": "Add GSTIN",
+    "amount": 10210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 44,
+    "salesName": "senthil prakash",
+    "company": "SENTHIL PRAKASH SEENI",
+    "serviceType": "Gazette Name Change - Personal",
+    "servicesList": [
+      "Gazette Name Change - Personal"
+    ],
+    "location": "Personal",
+    "relationshipManager": "PRATHAP N",
+    "accountManager": "AM: PORKAVI S - 8939835928",
+    "gstin": "Add GSTIN",
+    "amount": 11256.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 45,
+    "salesName": "Mallory",
+    "company": "MUSIRUL HAQUK",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: MD Aabid Faiyaz - 7904930952",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 46,
+    "salesName": "XELECTRON TECHNOLOGIES PRIVATE LIMITED",
+    "company": "XELECTRON TECHNOLOGIES PRIVATE LIMITED",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Siddhi Rajendra Pawar",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "Add GSTIN",
+    "amount": 10210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 47,
+    "salesName": "Aniket Yadav",
+    "company": "ANIKET YADAV",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - PPOB",
+      "Virtual Office - India",
+      "GST Registration - APOB"
+    ],
+    "location": "Rajasthan",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: SAI BHARATH PASUTULETI - 9150085523",
+    "gstin": "08CAAPY9929A1ZD",
+    "amount": 8856.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 48,
+    "salesName": "NAKUL",
+    "company": "VOLUME BRANDS PRIVATE LIMITED",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Siddhi Rajendra Pawar",
+    "accountManager": "AM: Mohammed Sohail Roshan Ali Shah - 8657443863",
+    "gstin": "Add GSTIN",
+    "amount": 9811.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 49,
+    "salesName": "Beena Khemka",
+    "company": "KIRTI KHEMKA",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India",
+      "GST Registration - PPOB",
+      "GST Registration - APOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Rajkumar Ganesh Acharya - 9619683520",
+    "gstin": "06KIQPK0588B1ZZ",
+    "amount": 9521.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 50,
+    "salesName": "Rohit Tiwari",
+    "company": "ROHIT TIWARI",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Rajasthan",
+    "relationshipManager": "Vishal Shyamkaran Yadav",
+    "accountManager": "AM: Matiba Khan - 8591201562",
+    "gstin": "Add GSTIN",
+    "amount": 7828.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 51,
+    "salesName": "Sridhar Sampathirao",
+    "company": "ZENVOKE LABS PRIVATE LIMITED",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - PPOB",
+      "Virtual Office - India",
+      "GST Registration - APOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: ALAMELUMANGAI A - 6384498636",
+    "gstin": "06AACCZ6490L1ZQ",
+    "amount": 9521.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 52,
+    "salesName": "MANO KNITTING MILLS",
+    "company": "AM GARMENTS",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Zeeshan Toufeeq Qureshi - 9920175616",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 53,
+    "salesName": "Tresna Collection",
+    "company": "TANYA YADAV",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India",
+      "GST Registration - PPOB",
+      "GST Registration - APOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "06BFXPP4362K1ZO",
+    "amount": 11210.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 54,
+    "salesName": "D Brothers",
+    "company": "MITHUN KUMAR",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India",
+      "GST Registration - APOB",
+      "GST Registration - PPOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Sampada Prakash Jadiyar - 8591200219",
+    "gstin": "06FNKPK4962B1ZY",
+    "amount": 9520.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 55,
+    "salesName": "Hinnis Consumer Pvt Ltd",
+    "company": "HINISS CONSUMER PRIVATE LIMITED",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - PPOB",
+      "Virtual Office - India",
+      "GST Registration - APOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Sudesh Pratap Gaikwad - 9150194443",
+    "gstin": "06AAGCH2304D1Z8",
+    "amount": 10111.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 56,
+    "salesName": "MAA TEXTILE",
+    "company": "ANSI",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India",
+      "GST Registration - APOB",
+      "GST Registration - PPOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "06EAVPA1371R1Z3",
+    "amount": 11210.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 57,
+    "salesName": "MANLINO",
+    "company": "KNIT KINGDOM",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Sampada Prakash Jadiyar - 8591200219",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 58,
+    "salesName": "Mohammad Zubair Jan",
+    "company": "NABSHAR HEALTHTECH PRIVATE LIMITED",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - PPOB",
+      "Virtual Office - India",
+      "GST Registration - APOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Vishal Shyamkaran Yadav",
+    "accountManager": "AM: Atharva Vikas Aranke - 9920175960",
+    "gstin": "06AALCN8596Q1Z8",
+    "amount": 9811.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 59,
+    "salesName": "Ankit Gupta",
+    "company": "Ankit Gupta",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Suraj Ram Kusekar - 6827322323",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 60,
+    "salesName": "NIRVIKA E Retail India Pvt Ltd",
+    "company": "NIRVIKA E-RETAIL INDIA PRIVATE LIMITED",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "Add GSTIN",
+    "amount": 9521.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 61,
+    "salesName": "NAMAN BATRA",
+    "company": "NAMAN BATRA",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Mohammed Sohail Roshan Ali Shah - 8657443863",
+    "gstin": "Add GSTIN",
+    "amount": 10210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 62,
+    "salesName": "SHEYN FASHION",
+    "company": "RAHUL KUMAR",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Samrudhi Manohar Khandait - 8657061946",
+    "gstin": "Add GSTIN",
+    "amount": 10210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 63,
+    "salesName": "Roshan Singh",
+    "company": "MOHAMMAD ZUBAIR",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 10210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 64,
+    "salesName": "Avijit",
+    "company": "AVIJIT GHOSH",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India",
+      "GST Registration - APOB",
+      "GST Registration - PPOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Vishal Shyamkaran Yadav",
+    "accountManager": "AM: Panjala Ganesh Narayan - 9920175313",
+    "gstin": "06BGGPG6414B1ZY",
+    "amount": 11210.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 65,
+    "salesName": "Wcsenterprise",
+    "company": "KACHHAD SAVITRIBEN UMESHBHAI",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "Add GSTIN",
+    "amount": 10210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 66,
+    "salesName": "AAMO HOMES LLP",
+    "company": "AAMO HOMES LLP",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Shivam Sanjay Chavan - 6827322104",
+    "gstin": "Add GSTIN",
+    "amount": 9521.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 67,
+    "salesName": "Mohit Arora",
+    "company": "MOHIT ARORA",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "Add GSTIN",
+    "amount": 9520.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 68,
+    "salesName": "DJSONSCONSUMERGOODSPVT",
+    "company": "DJ SONS CONSUMER GOODS PRIVATE LIMITED",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Vishal Shyamkaran Yadav",
+    "accountManager": "AM: Arfad Ibrahim - 8097454844",
+    "gstin": "Add GSTIN",
+    "amount": 9210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 69,
+    "salesName": "Omnitail",
+    "company": "VANEETA RANI",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "Add GSTIN",
+    "amount": 9521.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 70,
+    "salesName": "THE LASER ART",
+    "company": "KAILASHBEN RAJESHBHAI SHEKHADA",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Samrudhi Manohar Khandait - 8657061946",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 71,
+    "salesName": "KHUSH ENTERPRISE",
+    "company": "KHUSH ENTERPRISE",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Samrudhi Manohar Khandait - 8657061946",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 72,
+    "salesName": "ShreeRAm ENT.",
+    "company": "PREM RAMJI VAVIYA",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 10311.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 73,
+    "salesName": "Emart",
+    "company": "TUSHARBHAI SHAMBHUBHAI DONDA",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "Add GSTIN",
+    "amount": 8601.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 74,
+    "salesName": "TRISHAKTI ALLOYS INDUSTRIES",
+    "company": "MAHENDER SINGH",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - PPOB",
+      "Virtual Office - India",
+      "GST Registration - APOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: DARSHANA DOSHI - 7305080036",
+    "gstin": "06MPDPS8894C1Z5",
+    "amount": 9521.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 75,
+    "salesName": "SNENTERPRIESES",
+    "company": "VISHAL KUMAR",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 76,
+    "salesName": "Nice foto makers pvt.ltd.",
+    "company": "NICE FOTOMAKERS PRIVATE LIMITED",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Mohammed Sohail Roshan Ali Shah",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 77,
+    "salesName": "Honey",
+    "company": "ANKITA KUMAWAT",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - PPOB",
+      "Virtual Office - India",
+      "GST Registration - APOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "06EZJPK4023H1ZG",
+    "amount": 11210.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 78,
+    "salesName": "satyamfab",
+    "company": "SATYAM FAB",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "Add GSTIN",
+    "amount": 9521.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 79,
+    "salesName": "Sanjeev",
+    "company": "SANJEEV",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - PPOB",
+      "Virtual Office - India",
+      "GST Registration - APOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Samrudhi Manohar Khandait - 8657061946",
+    "gstin": "06FTDPS9265Q1ZK",
+    "amount": 11210.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 80,
+    "salesName": "AADHYA CREATION",
+    "company": "MALANI HETALBEN HIRENBHAI",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "Virtual Office - India",
+      "GST Registration - PPOB",
+      "GST Registration - APOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "",
+    "gstin": "Add GSTIN",
+    "amount": 9311.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 81,
+    "salesName": "Nick",
+    "company": "ACOFEL INDIA PRIVATE LIMITED",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - PPOB",
+      "Virtual Office - India",
+      "GST Registration - APOB"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: MAAZ JAVED KOTHAWALE - 8591201562",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 82,
+    "salesName": "IndianFestivals",
+    "company": "JAYDIPBHAI NARASHIBHAI GANGANI",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "",
+    "gstin": "Add GSTIN",
+    "amount": 9311.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 83,
+    "salesName": "DEELMO",
+    "company": "VAGHELA PARULBEN NARESHBHAI",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Vishal Shyamkaran Yadav",
+    "accountManager": "AM: 8108445602",
+    "gstin": "Add GSTIN",
+    "amount": 10161.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 84,
+    "salesName": "SANTRAM ENTERPRISE",
+    "company": "JAYKUMAR KIRITBHAI PATEL",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Vishal Shyamkaran Yadav",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 10210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 85,
+    "salesName": "Shailesh...",
+    "company": "HITESH RAMESH JAIN (HUF)",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "Add GSTIN",
+    "amount": 9521.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 86,
+    "salesName": "PASSION PETALS",
+    "company": "SHILPA GUPTA",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Siddhi Rajendra Pawar",
+    "accountManager": "AM: Shivam Sanjay Chavan - 6827322104",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 87,
+    "salesName": "Adarsh Kumar Jha",
+    "company": "CAPSNSHIFT PRIVATE LIMITED",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - APOB",
+      "GST Registration - PPOB",
+      "Virtual Office - India"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Arfad Ibrahim - 8097454844",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 88,
+    "salesName": "SURYA TEJA VALA",
+    "company": "FLUXCHARGE INDIA PRIVATE LIMITED",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - APOB",
+      "GST Registration - PPOB",
+      "Virtual Office - India"
+    ],
+    "location": "Rajasthan",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Shivam Sanjay Chavan - 6827322104",
+    "gstin": "08AAHCF2181P1Z5",
+    "amount": 12354.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 89,
+    "salesName": "Danish Rughwani",
+    "company": "DANISH RUGHWANI",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Vishal Shyamkaran Yadav",
+    "accountManager": "AM: Girish Pralhad Shinde - 8692066905",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 90,
+    "salesName": "SharkTribe Fashion India Pvt. Ltd.",
+    "company": "SHARKTRIBE FASHION (INDIA) PRIVATE LIMITED",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Vishal Shyamkaran Yadav",
+    "accountManager": "",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 91,
+    "salesName": "krishna collection",
+    "company": "RABINDRA KUMAR BHAGAT",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Mohammed Sohail Roshan Ali Shah",
+    "gstin": "Add GSTIN",
+    "amount": 8311.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 92,
+    "salesName": "FASHION RETAIL",
+    "company": "SANDEEP BHATIA",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Neetu Vinod Yadav - 8692069434",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 93,
+    "salesName": "Kanhelal Multitrade Pvt Ltd",
+    "company": "KANHELAL MULTI TRADE PRIVATE LIMITED",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Vishal Shyamkaran Yadav",
+    "accountManager": "AM: Mohammed Sohail Roshan Ali Shah",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 94,
+    "salesName": "GPN PRINT TECHNOLOGY",
+    "company": "NAVIN PREMJI GAMI",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 9811.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 95,
+    "salesName": "SHOPPING STATION",
+    "company": "SHOPPING STATION",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: 8108445602",
+    "gstin": "Add GSTIN",
+    "amount": 8850.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 96,
+    "salesName": "priyanka",
+    "company": "PRIYANKA SAHA",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana",
+    "relationshipManager": "Vishal Shyamkaran Yadav",
+    "accountManager": "AM: Mohammed Sohail Roshan Ali Shah",
+    "gstin": "Add GSTIN",
+    "amount": 8850.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 97,
+    "salesName": "Boat International",
+    "company": "RACHIT BHATIA",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 98,
+    "salesName": "GANESH ENT",
+    "company": "SHILABEN DIPAKBHAI SUTARIYA",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 9811.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 99,
+    "salesName": "Aditya Jayant Salunkhe",
+    "company": "ADITYA JAYANT SALUNKHE",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana",
+    "relationshipManager": "Vishal Shyamkaran Yadav",
+    "accountManager": "AM: Mohammed Sohail Roshan Ali Shah",
+    "gstin": "Add GSTIN",
+    "amount": 8850.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 100,
+    "salesName": "Amol",
+    "company": "PARMOD",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 9811.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 101,
+    "salesName": "Yasmin Mollick",
+    "company": "JASMIN SARKAR",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Shivam Sanjay Chavan - 6827322104",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 102,
+    "salesName": "Varni sales",
+    "company": "REENABEN AKSHAY DESAI",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 10311.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 103,
+    "salesName": "LUKHI NEEL NIKULBHAI",
+    "company": "LUKHI NEEL NIKULBHAI",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 9811.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 104,
+    "salesName": "Hardik Gabani",
+    "company": "HARDIK BHARATBHAI GABANI",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Siddhi Rajendra Pawar",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 9811.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 105,
+    "salesName": "SUSHANT",
+    "company": "KANDID LUXURY ENTERPRISES (OPC) PRIVATE LIMITED",
+    "serviceType": "GST Registration (APOB + PPOB) + Virtual Office - India",
+    "servicesList": [
+      "GST Registration - APOB",
+      "GST Registration - PPOB",
+      "Virtual Office - India"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "MD farid",
+    "accountManager": "AM: Matiba Khan - 8591201562",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 3
+  },
+  {
+    "id": 106,
+    "salesName": "Aarya Creation",
+    "company": "GOPI NILESH RADADIYA",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Siddhi Rajendra Pawar",
+    "accountManager": "AM: 8108445602",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 107,
+    "salesName": "Ms.Rajesh Khanna",
+    "company": "RAJESH ENTERPRISES",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 108,
+    "salesName": "SLNS MARKETING",
+    "company": "UGRANARASIMHAPPA DHANANJAYA",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Mohammed Sohail Roshan Ali Shah",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 109,
+    "salesName": "Oobs",
+    "company": "SANJEEV PURI",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 9600.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 110,
+    "salesName": "staify international",
+    "company": "Vasani Yamit Hirabhai",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Mohammed Sohail Roshan Ali Shah",
+    "gstin": "Add GSTIN",
+    "amount": 9811.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 111,
+    "salesName": "Mr.BRISK EXIM",
+    "company": "RUSHABH BABUBHAI RADADIA",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Zeeshan Toufeeq Qureshi - 992017...",
+    "gstin": "Add GSTIN",
+    "amount": 8850.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 112,
+    "salesName": "Sunpro",
+    "company": "SUMIT PASRICHA",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Payal Ashok Vishwakarma",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 113,
+    "salesName": "Vinod Kumar",
+    "company": "HEADWAY TALENT CONSULTING PRIVATE LIMITED",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Siddhi Rajendra Pawar",
+    "accountManager": "AM: KAVITHA K - 8925532585",
+    "gstin": "Add GSTIN",
+    "amount": 9521.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 114,
+    "salesName": "Upkar Apparels",
+    "company": "BHARAT LOONCHAND SALECHA",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "AM: Abhishek Surendra Ram - 6827322093",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  }
+];
+
+// 2. All raw line items (187 individual service rows)
+export const INDIA_FILINGS_RAW_DATA = [
   {
     "salesName": "Divyadevi narayanbhai balani",
     "company": "DIVYABEN BALANI",
@@ -2061,4 +3841,6 @@ export const INDIA_FILINGS_SALES_DATA = [
   }
 ];
 
-export default INDIA_FILINGS_SALES_DATA;
+// Default export is the clean deduplicated dataset
+export const INDIA_FILINGS_SALES_DATA = INDIA_FILINGS_DEDUPED_DATA;
+export default INDIA_FILINGS_DEDUPED_DATA;
