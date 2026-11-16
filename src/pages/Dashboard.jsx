@@ -5,7 +5,7 @@ import { useAuth } from '../components/AuthContext';
 import { SERVICE_STEPS } from '../services/services';
 import { auth, db } from '../firebase';
 import { getClient } from '../services/clients';
-import { collection, doc, onSnapshot } from 'firebase/firestore';
+import { collection, doc, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getClientDriveFolder } from '../services/documents';
 
 export default function Dashboard() {
@@ -165,42 +165,75 @@ export default function Dashboard() {
     let fallbackMsg = '';
 
     try {
-      const currentUser = auth.currentUser;
-      // Get client name from Firestore as requested
-      const { client } = await getClient(currentUser?.uid);
+      const currentUser = auth.currentUser || user;
       
+      // Use clientProfile from state, or fetch from Firestore safely
+      let client = clientProfile;
+      if (!client && currentUser?.uid) {
+        try {
+          const res = await getClient(currentUser.uid);
+          client = res?.client || null;
+        } catch (fetchErr) {
+          console.warn('Could not fetch client profile:', fetchErr);
+        }
+      }
+
+      const clientName = client?.name || client?.fullName || currentUser?.displayName || user?.displayName || user?.email?.split('@')[0] || 'Valued Client';
+      const clientEmail = client?.email || currentUser?.email || user?.email || 'N/A';
+      const clientPhone = client?.phone || client?.phoneNumber || 'N/A';
+
       fallbackMsg = `🔔 New Service Request from existing client!\n\n` +
-        `👤 Client: ${client?.name || 'Unknown'}\n` +
-        `📧 Email: ${client?.email || user?.email || 'Unknown'}\n` +
-        `📞 Phone: ${client?.phone || 'Unknown'}\n\n` +
+        `👤 Client: ${clientName}\n` +
+        `📧 Email: ${clientEmail}\n` +
+        `📞 Phone: ${clientPhone}\n\n` +
         `🛎️ Requested Service: ${selectedService}\n` +
-        `📝 Details: ${details || 'No additional details'}\n\n` +
+        `📝 Details: ${details?.trim() || 'No additional details'}\n\n` +
         `Please add this service to their dashboard.`;
         
       setWhatsAppMsg(fallbackMsg);
 
+      // 1. Record service request in Firestore under client's subcollection
+      if (currentUser?.uid) {
+        try {
+          await addDoc(collection(db, 'clients', currentUser.uid, 'service_requests'), {
+            service: selectedService,
+            details: details?.trim() || '',
+            status: 'pending',
+            createdAt: serverTimestamp(),
+            clientName,
+            clientEmail,
+            clientPhone
+          });
+        } catch (firestoreErr) {
+          console.warn('Could not save service request to Firestore:', firestoreErr);
+        }
+      }
+
+      // 2. Notify Google Apps Script webhook
       try {
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyV3FGQHAjeSoeCYm0o4Z_QXQ1f1_W6jSJl4W7yxjUzrqI5bCPs850kTrE-cgYC2Brf_A/exec';
 
         await fetch(SCRIPT_URL, {
           method: 'POST',
+          mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
-            name: client?.name || 'Unknown',
-            phone: client?.phone || 'Unknown',
-            email: client?.email || user?.email || 'Unknown',
+            name: clientName,
+            phone: clientPhone,
+            email: clientEmail,
             services: selectedService,
-            state: 'Existing Client — Dashboard Request',
-            details: details || ''
+            state: client?.state || 'Existing Client — Dashboard Request',
+            details: details?.trim() || ''
           })
         });
       } catch (fetchError) {
-        console.error("Apps script fetch failed:", fetchError);
+        console.warn('Apps script notification failed:', fetchError);
       }
 
       setSubmitSuccess(true);
       setCountdown(5);
     } catch (error) {
+      console.error('handleRequestSubmit error:', error);
       if (!fallbackMsg) {
          fallbackMsg = `🔔 New Service Request from existing client!\n\n` +
           `📧 Email: ${user?.email || 'Unknown'}\n` +
@@ -209,7 +242,7 @@ export default function Dashboard() {
           `Please add this service to my dashboard.`;
          setWhatsAppMsg(fallbackMsg);
       }
-      setSubmitError('Something went wrong.');
+      setSubmitError('Something went wrong. Please click below to WhatsApp us directly.');
     } finally {
       setIsSubmitting(false);
     }
