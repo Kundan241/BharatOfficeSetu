@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Check, FileText, Download, MessageCircle, X as XIcon, FolderOpen, ExternalLink, MapPin, Calendar } from 'lucide-react';
+import { LogOut, Check, FileText, Download, MessageCircle, X as XIcon, FolderOpen, ExternalLink, MapPin, Calendar, MessageSquare, Info } from 'lucide-react';
 import { useAuth } from '../components/AuthContext';
 import { SERVICE_STEPS } from '../services/services';
 import { auth, db } from '../firebase';
@@ -333,6 +333,29 @@ export default function Dashboard() {
 
       <div className="max-w-[760px] mx-auto px-5 pt-8">
         
+        {/* Notes from BOS Team for Client */}
+        {clientProfile?.clientNotes && (
+          <div className="mb-6 p-4 sm:p-5 bg-white border border-[rgba(27,107,47,0.22)] rounded-[16px] shadow-xs flex items-start gap-3.5 relative overflow-hidden fade-up-enter">
+            <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-[#1B6B2F]"></div>
+            <div className="w-9 h-9 rounded-full bg-[#EBF7EE] text-[#1B6B2F] flex items-center justify-center shrink-0 mt-0.5">
+              <MessageSquare size={17} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[12px] font-bold text-[#1B6B2F] uppercase tracking-wider">
+                  Notes from BOS Team
+                </span>
+                <span className="text-[10px] bg-[#EBF7EE] text-[#1B6B2F] font-semibold px-2 py-0.5 rounded-full">
+                  Updates for You
+                </span>
+              </div>
+              <p className="text-[13px] sm:text-[14px] text-[#111110] font-medium mt-1.5 whitespace-pre-wrap leading-relaxed break-words">
+                {clientProfile.clientNotes}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Section 1 - MY SERVICES */}
         <div className="mb-10 fade-up-enter" style={{ animationDelay: '0s' }}>
           <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-2">
@@ -535,6 +558,28 @@ export default function Dashboard() {
                       })}
                     </div>
                   </div>
+
+                  {/* Service Notes & Updates from BOS Team */}
+                  {service?.clientNotes && (
+                    <div className="mt-5 p-3.5 sm:p-4 bg-[#FAF9F5] border border-[rgba(27,107,47,0.2)] rounded-[12px] flex items-start gap-3">
+                      <div className="w-7 h-7 rounded-full bg-[#EBF7EE] text-[#1B6B2F] flex items-center justify-center shrink-0 mt-0.5">
+                        <FileText size={14} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[11px] font-bold text-[#1B6B2F] uppercase tracking-wider">
+                            Service Notes & Instructions
+                          </span>
+                          <span className="text-[10px] bg-white border border-[rgba(27,107,47,0.18)] text-[#1B6B2F] font-semibold px-2 py-0.2 rounded-full">
+                            BOS Support
+                          </span>
+                        </div>
+                        <div className="text-[13px] text-[#111110] font-medium mt-1 whitespace-pre-wrap leading-relaxed break-words">
+                          {service.clientNotes}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="mt-8 text-[12px] text-[rgba(17,17,16,0.35)]">
                     Last updated {service?.lastUpdated || 0} days ago

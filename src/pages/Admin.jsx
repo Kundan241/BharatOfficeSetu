@@ -691,7 +691,8 @@ function AddClientForm({ showConfirm }) {
       d.setFullYear(d.getFullYear() + 1);
       return d.toISOString().split('T')[0];
     })(),
-    notes: ''
+    notes: '',
+    clientNotes: ''
   });
   const [loading, setLoading] = useState(false);
   const [shakeFields, setShakeFields] = useState(false);
@@ -748,7 +749,9 @@ function AddClientForm({ showConfirm }) {
         officeState: formData.state || 'Maharashtra',
         createdAt: serverTimestamp(),
         createdBy: 'admin',
-        tempPasswordUsed: true
+        tempPasswordUsed: true,
+        notes: String(formData.notes || ''),
+        clientNotes: String(formData.clientNotes || '')
       });
 
       // 5. Add service
@@ -764,7 +767,8 @@ function AddClientForm({ showConfirm }) {
         statusIndex: 0,
         startDate: formData.startDate ? new Date(formData.startDate) : serverTimestamp(),
         completedDate: null,
-        notes: String(formData.notes || '')
+        notes: String(formData.notes || ''),
+        clientNotes: String(formData.clientNotes || '')
       };
 
       if (serviceType === 'Virtual Office' || formData.state) {
@@ -931,9 +935,44 @@ function AddClientForm({ showConfirm }) {
           )}
 
           <div className="h-[1px] bg-[rgba(17,17,16,0.06)] my-2"></div>
-          <div className="text-[11px] font-[600] tracking-[0.08em] text-[rgba(17,17,16,0.4)] mb-1">INTERNAL NOTES</div>
+          
+          <div className="space-y-3.5">
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="text-[11px] font-[700] tracking-[0.08em] text-[#1B6B2F]">
+                  NOTES FOR CLIENT
+                </div>
+                <span className="text-[10px] font-bold text-[#1B6B2F] bg-[#EBF7EE] border border-[rgba(27,107,47,0.2)] px-2 py-0.5 rounded-full">
+                  Visible to Client & You
+                </span>
+              </div>
+              <textarea 
+                rows={2} 
+                placeholder="Notes or instructions that both you and the client can see on their dashboard..." 
+                value={formData.clientNotes} 
+                onChange={e => setFormData({...formData, clientNotes: e.target.value})} 
+                className="w-full bg-[#FAF9F5] border border-[rgba(27,107,47,0.28)] rounded-[10px] p-3 text-[14px] outline-none focus:border-[#1B6B2F] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] resize-none" 
+              />
+            </div>
 
-          <textarea rows={3} placeholder="Any internal notes about this client..." value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} className="bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] p-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] resize-none" />
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="text-[11px] font-[600] tracking-[0.08em] text-[rgba(17,17,16,0.4)]">
+                  INTERNAL NOTES
+                </div>
+                <span className="text-[10px] font-semibold text-[rgba(17,17,16,0.45)] bg-[rgba(17,17,16,0.05)] border border-[rgba(17,17,16,0.08)] px-2 py-0.5 rounded-full">
+                  Admin Only
+                </span>
+              </div>
+              <textarea 
+                rows={2} 
+                placeholder="Any private internal notes about this client (only admin can see)..." 
+                value={formData.notes} 
+                onChange={e => setFormData({...formData, notes: e.target.value})} 
+                className="w-full bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] p-3 text-[14px] outline-none focus:border-[rgba(27,107,47,0.5)] focus:shadow-[0_0_0_3px_rgba(27,107,47,0.08)] resize-none" 
+              />
+            </div>
+          </div>
 
           <div className="bg-[rgba(27,107,47,0.04)] border border-[rgba(27,107,47,0.12)] rounded-[10px] p-[14px] px-4 mt-2 flex justify-between items-center">
             <div>
@@ -1182,6 +1221,7 @@ function ServiceCard({ client, service, showConfirm }) {
   const isCompleted = service?.status === 'completed' || currentIndex === (steps?.length || 0) - 1;
 
   const [notes, setNotes] = useState(service.notes || '');
+  const [clientNotes, setClientNotes] = useState(service.clientNotes || '');
   const [notesChanged, setNotesChanged] = useState(false);
 
   // Virtual Office / State & Expiry fields
@@ -1313,9 +1353,12 @@ function ServiceCard({ client, service, showConfirm }) {
   };
 
   const saveNotes = async () => {
-    await updateDoc(doc(db, 'clients', client.id, 'services', service.id), { notes });
+    await updateDoc(doc(db, 'clients', client.id, 'services', service.id), { 
+      notes,
+      clientNotes
+    });
     setNotesChanged(false);
-    addToast('success', 'Saved ✓');
+    addToast('success', 'Notes saved ✓');
   };
 
   // Formatted date helpers
@@ -1450,14 +1493,43 @@ function ServiceCard({ client, service, showConfirm }) {
         </div>
       </div>
 
-      <div className="pl-1">
-        <label className="text-[11px] font-[600] text-[rgba(17,17,16,0.4)]">Internal Notes</label>
-        <textarea 
-          rows={2} 
-          value={notes} 
-          onChange={(e) => { setNotes(e.target.value); setNotesChanged(true); }}
-          className="w-full mt-1 bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[8px] p-2.5 text-[13px] outline-none focus:border-[rgba(27,107,47,0.4)] resize-none font-sans"
-        />
+      <div className="pl-1 space-y-3">
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[11px] font-[700] text-[#1B6B2F] flex items-center gap-1.5">
+              <span>Notes for Client</span>
+              <span className="text-[9px] font-bold bg-[#EBF7EE] text-[#1B6B2F] border border-[rgba(27,107,47,0.2)] px-1.5 py-0.2 rounded-full">
+                Visible to Client & Admin
+              </span>
+            </label>
+          </div>
+          <textarea 
+            rows={2} 
+            placeholder="Add notes for client regarding this service (visible on their dashboard)..."
+            value={clientNotes} 
+            onChange={(e) => { setClientNotes(e.target.value); setNotesChanged(true); }}
+            className="w-full bg-[#FAF9F5] border border-[rgba(27,107,47,0.25)] rounded-[8px] p-2.5 text-[13px] outline-none focus:border-[#1B6B2F] resize-none font-sans"
+          />
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[11px] font-[600] text-[rgba(17,17,16,0.4)] flex items-center gap-1.5">
+              <span>Internal Notes</span>
+              <span className="text-[9px] font-semibold bg-[rgba(17,17,16,0.05)] text-[rgba(17,17,16,0.4)] px-1.5 py-0.2 rounded-full">
+                Admin Only
+              </span>
+            </label>
+          </div>
+          <textarea 
+            rows={2} 
+            placeholder="Private team notes for this service..."
+            value={notes} 
+            onChange={(e) => { setNotes(e.target.value); setNotesChanged(true); }}
+            className="w-full bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[8px] p-2.5 text-[13px] outline-none focus:border-[rgba(27,107,47,0.4)] resize-none font-sans"
+          />
+        </div>
+
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-[rgba(17,17,16,0.06)]">
           <button 
             onClick={handleDeleteService} 
@@ -1605,30 +1677,78 @@ function DocumentsCard({ client, driveFolderUrl, onSaveDriveUrl }) {
 // Client Notes Card Component
 function ClientNotesCard({ client }) {
   const { addToast } = useToast();
-  const [notes, setNotes] = useState(client.notes || '');
-  const [changed, setChanged] = useState(false);
+  const [internalNotes, setInternalNotes] = useState(client.notes || '');
+  const [clientNotes, setClientNotes] = useState(client.clientNotes || '');
+  const [internalChanged, setInternalChanged] = useState(false);
+  const [clientChanged, setClientChanged] = useState(false);
 
-  const saveNotes = async () => {
-    await updateDoc(doc(db, 'clients', client.id), { notes });
-    setChanged(false);
-    addToast('success', 'Saved ✓');
+  const saveClientNotes = async () => {
+    try {
+      await updateDoc(doc(db, 'clients', client.id), { clientNotes: clientNotes.trim() });
+      setClientChanged(false);
+      addToast('success', 'Notes for client saved ✓');
+    } catch (e) {
+      addToast('error', 'Failed to save client notes');
+    }
+  };
+
+  const saveInternalNotes = async () => {
+    try {
+      await updateDoc(doc(db, 'clients', client.id), { notes: internalNotes.trim() });
+      setInternalChanged(false);
+      addToast('success', 'Internal notes saved ✓');
+    } catch (e) {
+      addToast('error', 'Failed to save internal notes');
+    }
   };
 
   return (
-    <div className="bg-white rounded-[14px] border border-[rgba(17,17,16,0.08)] p-4">
-      <div className="text-[13px] font-[600] text-[#111110] mb-2.5">Internal Notes</div>
-      <textarea 
-        rows={4}
-        placeholder="Add private notes about this client. Only admins can see this."
-        value={notes}
-        onChange={(e) => { setNotes(e.target.value); setChanged(true); }}
-        className="w-full bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[8px] p-3 text-[13px] outline-none focus:border-[rgba(27,107,47,0.4)] resize-y font-sans"
-      />
-      {changed && (
-        <button onClick={saveNotes} className="mt-2 h-[32px] px-3 rounded-[100px] border border-[rgba(27,107,47,0.25)] text-[#1B6B2F] text-[12px] font-[600] hover:bg-[#F0F5EA] transition-colors">
-          Save Notes
-        </button>
-      )}
+    <div className="bg-white rounded-[14px] border border-[rgba(17,17,16,0.08)] p-4 space-y-4">
+      {/* 1. Shared Notes for Client */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-[13px] font-[700] text-[#1B6B2F]">Notes for Client</div>
+          <span className="text-[10px] font-bold bg-[#EBF7EE] text-[#1B6B2F] border border-[rgba(27,107,47,0.2)] px-2 py-0.5 rounded-full">
+            Visible to Client & You
+          </span>
+        </div>
+        <textarea 
+          rows={3}
+          placeholder="Notes or notice for this client. They can see this directly on their dashboard..."
+          value={clientNotes}
+          onChange={(e) => { setClientNotes(e.target.value); setClientChanged(true); }}
+          className="w-full bg-[#FAF9F5] border border-[rgba(27,107,47,0.25)] rounded-[8px] p-3 text-[13px] outline-none focus:border-[#1B6B2F] resize-y font-sans"
+        />
+        {clientChanged && (
+          <button onClick={saveClientNotes} className="mt-2 h-[30px] px-3 rounded-[100px] bg-[#1B6B2F] text-white text-[12px] font-[600] hover:bg-[#145324] transition-colors cursor-pointer">
+            Save Notes for Client
+          </button>
+        )}
+      </div>
+
+      <div className="h-[1px] bg-[rgba(17,17,16,0.06)]"></div>
+
+      {/* 2. Private Internal Notes */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-[13px] font-[600] text-[#111110]">Internal Notes</div>
+          <span className="text-[10px] font-semibold bg-[rgba(17,17,16,0.05)] text-[rgba(17,17,16,0.4)] px-2 py-0.5 rounded-full">
+            Admin Only
+          </span>
+        </div>
+        <textarea 
+          rows={3}
+          placeholder="Add private notes about this client. Only admins can see this."
+          value={internalNotes}
+          onChange={(e) => { setInternalNotes(e.target.value); setInternalChanged(true); }}
+          className="w-full bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[8px] p-3 text-[13px] outline-none focus:border-[rgba(27,107,47,0.4)] resize-y font-sans"
+        />
+        {internalChanged && (
+          <button onClick={saveInternalNotes} className="mt-2 h-[30px] px-3 rounded-[100px] border border-[rgba(27,107,47,0.25)] text-[#1B6B2F] text-[12px] font-[600] hover:bg-[#F0F5EA] transition-colors cursor-pointer">
+            Save Internal Notes
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -1773,6 +1893,7 @@ function AddServiceModal({ client, onClose }) {
     return d.toISOString().split('T')[0];
   });
   const [notes, setNotes] = useState('');
+  const [clientNotes, setClientNotes] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleStartDateChange = (val) => {
@@ -1796,7 +1917,8 @@ function AddServiceModal({ client, onClose }) {
         statusIndex: 0,
         startDate: date ? new Date(date) : serverTimestamp(),
         completedDate: null,
-        notes: String(notes || '')
+        notes: String(notes || ''),
+        clientNotes: String(clientNotes || '')
       };
 
       if (type === 'Virtual Office' || state) {
@@ -1888,8 +2010,35 @@ function AddServiceModal({ client, onClose }) {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[12px] font-[600] text-[#111110]">Internal Notes</label>
-            <textarea rows={2} value={notes} onChange={e=>setNotes(e.target.value)} className="bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] p-3 text-[14px] outline-none resize-none" />
+            <div className="flex items-center justify-between">
+              <label className="text-[12px] font-[700] text-[#1B6B2F]">Notes for Client</label>
+              <span className="text-[10px] font-bold text-[#1B6B2F] bg-[#EBF7EE] border border-[rgba(27,107,47,0.2)] px-2 py-0.2 rounded-full">
+                Visible to Client & You
+              </span>
+            </div>
+            <textarea 
+              rows={2} 
+              placeholder="Notes or updates visible to client on their dashboard..."
+              value={clientNotes} 
+              onChange={e=>setClientNotes(e.target.value)} 
+              className="bg-[#FAF9F5] border border-[rgba(27,107,47,0.25)] rounded-[10px] p-3 text-[14px] outline-none focus:border-[#1B6B2F] resize-none" 
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-[12px] font-[600] text-[#111110]">Internal Notes</label>
+              <span className="text-[10px] font-semibold text-[rgba(17,17,16,0.4)] bg-[rgba(17,17,16,0.05)] border border-[rgba(17,17,16,0.08)] px-2 py-0.2 rounded-full">
+                Admin Only
+              </span>
+            </div>
+            <textarea 
+              rows={2} 
+              placeholder="Private team notes for this service..."
+              value={notes} 
+              onChange={e=>setNotes(e.target.value)} 
+              className="bg-[#F9F8F5] border border-[rgba(17,17,16,0.1)] rounded-[10px] p-3 text-[14px] outline-none resize-none" 
+            />
           </div>
         </div>
 
