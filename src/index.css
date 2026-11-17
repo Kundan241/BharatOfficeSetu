@@ -954,3 +954,29 @@ button, a {
     transition: opacity 0.15s ease;
   }
 }
+
+/* ─── Client Logos Bulletin Ticker ─── */
+@keyframes clientTicker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-client-ticker {
+  animation: clientTicker 35s linear infinite;
+  will-change: transform;
+}
+
+.animate-client-ticker:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-client-ticker {
+    animation-duration: 90s;
+  }
+}
+

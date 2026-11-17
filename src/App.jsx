@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import ServicesShowcase from './components/ServicesShowcase'
+import ClientLogosTicker from './components/ClientLogosTicker'
 import WhyBosSection from './components/WhyBosSection'
 import WorkspaceListings from './components/WorkspaceListings'
 import FreeConsultation from './components/FreeConsultation'
@@ -41,6 +42,9 @@ function LandingPage() {
 
         {/* 2. ADD THIS HERE: The New Services Carousel */}
         <ServicesShowcase />
+
+        {/* Client Logos Bulletin Marquee */}
+        <ClientLogosTicker />
 
         {/* 3. The Dark Green "Stop doing the boring stuff" Section */}
         <WhyBosSection />
