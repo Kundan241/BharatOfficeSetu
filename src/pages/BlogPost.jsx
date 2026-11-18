@@ -32,8 +32,8 @@ export default function BlogPost() {
         setPost(data);
 
         const cleanedTitle = cleanBlogTitle(data.title);
-        const coverImg = data.image_url || data.cover_image || 'https://bharatofficesetu.com/logo.png';
-        const canonicalUrl = `https://bharatofficesetu.com/blog/${data.slug || slug}`;
+        const coverImg = data.image_url || data.cover_image || 'https://www.bharatofficesetu.com/logo.png';
+        const canonicalUrl = `https://www.bharatofficesetu.com/blog/${data.slug || slug}`;
 
         applySeoMeta({
           title: `${cleanedTitle} | Bharat Office Setu`,
@@ -74,7 +74,7 @@ export default function BlogPost() {
 
   const getInitials = (name) => (name ? name.charAt(0).toUpperCase() : '?');
 
-  const canonicalUrl = `https://bharatofficesetu.com/blog/${post?.slug || slug}`;
+  const canonicalUrl = `https://www.bharatofficesetu.com/blog/${post?.slug || slug}`;
 
   const jsonLdSchemas = useMemo(() => {
     if (!post) return [];
@@ -88,7 +88,7 @@ export default function BlogPost() {
         },
         headline: cleanedTitle,
         description: post.excerpt || cleanedTitle,
-        image: coverImage ? [coverImage] : ['https://bharatofficesetu.com/logo.png'],
+        image: coverImage ? [coverImage] : ['https://www.bharatofficesetu.com/logo.png'],
         datePublished: post.created_at,
         dateModified: post.updated_at || post.created_at,
         articleSection: post.category || 'Business Compliance',
@@ -97,15 +97,15 @@ export default function BlogPost() {
         author: {
           '@type': 'Organization',
           name: 'Bharat Office Setu',
-          url: 'https://bharatofficesetu.com',
+          url: 'https://www.bharatofficesetu.com',
         },
         publisher: {
           '@type': 'Organization',
           name: 'Bharat Office Setu',
-          url: 'https://bharatofficesetu.com',
+          url: 'https://www.bharatofficesetu.com',
           logo: {
             '@type': 'ImageObject',
-            url: 'https://bharatofficesetu.com/logo.png',
+            url: 'https://www.bharatofficesetu.com/logo.png',
           },
         },
       },
@@ -117,13 +117,13 @@ export default function BlogPost() {
             '@type': 'ListItem',
             position: 1,
             name: 'Home',
-            item: 'https://bharatofficesetu.com/',
+            item: 'https://www.bharatofficesetu.com/',
           },
           {
             '@type': 'ListItem',
             position: 2,
             name: 'Blog',
-            item: 'https://bharatofficesetu.com/blog',
+            item: 'https://www.bharatofficesetu.com/blog',
           },
           {
             '@type': 'ListItem',

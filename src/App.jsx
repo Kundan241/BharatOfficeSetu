@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
@@ -31,8 +31,20 @@ import ChangePassword from './pages/ChangePassword'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import Terms from './pages/Terms'
 import RefundPolicy from './pages/RefundPolicy'
+import NotFound from './pages/NotFound'
+import { applySeoMeta } from './utils/seo'
 
 function LandingPage() {
+  useEffect(() => {
+    applySeoMeta({
+      title: 'Bharat Office Setu | Virtual Offices, GST Registration & Compliance',
+      description: 'Bharat Office Setu provides compliant virtual offices for GST and MCA company registration, coworking spaces, and end-to-end business compliance across 28+ Indian states.',
+      url: 'https://www.bharatofficesetu.com/',
+      image: 'https://www.bharatofficesetu.com/logo.png',
+      type: 'website',
+    });
+  }, []);
+
   return (
     <div className="bg-[var(--color-bg-warm)] text-[var(--color-text-dark)]">
       <Navbar />
@@ -83,6 +95,8 @@ function App() {
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-and-conditions" element={<Terms />} />
               <Route path="/refund-policy" element={<RefundPolicy />} />
+              <Route path="/404" element={<NotFound />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
         </ToastProvider>

@@ -24,8 +24,8 @@ export default function BlogListing() {
     applySeoMeta({
       title: 'Insights & Guides | Bharat Office Setu',
       description: 'Weekly guides on GST, virtual office compliance, company registration, and business expansion across India.',
-      url: 'https://bharatofficesetu.com/blog',
-      image: 'https://bharatofficesetu.com/logo.png',
+      url: 'https://www.bharatofficesetu.com/blog',
+      image: 'https://www.bharatofficesetu.com/logo.png',
       type: 'website',
     });
   }, []);
@@ -109,11 +109,11 @@ export default function BlogListing() {
           "@type": "Blog",
           "name": "Bharat Office Setu Blog",
           "description": "Weekly guides on GST, company registration, virtual offices and business expansion across India",
-          "url": "https://bharatofficesetu.com/blog",
+          "url": "https://www.bharatofficesetu.com/blog",
           "publisher": {
             "@type": "Organization",
             "name": "Bharat Office Setu",
-            "logo": "https://bharatofficesetu.com/logo.png"
+            "logo": "https://www.bharatofficesetu.com/logo.png"
           }
         })}
       </script>
@@ -182,7 +182,7 @@ export default function BlogListing() {
               {posts.map((post, index) => {
                 const isFeatured = index === 0 && activeTag === 'All' && page === 1;
                 const displayTitle = cleanBlogTitle(post.title);
-                const postUrl = `https://bharatofficesetu.com/blog/${post.slug}`;
+                const postUrl = `https://www.bharatofficesetu.com/blog/${post.slug}`;
                 const coverImg = post.cover_image || post.image_url;
                 
                 return (

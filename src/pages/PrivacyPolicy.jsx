@@ -2,10 +2,17 @@ import React, { useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import FooterBanner from '../components/FooterBanner';
 import WhatsAppWidget from '../components/WhatsAppWidget';
+import { applySeoMeta } from '../utils/seo';
 
 export default function PrivacyPolicy() {
   useEffect(() => {
-    document.title = "Privacy Policy | Bharat Office Setu";
+    applySeoMeta({
+      title: 'Privacy Policy | Bharat Office Setu',
+      description: 'Privacy policy and data protection practices at Bharat Office Setu. Learn how we safeguard your personal data, business details, and KYC documents.',
+      url: 'https://www.bharatofficesetu.com/privacy-policy',
+      image: 'https://www.bharatofficesetu.com/logo.png',
+      type: 'website',
+    });
     window.scrollTo(0, 0);
   }, []);
 

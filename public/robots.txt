@@ -62,6 +62,6 @@ Disallow: /partner-dashboard
 Disallow: /login
 Disallow: /drafts
 
-Sitemap: https://bharatofficesetu.com/sitemap.xml
-# AI Context File: https://bharatofficesetu.com/llms.txt
+Sitemap: https://www.bharatofficesetu.com/sitemap.xml
+# AI Context File: https://www.bharatofficesetu.com/llms.txt
 

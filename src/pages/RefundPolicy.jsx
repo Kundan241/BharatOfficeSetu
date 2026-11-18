@@ -2,10 +2,17 @@ import React, { useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import FooterBanner from '../components/FooterBanner';
 import WhatsAppWidget from '../components/WhatsAppWidget';
+import { applySeoMeta } from '../utils/seo';
 
 export default function RefundPolicy() {
   useEffect(() => {
-    document.title = "Refund Policy | Bharat Office Setu";
+    applySeoMeta({
+      title: 'Refund & Cancellation Policy | Bharat Office Setu',
+      description: 'Refund, cancellation, and fee guidelines for virtual office subscriptions, GST registrations, and corporate compliance services provided by Bharat Office Setu.',
+      url: 'https://www.bharatofficesetu.com/refund-policy',
+      image: 'https://www.bharatofficesetu.com/logo.png',
+      type: 'website',
+    });
     window.scrollTo(0, 0);
   }, []);
 

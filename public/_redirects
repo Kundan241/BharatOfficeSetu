@@ -1,1 +1,19 @@
-/*    /index.html   200
+# Domain canonicalization: non-www to www (301 permanent redirect)
+https://bharatofficesetu.com/*  https://www.bharatofficesetu.com/:splat  301!
+http://bharatofficesetu.com/*   https://www.bharatofficesetu.com/:splat  301!
+http://www.bharatofficesetu.com/* https://www.bharatofficesetu.com/:splat 301!
+
+# Private / App SPA routes (fallback to index.html with 200)
+/dashboard/*            /index.html  200
+/dashboard              /index.html  200
+/partner-dashboard/*    /index.html  200
+/partner-dashboard      /index.html  200
+/admin/*                /index.html  200
+/admin                  /index.html  200
+/login                  /index.html  200
+/set-password           /index.html  200
+/change-password        /index.html  200
+/drafts                 /index.html  200
+
+# Note: All public routes (/, /blog, /blog/*, legal pages) have static HTML files generated at build time.
+# Cloudflare Pages automatically serves 404.html with status 404 for any other unmatched URL.

@@ -12,7 +12,16 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'logo.png'],
       workbox: {
-        navigateFallbackDenylist: [/^\/sitemap\.xml$/, /^\/robots\.txt$/, /^\/llms\.txt$/]
+        navigateFallbackDenylist: [
+          /^\/blog(\/.*)?$/,
+          /^\/privacy-policy$/,
+          /^\/terms-and-conditions$/,
+          /^\/refund-policy$/,
+          /^\/sitemap\.xml$/,
+          /^\/robots\.txt$/,
+          /^\/llms\.txt$/,
+          /^\/404(\.html)?$/
+        ]
       },
       manifest: {
         name: 'Bharat Office Setu',

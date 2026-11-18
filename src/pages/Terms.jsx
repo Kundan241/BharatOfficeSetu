@@ -2,10 +2,17 @@ import React, { useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import FooterBanner from '../components/FooterBanner';
 import WhatsAppWidget from '../components/WhatsAppWidget';
+import { applySeoMeta } from '../utils/seo';
 
 export default function Terms() {
   useEffect(() => {
-    document.title = "Terms and Conditions | Bharat Office Setu";
+    applySeoMeta({
+      title: 'Terms & Conditions | Bharat Office Setu',
+      description: 'Review the terms and conditions for utilizing Bharat Office Setu virtual office plans, GST registrations, company incorporation, and business compliance services.',
+      url: 'https://www.bharatofficesetu.com/terms-and-conditions',
+      image: 'https://www.bharatofficesetu.com/logo.png',
+      type: 'website',
+    });
     window.scrollTo(0, 0);
   }, []);
 
