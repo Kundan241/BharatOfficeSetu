@@ -23,7 +23,7 @@ import {
 } from '../data/indiaFilingsSalesData';
 
 const AdminSalesLedger = ({ isAdmin = true }) => {
-  // 'deduped' (114 unique client cases) or 'raw' (187 line items)
+  // 'deduped' (116 unique client cases) or 'raw' (189 line items)
   const [viewMode, setViewMode] = useState('deduped');
   const [searchTerm, setSearchTerm] = useState('');
   const [serviceFilter, setServiceFilter] = useState('ALL');

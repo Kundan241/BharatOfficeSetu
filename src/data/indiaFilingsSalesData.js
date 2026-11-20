@@ -1,7 +1,7 @@
 // India Filings Marketplace Sales Ledger Data
 // Sourced from LEDGERS PRO Marketplace (BHARAT OFFICE SETU PRIVATE LIMITED)
 
-// 1. Deduplicated unique cases (114 unique client deals, combo services merged into single cases)
+// 1. Deduplicated unique cases (116 unique client deals, combo services merged into single cases)
 export const INDIA_FILINGS_DEDUPED_DATA = [
   {
     "id": 1,
@@ -1777,10 +1777,40 @@ export const INDIA_FILINGS_DEDUPED_DATA = [
     "gstin": "Add GSTIN",
     "amount": 11210.0,
     "lineItemCount": 1
+  },
+  {
+    "id": 115,
+    "salesName": "Vivera International",
+    "company": "AKANKSHA GULERIA",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Siddhi Rajendra Pawar",
+    "accountManager": "N/A",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
+  },
+  {
+    "id": 116,
+    "salesName": "Geek Genius India",
+    "company": "SRILEO TECHNOLOGIES (OPC) PRIVATE LIMITED",
+    "serviceType": "Virtual Office - India Renewal",
+    "servicesList": [
+      "Virtual Office - India Renewal"
+    ],
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "N/A",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "lineItemCount": 1
   }
 ];
 
-// 2. All raw line items (187 individual service rows)
+// 2. All raw line items (189 individual service rows)
 export const INDIA_FILINGS_RAW_DATA = [
   {
     "salesName": "Divyadevi narayanbhai balani",
@@ -3838,6 +3868,28 @@ export const INDIA_FILINGS_RAW_DATA = [
     "gstin": "Add GSTIN",
     "amount": 11210.0,
     "id": 187
+  },
+  {
+    "salesName": "Vivera International",
+    "company": "AKANKSHA GULERIA",
+    "serviceType": "Virtual Office - India Renewal",
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Siddhi Rajendra Pawar",
+    "accountManager": "N/A",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "id": 188
+  },
+  {
+    "salesName": "Geek Genius India",
+    "company": "SRILEO TECHNOLOGIES (OPC) PRIVATE LIMITED",
+    "serviceType": "Virtual Office - India Renewal",
+    "location": "Haryana - Gurugram",
+    "relationshipManager": "Rinku Ruparam Prajapati",
+    "accountManager": "N/A",
+    "gstin": "Add GSTIN",
+    "amount": 11210.0,
+    "id": 189
   }
 ];
 
