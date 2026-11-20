@@ -1,6 +1,7 @@
 {
   "hosting": {
     "public": "dist",
+    "cleanUrls": false,
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -8,7 +9,31 @@
     ],
     "rewrites": [
       {
-        "source": "**",
+        "source": "/dashboard/**",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/partner-dashboard/**",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/admin/**",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/login",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/set-password",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/change-password",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/drafts",
         "destination": "/index.html"
       }
     ]

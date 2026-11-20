@@ -361,7 +361,7 @@ async function main() {
   console.log(`[prerender] sitemap.xml generated (${posts.length + 5} URLs).`);
 
   // 7. Ensure _redirects, robots.txt, llms.txt, and verification files exist in dist
-  const publicFilesToSync = ['_redirects', 'robots.txt', 'llms.txt', 'google0457e530ead9e490.html'];
+  const publicFilesToSync = ['_redirects', 'robots.txt', 'llms.txt', 'google0457e530ead9e490.html', 'google0457e530ead9e490'];
   for (const f of publicFilesToSync) {
     const srcF = path.join(projectRoot, 'public', f);
     const dstF = path.join(distDir, f);
